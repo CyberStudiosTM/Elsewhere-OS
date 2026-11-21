@@ -1,0 +1,403 @@
+{
+  "collection": "Elsewhere Messenger / Dead Signal",
+  "asset_count": 39,
+  "notes": [
+    "All imagery extracted from approved supplied artwork, no regeneration.",
+    "Icon canvas padding is intentional.",
+    "Master branding crops preserve the source pixel-art appearance; smaller fish variants are nearest-neighbor resamples, not separately hand-drawn.",
+    "Composer bold, italic, underline and font-color glyphs are dark in the supplied artwork and may need a lighter UI surface or separately approved lighter versions.",
+    "Avatar background is intentionally opaque; the palm is center cropped from the approved sheet without stretching."
+  ],
+  "assets": [
+    {
+      "filename": "skeletal-fish.png",
+      "path": "branding/skeletal-fish.png",
+      "width": 854,
+      "height": 424,
+      "mode": "RGBA",
+      "intended_use": "Master skeletal fish emblem",
+      "source": "approved branding sheet",
+      "processing": "Isolated alpha crop"
+    },
+    {
+      "filename": "dead-signal-wordmark.png",
+      "path": "branding/dead-signal-wordmark.png",
+      "width": 1404,
+      "height": 342,
+      "mode": "RGBA",
+      "intended_use": "Master Dead Signal wordmark",
+      "source": "approved branding sheet",
+      "processing": "Isolated alpha crop"
+    },
+    {
+      "filename": "skeletal-fish-16.png",
+      "path": "branding/skeletal-fish-16.png",
+      "width": 16,
+      "height": 8,
+      "mode": "RGBA",
+      "intended_use": "Small fish emblem, max width 16",
+      "source": "approved branding sheet",
+      "processing": "Nearest-neighbor resampling; tight alpha crop"
+    },
+    {
+      "filename": "skeletal-fish-24.png",
+      "path": "branding/skeletal-fish-24.png",
+      "width": 24,
+      "height": 12,
+      "mode": "RGBA",
+      "intended_use": "Small fish emblem, max width 24",
+      "source": "approved branding sheet",
+      "processing": "Nearest-neighbor resampling; tight alpha crop"
+    },
+    {
+      "filename": "skeletal-fish-32.png",
+      "path": "branding/skeletal-fish-32.png",
+      "width": 32,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Small fish emblem, max width 32",
+      "source": "approved branding sheet",
+      "processing": "Nearest-neighbor resampling; tight alpha crop"
+    },
+    {
+      "filename": "skeletal-fish-48.png",
+      "path": "branding/skeletal-fish-48.png",
+      "width": 48,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Small fish emblem, max width 48",
+      "source": "approved branding sheet",
+      "processing": "Nearest-neighbor resampling; tight alpha crop"
+    },
+    {
+      "filename": "skeletal-fish-64.png",
+      "path": "branding/skeletal-fish-64.png",
+      "width": 64,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Small fish emblem, max width 64",
+      "source": "approved branding sheet",
+      "processing": "Nearest-neighbor resampling; tight alpha crop"
+    },
+    {
+      "filename": "toolbar-invite.png",
+      "path": "icons/toolbar-invite.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-invite",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-send-files.png",
+      "path": "icons/toolbar-send-files.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-send-files",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-webcam.png",
+      "path": "icons/toolbar-webcam.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-webcam",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-audio.png",
+      "path": "icons/toolbar-audio.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-audio",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-activities.png",
+      "path": "icons/toolbar-activities.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-activities",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-emoticons.png",
+      "path": "icons/toolbar-emoticons.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-emoticons",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-winks.png",
+      "path": "icons/toolbar-winks.png",
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "intended_use": "Conversation toolbar / toolbar-winks",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "buddy-add.png",
+      "path": "icons/buddy-add.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / buddy-add",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-mail.png",
+      "path": "icons/toolbar-mail.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / toolbar-mail",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-call.png",
+      "path": "icons/toolbar-call.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / toolbar-call",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "buddy-webcam.png",
+      "path": "icons/buddy-webcam.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / buddy-webcam",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-pencil.png",
+      "path": "icons/toolbar-pencil.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / toolbar-pencil",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-lightning.png",
+      "path": "icons/toolbar-lightning.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / toolbar-lightning",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "toolbar-gift.png",
+      "path": "icons/toolbar-gift.png",
+      "width": 24,
+      "height": 24,
+      "mode": "RGBA",
+      "intended_use": "Buddy list toolbar / toolbar-gift",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-font.png",
+      "path": "icons/composer-font.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-font",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-bold.png",
+      "path": "icons/composer-bold.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-bold",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-italic.png",
+      "path": "icons/composer-italic.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-italic",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-underline.png",
+      "path": "icons/composer-underline.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-underline",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-color.png",
+      "path": "icons/composer-color.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-color",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-emoticon.png",
+      "path": "icons/composer-emoticon.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-emoticon",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-picture.png",
+      "path": "icons/composer-picture.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-picture",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "composer-gift.png",
+      "path": "icons/composer-gift.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Composer toolbar / composer-gift",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "presence-online.png",
+      "path": "icons/presence-online.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Presence indicators / presence-online",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "presence-away.png",
+      "path": "icons/presence-away.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Presence indicators / presence-away",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "presence-busy.png",
+      "path": "icons/presence-busy.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Presence indicators / presence-busy",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "presence-offline.png",
+      "path": "icons/presence-offline.png",
+      "width": 16,
+      "height": 16,
+      "mode": "RGBA",
+      "intended_use": "Presence indicators / presence-offline",
+      "source": "approved icon sheet",
+      "processing": "Alpha crop, area resampling, centered on standardized transparent canvas"
+    },
+    {
+      "filename": "transmission-tower.png",
+      "path": "avatars/transmission-tower.png",
+      "width": 96,
+      "height": 96,
+      "mode": "RGB",
+      "intended_use": "Display picture",
+      "source": "approved standalone transmission-tower",
+      "processing": "Area resampling, scenic background retained"
+    },
+    {
+      "filename": "transmission-tower.png",
+      "path": "avatars/128/transmission-tower.png",
+      "width": 128,
+      "height": 128,
+      "mode": "RGB",
+      "intended_use": "Display picture",
+      "source": "approved standalone transmission-tower",
+      "processing": "Area resampling, scenic background retained"
+    },
+    {
+      "filename": "crt-skull.png",
+      "path": "avatars/crt-skull.png",
+      "width": 96,
+      "height": 96,
+      "mode": "RGB",
+      "intended_use": "Display picture",
+      "source": "approved standalone crt-skull",
+      "processing": "Area resampling, scenic background retained"
+    },
+    {
+      "filename": "crt-skull.png",
+      "path": "avatars/128/crt-skull.png",
+      "width": 128,
+      "height": 128,
+      "mode": "RGB",
+      "intended_use": "Display picture",
+      "source": "approved standalone crt-skull",
+      "processing": "Area resampling, scenic background retained"
+    },
+    {
+      "filename": "red-sunset-palm.png",
+      "path": "avatars/red-sunset-palm.png",
+      "width": 96,
+      "height": 96,
+      "mode": "RGB",
+      "intended_use": "Display picture",
+      "source": "approved icon sheet, palm interior",
+      "processing": "Square interior crop and area resampling"
+    },
+    {
+      "filename": "red-sunset-palm.png",
+      "path": "avatars/128/red-sunset-palm.png",
+      "width": 128,
+      "height": 128,
+      "mode": "RGB",
+      "intended_use": "Display picture",
+      "source": "approved icon sheet, palm interior",
+      "processing": "Square interior crop and area resampling"
+    }
+  ]
+}

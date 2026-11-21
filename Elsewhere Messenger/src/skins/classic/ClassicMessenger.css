@@ -1,0 +1,3560 @@
+
+/* ELSEWHERE MESSENGER - CLASSIC SKIN
+   Development visual reconstruction
+   Approved screenshot: classic/default xp messenger.png
+*/
+
+:root {
+  color-scheme: light;
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  display: block;
+  min-height: 100vh;
+  text-align: left;
+}
+
+.em-app,
+.em-app * {
+  box-sizing: border-box;
+}
+
+.em-app {
+  min-height: 100vh;
+  font: 13px/1.35 Tahoma, Verdana, "Segoe UI", sans-serif;
+  color: #101a31;
+  background: #dcebff;
+}
+
+.em-app button,
+.em-app input,
+.em-app select,
+.em-app textarea {
+  font: inherit;
+}
+
+.em-app button {
+  cursor: pointer;
+}
+
+.em-app button:disabled {
+  cursor: default;
+}
+
+.em-dev-strip {
+  min-height: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 15px;
+  background: #eef6ff;
+  border-bottom: 1px solid #9dbbe3;
+  color: #164780;
+  font-size: 11px;
+}
+
+.em-dev-strip strong {
+  font-size: 12px;
+}
+
+.em-dev-strip span {
+  flex: 1;
+}
+
+.em-dev-strip button {
+  border: 1px solid #8aafd9;
+  border-radius: 4px;
+  padding: 3px 8px;
+  color: #06418d;
+  background: linear-gradient(#ffffff, #d9ecff);
+}
+
+.em-desktop-preview {
+  position: relative;
+  min-height: calc(100vh - 34px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 16px 150px;
+  overflow: auto;
+  background: linear-gradient(
+    180deg,
+    #d7ecff 0%,
+    #ebf6ff 55%,
+    #cae3ff 100%
+  );
+}
+
+/* COMMON CLASSIC WINDOWS */
+
+.em-window {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f5f9ff;
+  border: 2px solid #0850b4;
+  border-radius: 9px;
+  box-shadow:
+    0 0 0 1px #88baf6,
+    0 4px 0 rgba(18, 66, 128, .12),
+    0 9px 20px rgba(4, 47, 117, .22);
+}
+
+.em-titlebar {
+  position: relative;
+  z-index: 1;
+  height: 37px;
+  padding: 4px 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  background: linear-gradient(
+    to bottom,
+    #7bc7ff 0%,
+    #2388ed 9%,
+    #095bd0 29%,
+    #003da5 64%,
+    #1267d6 87%,
+    #6eb8fb 100%
+  );
+  border-bottom: 1px solid #063e97;
+  text-shadow: 0 1px 2px #003071;
+}
+
+.em-titlebar::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 2px 3px auto;
+  height: 13px;
+  border-radius: 7px 7px 55% 55%;
+  background: linear-gradient(
+    rgba(255,255,255,.47),
+    rgba(255,255,255,.02)
+  );
+}
+
+.em-brand-icon {
+  position: relative;
+  z-index: 1;
+  width: 29px;
+  height: 27px;
+  flex: 0 0 29px;
+  background-image: url('/approved/default-xp-messenger.png');
+  background-repeat: no-repeat;
+  background-size: 1408px 1056px;
+  background-position: -440px -112px;
+}
+
+.em-title {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  font-weight: bold;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.em-window-controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 3px;
+}
+
+.em-window-controls button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid #b1dcff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 1px #164583;
+  background: linear-gradient(
+    #acdfff 0%,
+    #3e95f0 35%,
+    #1260ca 65%,
+    #0846ae 100%
+  );
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.75),
+    0 0 0 1px #08419c;
+}
+
+.em-window-controls button:disabled {
+  opacity: .7;
+}
+
+.em-window-controls .em-close {
+  font-size: 22px;
+  line-height: 17px;
+  background: linear-gradient(
+    #ffc5b9,
+    #f75c43 33%,
+    #db2415 65%,
+    #a80c08
+  );
+  border-color: #ffe1d9;
+}
+
+.em-window-controls .em-close:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.em-menubar {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  background: linear-gradient(#fff, #f0f5fd);
+  border-bottom: 1px solid #b1c3dd;
+  color: #101010;
+  font-size: 13px;
+}
+
+.em-menubar button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.em-menubar button:hover {
+  text-decoration: underline;
+}
+
+/* SIGN-IN WINDOW */
+
+.em-login-window {
+  position: absolute;
+  top: 58px;
+  left: 14px;
+  z-index: 8;
+  width: 285px;
+  background: linear-gradient(#e0f2ff, #fff 40%, #fff 85%, #cce7ff);
+}
+
+.em-login-brand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 10px 10px;
+  color: #073b93;
+}
+
+.em-login-brand-icon {
+  width: 33px;
+  height: 30px;
+  background-image: url('/approved/default-xp-messenger.png');
+  background-repeat: no-repeat;
+  background-size: 1408px 1056px;
+  background-position: -166px -264px;
+}
+
+.em-login-brand div {
+  display: flex;
+  flex-direction: column;
+  font-size: 20px;
+  line-height: 1;
+  font-style: italic;
+}
+
+.em-login-photo {
+  width: 112px;
+  height: 112px;
+  margin: 10px auto 16px;
+  border: 3px solid white;
+  border-radius: 10px;
+  outline: 2px solid #2c73cc;
+  background-image: url('/approved/default-xp-messenger.png');
+  background-repeat: no-repeat;
+  background-size: 1408px 1056px;
+  background-position: -218px -387px;
+  box-shadow: 0 3px 8px rgba(6,52,116,.2);
+}
+
+.em-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 24px;
+}
+
+.em-login-form > label:not(.em-check-label) {
+  margin-top: 6px;
+  font-weight: bold;
+}
+
+.em-login-form input:not([type=checkbox]),
+.em-login-form select {
+  height: 29px;
+  width: 100%;
+  padding: 4px 7px;
+  border: 1px solid #527fc3;
+  border-radius: 4px;
+  background: #fff;
+  color: #132b57;
+}
+
+.em-check-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 13px 0;
+  font-size: 11px;
+}
+
+.em-signin-button,
+.em-compose button[type=submit] {
+  padding: 8px 14px;
+  border: 1px solid #1751ab;
+  border-radius: 7px;
+  color: white;
+  font-weight: bold;
+  background: linear-gradient(
+    #bce5ff 0%,
+    #4e9ef4 35%,
+    #1261cd 65%,
+    #0643ae 100%
+  );
+  box-shadow: inset 0 1px rgba(255,255,255,.85);
+}
+
+.em-signin-button {
+  align-self: center;
+  min-width: 140px;
+}
+
+.em-login-note {
+  padding: 15px 22px 28px;
+  text-align: center;
+  font-size: 11px;
+  color: #3c5683;
+}
+
+.em-login-wave {
+  height: 30px;
+  background: linear-gradient(
+    175deg,
+    transparent 0%,
+    #caeaff 45%,
+    #7ab9f7 53%,
+    #dff5ff 61%,
+    #8cc5ff 100%
+  );
+  border-top: 1px solid #a2cef5;
+}
+
+/* BUDDY LIST */
+
+.em-buddy-window {
+  width: 310px;
+  flex: 0 0 310px;
+}
+
+.em-profile {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 108px;
+  padding: 11px;
+  background: linear-gradient(
+    #eaf8ff,
+    #cbe8ff 35%,
+    #9fcaf9 100%
+  );
+  border-bottom: 1px solid #8eb6e6;
+}
+
+.em-avatar {
+  flex-shrink: 0;
+  width: 69px;
+  height: 69px;
+  border: 3px solid #fff;
+  border-radius: 7px;
+  box-shadow: 0 0 0 2px #327ace;
+}
+
+.em-avatar-self {
+  background-image: url('/approved/default-xp-messenger.png');
+  background-repeat: no-repeat;
+  background-size: 1408px 1056px;
+  background-position: -449px -183px;
+}
+
+.em-profile-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.em-profile-heading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.em-profile-heading strong {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.em-profile-heading select {
+  max-width: 110px;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid #79a7d7;
+  border-radius: 4px;
+  background: white;
+  color: #173967;
+}
+
+.em-profile-info p {
+  margin: 8px 0 3px;
+  color: #083f94;
+  font-size: 11px;
+}
+
+.em-profile-info small {
+  color: #53759a;
+  font-size: 10px;
+}
+
+.em-buddy-tools {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 5px;
+  border-bottom: 1px solid #91bae8;
+  background: linear-gradient(#fff, #dceeff);
+}
+
+.em-buddy-tools button {
+  width: 37px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #1465bb;
+  font-size: 23px;
+}
+
+.em-buddy-tools button:disabled {
+  opacity: .9;
+}
+
+.em-groups {
+  min-height: 310px;
+  padding: 8px 6px 12px;
+  background: #fff;
+}
+
+.em-group {
+  margin-bottom: 10px;
+}
+
+.em-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 5px;
+  border: 1px solid #6a9fdf;
+  color: #08449b;
+  background: linear-gradient(
+    #f2faff,
+    #cfe7ff 48%,
+    #9dc7f9 100%
+  );
+  box-shadow: inset 0 1px white;
+  text-align: left;
+}
+
+.em-group-members {
+  padding: 5px 3px;
+}
+
+.em-contact {
+  width: 100%;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  text-align: left;
+  color: #17213a;
+}
+
+.em-contact:hover,
+.em-contact-selected {
+  background: #e0efff;
+}
+
+.em-presence {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  border-radius: 50%;
+  border: 1px solid #6b916c;
+}
+
+.em-online {
+  background: radial-gradient(
+    circle at 32% 25%,
+    #edffad,
+    #7dde1d 40%,
+    #2ba900 72%,
+    #147000
+  );
+}
+
+.em-offline {
+  border-color: #909090;
+  background: radial-gradient(
+    circle at 32% 25%,
+    #fff,
+    #ccc 40%,
+    #999 75%,
+    #777
+  );
+}
+
+.em-contact-name {
+  flex: 1;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.em-contact-state {
+  font-size: 10px;
+  color: #6480a0;
+}
+
+.em-buddy-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  color: #335888;
+  font-size: 11px;
+  border-top: 1px solid #aac8e6;
+  background: linear-gradient(#ecf6ff, #bedbfa);
+}
+
+/* CONVERSATION */
+
+.em-chat-window {
+  width: 560px;
+  flex: 0 1 560px;
+  min-width: 390px;
+}
+
+.em-chat-tools {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 5px;
+  gap: 3px;
+  border-bottom: 1px solid #8db2e1;
+  background: linear-gradient(#fff, #dfedff);
+}
+
+.em-chat-tools button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 55px;
+  padding: 3px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #153d8c;
+}
+
+.em-chat-tools button > span {
+  font-size: 24px;
+  line-height: 26px;
+}
+
+.em-chat-tools small {
+  font-size: 10px;
+}
+
+.em-chat-content {
+  display: flex;
+  gap: 10px;
+  padding: 11px 9px;
+  background: linear-gradient(#e2f0ff, #f8fbff 30%);
+}
+
+.em-message-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.em-recipient {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 27px;
+  padding: 5px 8px;
+  color: #153d81;
+  background: linear-gradient(#fff, #f0f6ff);
+  border: 1px solid #8baede;
+  border-radius: 6px 6px 0 0;
+}
+
+.em-history {
+  height: 260px;
+  overflow-y: auto;
+  padding: 12px 10px;
+  background: white;
+  border: 1px solid #8baede;
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  box-shadow: inset 0 1px 3px rgba(4,66,140,.1);
+}
+
+.em-message {
+  margin-bottom: 13px;
+  font-size: 13px;
+}
+
+.em-sender-me {
+  color: #0751ba;
+}
+
+.em-sender-them {
+  color: #188324;
+}
+
+.em-message p {
+  margin: 4px 0 0 15px;
+  color: #141414;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.em-empty {
+  color: #647b98;
+  font-style: italic;
+}
+
+.em-formatting {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 34px;
+  padding: 4px 0;
+  color: #0949a5;
+}
+
+.em-formatting button {
+  min-width: 29px;
+  height: 27px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #06479f;
+  font-size: 17px;
+}
+
+.em-formatting button:hover,
+.em-format-active {
+  background: #d2e6ff !important;
+  border-color: #83b0e6 !important;
+}
+
+.em-font-label {
+  padding: 0 9px;
+  font-size: 17px;
+  border-right: 1px solid #98b9dc;
+}
+
+.em-compose {
+  display: flex;
+  gap: 7px;
+  align-items: flex-end;
+}
+
+.em-compose textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 79px;
+  padding: 8px;
+  resize: vertical;
+  border: 1px solid #81a7d9;
+  border-radius: 5px;
+  background: #fff;
+  color: #16253b;
+  font-size: 13px;
+}
+
+.em-compose button[type=submit] {
+  min-width: 72px;
+  margin-bottom: 0;
+}
+
+.em-compose button[type=submit]:disabled {
+  opacity: .55;
+}
+
+.em-chat-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 105px;
+  width: 105px;
+  font-size: 11px;
+  color: #1a4485;
+  text-align: center;
+}
+
+.em-chat-sidebar strong {
+  overflow-wrap: anywhere;
+}
+
+.em-chat-sidebar small {
+  color: #4770a2;
+}
+
+.em-photo-frame {
+  width: 105px;
+  height: 105px;
+  overflow: hidden;
+  border: 4px solid white;
+  border-radius: 9px;
+  outline: 2px solid #3178cf;
+  box-shadow: 0 3px 6px rgba(0,66,138,.18);
+  background: #c6e9ff;
+  margin-bottom: 4px;
+}
+
+.em-avatar-sunny {
+  width: 104px;
+  height: 104px;
+  background-image: url('/approved/default-xp-messenger.png');
+  background-size: 1408px 1056px;
+  background-position: -1186px -348px;
+  background-repeat: no-repeat;
+}
+
+.em-my-photo {
+  margin-top: 14px;
+}
+
+.em-my-photo .em-avatar-self {
+  width: 69px;
+  height: 69px;
+  margin: 12px auto;
+  border-radius: 5px;
+}
+
+.em-chat-footer {
+  min-height: 24px;
+  padding: 5px 10px;
+  color: #315a91;
+  background: linear-gradient(#f0f8ff, #bedaf8);
+  border-top: 1px solid #9fc0e5;
+  font-size: 11px;
+}
+
+/* TOAST NOTIFICATION */
+
+.em-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 18px;
+  z-index: 7;
+  width: 330px;
+  overflow: hidden;
+  border: 2px solid #0750b7;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(0,55,127,.25);
+}
+
+.em-toast-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 31px;
+  padding: 3px 6px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(#75c2ff, #0a59c8 45%, #0744a7);
+  text-shadow: 0 1px #034386;
+}
+
+.em-toast-title button {
+  margin-left: auto;
+  border: 1px solid #bce4ff;
+  border-radius: 3px;
+  background: #236fd1;
+  color: white;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.em-toast-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.em-toast-avatar {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border: 2px solid #3d83d5;
+  border-radius: 5px;
+  background-image: url('/approved/default-xp-messenger.png');
+  background-size: 1408px 1056px;
+  background-position: -931px -879px;
+  background-repeat: no-repeat;
+}
+
+.em-toast > small {
+  display: block;
+  padding: 0 10px 7px;
+  text-align: right;
+  color: #6782aa;
+}
+
+/* NARROW WINDOW SUPPORT */
+
+@media (max-width: 900px) {
+  .em-desktop-preview {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .em-chat-window {
+    flex: 1 1 450px;
+  }
+}
+
+@media (max-width: 640px) {
+  .em-desktop-preview {
+    padding: 12px 8px 130px;
+  }
+
+  .em-buddy-window,
+  .em-chat-window {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .em-login-window {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+  }
+
+  .em-chat-sidebar {
+    display: none;
+  }
+
+  .em-toast {
+    width: calc(100% - 20px);
+    right: 10px;
+  }
+}
+
+/* =============================================
+   CLASSIC MESSENGER | QA CORRECTIONS
+   Approved graphic extracts and input behavior
+   ============================================= */
+
+/* Replace unreliable full-screenshot sprite offsets */
+
+
+/* Elsewhere OS butterfly */
+
+.em-brand-icon,
+.em-login-brand-icon {
+  background: transparent
+    url('/approved/glass-butterfly.png')
+    center / contain no-repeat;
+}
+
+.em-login-brand-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+
+
+.em-avatar-self {
+  background: url('/approved/classic-extracts/avatar-flower.png')
+    center / cover no-repeat;
+}
+
+.em-login-photo {
+  background: url('/approved/classic-extracts/avatar-cloud.png')
+    center / cover no-repeat;
+}
+
+.em-avatar-sunny {
+  width: 100%;
+  height: 100%;
+  background: url('/approved/classic-extracts/avatar-palm.png')
+    center / cover no-repeat;
+}
+
+.em-toast-avatar {
+  background: url('/approved/classic-extracts/avatar-palm.png')
+    center / cover no-repeat;
+}
+
+/* Contact pictures: consistent sizing and placement */
+
+.em-chat-sidebar {
+  flex: 0 0 112px;
+  width: 112px;
+  align-items: center;
+  gap: 5px;
+  padding-top: 2px;
+}
+
+.em-photo-frame {
+  width: 106px;
+  height: 106px;
+  padding: 3px;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid #3783dc;
+  border-radius: 10px;
+  outline: 1px solid #e0efff;
+}
+
+.em-my-photo {
+  margin-top: 20px;
+}
+
+.em-my-photo .em-avatar-self {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 5px;
+}
+
+.em-avatar-unknown {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  color: #3168a9;
+  font-size: 42px;
+  font-weight: bold;
+  background: linear-gradient(
+    145deg,
+    #f1faff,
+    #a9d4f7 55%,
+    #d6f0ff
+  );
+}
+
+/* Approved Classic chat toolbar arrangement */
+
+.em-chat-tools {
+  position: relative;
+  align-items: center;
+  justify-content: space-around;
+  gap: 2px;
+  padding: 7px 5px;
+  background: linear-gradient(#ffffff, #eef4fc);
+}
+
+.em-chat-tools button {
+  min-width: 0;
+  flex: 1;
+  padding: 3px 2px;
+  gap: 3px;
+  opacity: 1;
+}
+
+.em-chat-tools button:disabled {
+  opacity: 1;
+}
+
+.em-tool-icon {
+  display: block;
+  width: 34px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.em-chat-tools small {
+  white-space: nowrap;
+  color: #172a5b;
+  font-size: 10px;
+}
+
+/* Classic illustrated emoticons, not Windows emoji */
+
+.em-classic-emoticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -4px;
+
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+
+  border: 1px solid #a66b05;
+
+  background: radial-gradient(
+    circle at 35% 24%,
+    #fff8ad 0%,
+    #ffe347 35%,
+    #ffc526 67%,
+    #df8b09 100%
+  );
+
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.95),
+    0 1px 1px rgba(100,65,0,.2);
+}
+
+.em-classic-emoticon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Pop-up for selecting legacy-style emoticons */
+
+.em-emoticon-menu {
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 12px;
+  z-index: 20;
+
+  display: flex;
+  gap: 5px;
+  padding: 8px;
+
+  background: #fff;
+  border: 1px solid #5e92d2;
+  border-radius: 5px;
+  box-shadow: 0 5px 13px rgba(15,64,128,.22);
+}
+
+.em-emoticon-menu button {
+  min-width: 31px;
+  height: 32px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+} 
+
+.em-emoticon-menu button:hover {
+  border-color: #9bc5f2;
+  background: #e4f2ff;
+}
+
+/*  Allow classic-style italic rendering */
+
+.em-app {
+  font-synthesis: style;
+}
+
+.em-compose textarea,
+.em-message p {
+  font-synthesis: style;
+}
+
+/* Corrected sign-in illustration */
+
+.em-login-photo {
+  width: 115px;
+  height: 116px;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
+  box-shadow: none;
+
+  background-image:
+    url('/approved/classic-extracts-v2/avatar-cloud-framed.png');
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Corrected toolbar preview sizing */
+
+.em-tool-icon {
+  display: block;
+  width: 42px;
+  height: 37px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* ==========================================
+   CLASSIC MESSENGER
+   Conversation Composer Reconstruction
+   ========================================== */
+
+.em-composer-frame {
+  margin-top: 5px;
+  padding: 3px 5px 5px;
+  border: 1px solid #5a8dcf;
+  border-radius: 7px;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e4efff 13%,
+    #eef5ff 100%
+  );
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 0 0 1px #c6dcf8;
+}
+
+.em-composer-frame .em-formatting {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 34px;
+  margin: 0;
+  padding: 2px 3px 4px;
+  border-bottom: 1px solid #aac7ed;
+  background: transparent;
+}
+
+.em-composer-frame .em-formatting button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 27px;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #123b85;
+  background: transparent;
+  font-family: Tahoma, sans-serif;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.em-composer-frame .em-formatting button:disabled {
+  opacity: 1;
+  color: #315b96;
+}
+
+.em-composer-frame .em-formatting button:hover:not(:disabled),
+.em-composer-frame .em-formatting button.em-format-active {
+  border-color: #7ba7e7;
+  background: linear-gradient(#f7fbff, #c9dfff);
+  box-shadow: inset 0 1px #fff;
+}
+
+.em-composer-frame .em-formatting .em-font-picker {
+  width: 38px;
+  gap: 5px;
+  font-size: 15px;
+}
+
+.em-font-picker span {
+  font-size: 10px;
+}
+
+.em-format-separator {
+  height: 23px;
+  width: 1px;
+  flex: 0 0 1px;
+  margin: 0 4px;
+  background: #a0bce3;
+  box-shadow: 1px 0 #fff;
+}
+
+.em-font-color-icon {
+  display: inline-block;
+  position: relative;
+  font-size: 18px;
+  line-height: 21px;
+  color: #173b7f;
+}
+
+.em-font-color-icon::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: -2px;
+  height: 3px;
+  background: #e52d2d;
+  border: 1px solid #a51c1c;
+}
+
+.em-composer-frame .em-compose {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding: 5px 1px 0;
+  margin: 0;
+  background: transparent;
+}
+
+.em-composer-frame .em-compose textarea {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 75px;
+  max-height: 160px;
+  margin: 0;
+  padding: 7px;
+  border: 1px solid #829ec6;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: inset 1px 1px 2px #d2dceb;
+  color: #111827;
+  font-family: Tahoma, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.em-composer-frame .em-compose textarea:focus {
+  outline: 1px solid #a9c9f4;
+  outline-offset: 0;
+}
+
+.em-composer-frame .em-compose button[type="submit"] {
+  align-self: flex-end;
+  min-width: 72px;
+  height: 38px;
+  margin: 0 1px 2px 0;
+  padding: 5px 12px;
+  border: 1px solid #2d65b5;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0 1px #28538c;
+  background: linear-gradient(
+    #e6f4ff 0%,
+    #93c5fc 14%,
+    #5a9fe8 48%,
+    #1764cb 51%,
+    #1759b2 100%
+  );
+  box-shadow:
+    inset 0 1px #fff,
+    0 1px 2px #9ebde3;
+}
+
+.em-composer-frame .em-compose button[type="submit"]:disabled {
+  opacity: .65;
+}
+
+.em-chat-window .em-chat-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 5px 12px;
+  background: linear-gradient(#f8fbff, #d6e9ff);
+  border-top: 1px solid #91b7e9;
+  color: #263f6f;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.em-status-bubble {
+  position: relative;
+  display: inline-block;
+  width: 17px;
+  height: 13px;
+  border: 2px solid #294e91;
+  border-radius: 50%;
+  background: #f9fcff;
+  flex-shrink: 0;
+}
+
+.em-status-bubble::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  bottom: -5px;
+  width: 5px;
+  height: 5px;
+  background: #f9fcff;
+  border-left: 2px solid #294e91;
+  border-bottom: 2px solid #294e91;
+  transform: skewY(-35deg);
+}
+
+/* Classic toolbar and conversation portrait corrections */
+
+.em-chat-tools .em-tool-icon {
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+
+/* Preserve the original portrait proportions */
+
+.em-chat-sidebar .em-photo-frame {
+  width: 106px;
+  height: 107px;
+  padding: 3px;
+}
+
+.em-chat-sidebar .em-avatar-sunny {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  background: url('/approved/classic-extracts-v2/avatar-palm-full.png')
+    center / contain no-repeat;
+}
+
+.em-chat-sidebar .em-my-photo {
+  width: 106px;
+  height: 116px;
+}
+
+.em-chat-sidebar .em-my-photo .em-avatar-self {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  background: url('/approved/classic-extracts-v2/avatar-flower-full.png')
+    center / contain no-repeat;
+}
+/* Classic sign-in display picture */
+
+.em-login-window .em-login-photo {
+  width: 112px;
+  height: 112px;
+  margin: 10px auto 16px;
+
+  border: 4px solid #ffffff;
+  border-radius: 9px;
+  outline: 2px solid #2869b7;
+
+  background: url('/approved/classic-extracts-v2/avatar-cloud-clean.png')
+    center / contain no-repeat;
+
+  background-color: #ffffff;
+
+  box-shadow:
+    0 2px 4px rgba(16, 62, 120, 0.3);
+}
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   Batch 02A - Buddy List Reconstruction
+   ========================================== */
+
+/* WINDOW PROPORTIONS */
+
+.em-buddy-window {
+  width: 310px;
+  flex: 0 0 310px;
+  background: #f8fbff;
+  border: 2px solid #0644ad;
+  border-radius: 9px;
+  box-shadow:
+    inset 0 0 0 1px #8bc6ff,
+    0 0 0 1px #3987df,
+    0 4px 7px rgba(9, 56, 125, .25);
+}
+
+.em-buddy-window .em-titlebar {
+  height: 35px;
+  padding: 4px 6px;
+  gap: 5px;
+}
+
+.em-buddy-window .em-brand-icon {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+}
+
+.em-buddy-window .em-title {
+  font-size: 14px;
+  letter-spacing: -.2px;
+}
+
+.em-buddy-window .em-window-controls {
+  gap: 3px;
+}
+
+.em-buddy-window .em-window-controls button {
+  width: 23px;
+  height: 23px;
+}
+
+.em-buddy-window .em-menubar {
+  min-height: 28px;
+  gap: 15px;
+  padding: 4px 9px;
+  background: linear-gradient(
+    #ffffff,
+    #f5f5ee
+  );
+  border-bottom: 1px solid #99b5d9;
+  font-size: 13px;
+}
+
+/* PROFILE PANEL */
+
+.em-buddy-window .em-profile {
+  min-height: 90px;
+  margin: 3px 4px 0;
+  padding: 8px;
+  gap: 11px;
+
+  background: linear-gradient(
+    180deg,
+    #e9f4ff 0%,
+    #cfe5ff 55%,
+    #b9d9fc 100%
+  );
+
+  border: 1px solid #8eb7e9;
+  border-radius: 7px 7px 0 0;
+
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 1px 0 0 #ffffff,
+    inset -1px 0 0 #ffffff;
+}
+
+.em-buddy-window .em-avatar {
+  width: 70px;
+  height: 70px;
+  border: 3px solid #fff;
+  border-radius: 7px;
+
+  box-shadow:
+    0 0 0 1px #1c66bd,
+    0 2px 3px rgba(7, 54, 111, .2);
+}
+
+.em-buddy-window .em-avatar-self {
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.em-buddy-window .em-profile-info {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+}
+
+.em-buddy-window .em-profile-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.em-buddy-window .em-profile-heading strong {
+  max-width: 100%;
+  color: #101932;
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.em-buddy-window .em-profile-heading select {
+  width: auto;
+  max-width: 110px;
+  min-width: 0;
+  height: 24px;
+
+  margin: 0;
+  padding: 0 2px;
+
+  border: 0;
+  border-radius: 0;
+
+  color: #142343;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.em-buddy-window .em-profile-heading select:hover {
+  background: #e5f1ff;
+}
+
+.em-buddy-window .em-profile-info p {
+  margin: 7px 0 0;
+  color: #153a7e;
+  font-size: 12px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* Hide the prototype-only music status caption */
+
+.em-buddy-window .em-profile-info small {
+  display: none;
+}
+
+/* BUDDY TOOLBAR */
+
+.em-buddy-window .em-buddy-tools {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 2px;
+
+  min-height: 46px;
+  padding: 4px 3px;
+  margin: 0 4px;
+
+  background: linear-gradient(
+    #ffffff 0%,
+    #f8f9f5 55%,
+    #eef3fa 100%
+  );
+
+  border: 1px solid #a7c0e0;
+  border-top: 0;
+  border-radius: 0 0 5px 5px;
+
+  box-shadow: inset 0 1px #ffffff;
+}
+
+.em-buddy-window .em-buddy-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 1 1 0;
+  min-width: 0;
+  height: 35px;
+  padding: 2px;
+
+  border: 1px solid transparent;
+  border-radius: 4px;
+
+  background: transparent;
+  box-shadow: none;
+
+  color: #2266b4;
+  opacity: 1;
+}
+
+.em-buddy-window .em-buddy-tool-icon {
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  background: transparent;
+}
+
+.em-buddy-window .em-buddy-tool-placeholder {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* CONTACT LIST */
+
+.em-buddy-window .em-groups {
+  min-height: 285px;
+  margin: 4px;
+  padding: 3px 3px 12px;
+
+  background: linear-gradient(
+    #ffffff,
+    #fbfdff
+  );
+
+  border: 1px solid #a5bfe0;
+  border-radius: 5px;
+
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 0 0 1px #edf5ff;
+}
+
+.em-buddy-window .em-group {
+  margin: 0 0 8px;
+}
+
+.em-buddy-window .em-group:last-child {
+  margin-bottom: 0;
+}
+
+.em-buddy-window .em-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  width: 100%;
+  min-height: 29px;
+  padding: 4px 8px;
+
+  border: 1px solid #5f8ac6;
+  border-radius: 5px;
+
+  background: linear-gradient(
+    #eef7ff 0%,
+    #cbe2fc 42%,
+    #a2c6f4 100%
+  );
+
+  color: #0b3a85;
+  font-size: 15px;
+
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 #d6eaff;
+
+  text-align: left;
+}
+
+.em-buddy-window .em-group-heading > span {
+  width: 14px;
+  color: #174d95;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+}
+
+.em-buddy-window .em-group-members {
+  padding: 4px 2px 2px;
+}
+
+.em-buddy-window .em-contact {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  min-height: 27px;
+  gap: 9px;
+  padding: 3px 8px 3px 15px;
+
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+
+  color: #141a24;
+  font-size: 14px;
+  text-align: left;
+}
+
+.em-buddy-window .em-contact:hover {
+  border-color: #a5c8f3;
+  background: #edf5ff;
+}
+
+.em-buddy-window .em-contact-selected {
+  border-color: #94bce9;
+  background: linear-gradient(
+    #edf7ff,
+    #cfe4ff
+  );
+}
+
+.em-buddy-window .em-contact-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.em-buddy-window
+.em-contact:has(.em-offline)
+.em-contact-name {
+  font-weight: 700;
+}
+
+/* Keep status available to assistive technology,
+   but remove the extra status column visually. */
+
+.em-buddy-window .em-contact-state {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* CLASSIC BUDDY PRESENCE SYMBOLS
+   CSS reconstruction of the small person shapes.
+   No external images required.
+*/
+
+.em-buddy-window .em-presence {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 19px;
+
+  width: 19px;
+  height: 22px;
+
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Head */
+
+.em-buddy-window .em-presence::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+
+  top: 0;
+  left: 5px;
+
+  width: 10px;
+  height: 11px;
+
+  border: 1px solid #4b7c13;
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle at 35% 25%,
+    #f4ffb1 0%,
+    #a2df45 30%,
+    #62b325 65%,
+    #2c8611 100%
+  );
+
+  box-shadow: inset 0 1px rgba(255, 255, 255, .6);
+}
+
+/* Shoulders and body */
+
+.em-buddy-window .em-presence::after {
+  content: "";
+  position: absolute;
+
+  left: 1px;
+  bottom: 1px;
+
+  width: 17px;
+  height: 13px;
+
+  border: 1px solid #4b7c13;
+  border-radius: 8px 8px 5px 5px;
+
+  background: linear-gradient(
+    145deg,
+    #dbf898 0%,
+    #92d833 30%,
+    #59b224 65%,
+    #2e8313 100%
+  );
+
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .65),
+    0 1px 1px rgba(45, 99, 30, .2);
+}
+
+/* Offline variant */
+
+.em-buddy-window .em-presence.em-offline::before {
+  border-color: #81858b;
+
+  background: radial-gradient(
+    circle at 35% 25%,
+    #ffffff,
+    #d9dce0 35%,
+    #a0a4a9 72%,
+    #777b81
+  );
+}
+
+.em-buddy-window .em-presence.em-offline::after {
+  border-color: #81858b;
+
+  background: linear-gradient(
+    145deg,
+    #f5f5f6,
+    #d0d2d5 35%,
+    #a2a5aa 75%,
+    #777b81
+  );
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.7),
+    0 1px 1px rgba(60,60,60,.15);
+}
+
+/* Hide the buddy list footer in Classic. */
+
+.em-buddy-window .em-buddy-footer {
+  display: none;
+}
+
+/* Preserve the existing narrow-window behavior */
+
+@media (max-width: 640px) {
+  .em-buddy-window {
+    width: 100%;
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   Batch 02B - Approved Toolbar Artwork
+   ========================================== */
+
+/* Buddy toolbar */
+
+.em-buddy-window .em-buddy-tool-icon {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+
+  object-fit: contain;
+  object-position: center;
+
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+
+  user-select: none;
+  pointer-events: none;
+}
+
+.em-buddy-window .em-buddy-tools button {
+  opacity: 1;
+  overflow: visible;
+}
+
+/* Compact conversation composer icons */
+
+.em-composer-frame .em-composer-tool-icon {
+  display: block;
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+
+  object-fit: contain;
+  object-position: center;
+
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+
+  user-select: none;
+  pointer-events: none;
+}
+
+.em-composer-frame .em-formatting button {
+  opacity: 1;
+  overflow: visible;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 03 - CLASSIC SIGN-IN
+   ========================================== */
+
+.em-app .em-login-window {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+  min-height: 550px;
+  background: #ffffff;
+  font-family: Tahoma, Arial, sans-serif;
+  color: #151515;
+}
+
+/* Branded blue header */
+
+.em-login-window .em-login-brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 9px;
+
+  min-height: 113px;
+  padding: 12px 14px 29px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  background: linear-gradient(
+    110deg,
+    #a8d5ff 0%,
+    #e2f1ff 46%,
+    #82bbf6 100%
+  );
+  border: 0;
+  border-radius: 0;
+}
+
+.em-login-window .em-login-brand-icon {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+  width: 65px;
+  height: 65px;
+  flex: 0 0 65px;
+
+  background-image: url("/approved/glass-butterfly.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  margin: 0;
+}
+
+.em-login-window .em-login-brand-wordmark {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  color: #133d86;
+  text-align: left;
+  font-style: italic;
+  line-height: 1;
+}
+
+.em-login-window .em-login-brand-wordmark strong {
+  display: block;
+  font-family: Tahoma, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  text-shadow: 0 1px 0 #ffffffaa;
+}
+
+.em-login-window .em-login-brand-wordmark strong:first-child {
+  font-size: 25px;
+}
+
+.em-login-window .em-login-brand-wordmark strong:last-child {
+  font-size: 22px;
+}
+
+/* Sweeping Classic header wave */
+
+.em-login-window .em-login-header-wave {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: -19px;
+  height: 44px;
+  z-index: 1;
+
+  background: #ffffff;
+  border-top: 5px solid #69a9ee;
+  border-radius: 55% 65% 0 0 / 72% 90% 0 0;
+  transform: rotate(-3deg);
+
+  pointer-events: none;
+}
+
+.em-login-window .em-login-header-wave::before {
+  content: "";
+  position: absolute;
+
+  left: -5%;
+  right: -5%;
+  top: -11px;
+  height: 15px;
+
+  border-top: 3px solid #d9efff;
+  border-radius: 55% 70% 0 0;
+}
+
+/* Sign-in content */
+
+.em-login-window .em-login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  flex: 1 0 auto;
+  padding: 9px 22px 4px;
+  box-sizing: border-box;
+}
+
+/* Keep the approved photo and its existing crop. */
+
+.em-login-window .em-login-photo {
+  flex-shrink: 0;
+  align-self: center;
+  margin: 3px auto 15px;
+}
+
+/* Account fields */
+
+.em-login-window .em-login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+  text-align: left;
+}
+
+.em-login-window .em-login-form > label {
+  display: block;
+
+  margin: 0;
+  padding: 0;
+
+  color: #202020;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.em-login-window .em-login-form > input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 25px;
+
+  margin: 0 0 5px;
+  padding: 3px 5px;
+
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+  background: #ffffff;
+
+  color: #161616;
+  font: 12px Tahoma, Arial, sans-serif;
+
+  box-shadow: inset 1px 1px 2px #00000012;
+}
+
+.em-login-window .em-login-form > input:disabled {
+  background: #f2f2ef;
+  color: #808080;
+  opacity: 1;
+}
+
+.em-login-window .em-login-form > input:focus {
+  outline: 1px solid #7f9db9;
+  outline-offset: 1px;
+}
+
+/* Presence selector */
+
+.em-login-window .em-login-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 3px 0 6px;
+
+  font-size: 11px;
+}
+
+.em-login-window .em-login-status-row label {
+  flex: 0 0 auto;
+}
+
+.em-login-window .em-login-status-row select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 24px;
+
+  padding: 2px 4px;
+
+  border: 1px solid #7f9db9;
+  border-radius: 2px;
+
+  background: #ffffff;
+  color: #202020;
+
+  font: 12px Tahoma, Arial, sans-serif;
+  color-scheme: light;
+}
+
+/* Compact XP-style checkbox group */
+
+.em-login-window .em-login-checks {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+
+  margin: 3px 0 12px;
+}
+
+.em-login-window .em-login-check-label,
+.em-login-window .em-login-checks .em-check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin: 0;
+  padding: 0;
+
+  color: #292929;
+  font: 11px Tahoma, Arial, sans-serif;
+  line-height: 15px;
+}
+
+.em-login-window .em-login-checks input[type="checkbox"] {
+  appearance: auto;
+
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+
+  accent-color: #276bc6;
+  color-scheme: light;
+}
+
+/* Beveled primary button */
+
+.em-login-window .em-signin-button {
+  align-self: center;
+
+  width: 110px;
+  min-height: 27px;
+
+  margin: 2px 0 8px;
+  padding: 3px 10px;
+
+  border: 1px solid #174b95;
+  border-radius: 3px;
+
+  background: linear-gradient(
+    #ffffff,
+    #f2f6fb 45%,
+    #d9e8f8
+  );
+
+  color: #151515;
+  font: 12px Tahoma, Arial, sans-serif;
+
+  box-shadow:
+    inset 0 0 0 2px #ffffff,
+    0 1px 1px #0000001a;
+}
+
+.em-login-window .em-signin-button:hover {
+  background: linear-gradient(
+    #ffffff,
+    #e3effd 45%,
+    #b9d6f7
+  );
+}
+
+.em-login-window .em-signin-button:active {
+  box-shadow: inset 1px 1px 3px #4676ac66;
+}
+
+/* Account links */
+
+.em-login-window .em-login-account-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  margin: 0 0 9px;
+}
+
+.em-login-window .em-login-account-links button {
+  display: inline;
+  width: auto;
+  min-height: 0;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+
+  color: #275da5;
+  font: 11px Tahoma, Arial, sans-serif;
+  text-decoration: underline;
+
+  opacity: 1;
+  cursor: pointer;
+}
+
+.em-login-window .em-login-error {
+  margin: 4px 0 0;
+  color: #b00020;
+  font: 11px Tahoma, Arial, sans-serif;
+  text-align: center;
+}
+
+.em-login-window .em-login-note {
+  margin: 2px 0 8px;
+  padding: 0;
+
+  color: #707070;
+  font: 10px Tahoma, Arial, sans-serif;
+
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Decorative footer */
+
+.em-login-window .em-login-wave {
+  position: relative;
+  flex: 0 0 51px;
+  height: 51px;
+
+  margin: auto 0 0;
+  padding: 0;
+
+  overflow: hidden;
+
+  background: linear-gradient(
+    105deg,
+    #b8ddff,
+    #77b5f4 65%,
+    #4c91e5
+  );
+
+  border: 0;
+  border-radius: 0;
+}
+
+.em-login-window .em-login-wave::before {
+  content: "";
+
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: -24px;
+  height: 40px;
+
+  background: #ffffff;
+  border-bottom: 4px solid #e0f1ff;
+  border-radius: 0 0 50% 65%;
+
+  transform: rotate(-4deg);
+}
+
+.em-login-window .em-login-footer-butterfly {
+  position: absolute;
+  right: 12px;
+  bottom: 5px;
+
+  display: block;
+  width: 38px;
+  height: 38px;
+
+  background-image: url("/approved/glass-butterfly.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 04A - NATIVE CHAT WINDOW
+   ========================================== */
+
+html:has(.em-native-chat),
+html:has(.em-native-chat) body,
+html:has(.em-native-chat) #root {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.em-app.em-native-chat {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f9ff;
+}
+
+.em-native-chat .em-dev-strip,
+.em-native-chat .em-login-window,
+.em-native-chat .em-buddy-window,
+.em-native-chat .em-toast {
+  display: none;
+}
+
+.em-native-chat .em-desktop-preview {
+  display: block;
+  position: static;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.em-native-chat .em-chat-window {
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  height: auto;
+  margin: 0;
+  box-shadow: none;
+}
+
+.em-native-chat .em-titlebar {
+  flex-shrink: 0;
+  cursor: default;
+  user-select: none;
+}
+
+.em-native-chat .em-window-controls button {
+  cursor: pointer;
+}
+
+.em-native-chat .em-menubar,
+.em-native-chat .em-chat-tools,
+.em-native-chat .em-chat-footer {
+  flex-shrink: 0;
+}
+
+.em-native-chat .em-chat-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 04C - NATIVE SIGN-IN WINDOW
+   ========================================== */
+
+html:has(.em-native-login),
+html:has(.em-native-login) body,
+html:has(.em-native-login) #root {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 0;
+
+  margin: 0;
+  padding: 0;
+
+  text-align: left;
+}
+
+.em-app.em-native-login {
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.em-native-login .em-dev-strip,
+.em-native-login .em-buddy-window,
+.em-native-login .em-chat-window,
+.em-native-login .em-toast {
+  display: none;
+}
+
+.em-native-login .em-desktop-preview {
+  display: block;
+  position: static;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+}
+
+.em-native-login .em-login-window {
+  position: relative;
+
+  top: auto;
+  left: auto;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  height: auto;
+
+  margin: 0;
+  box-shadow: none;
+}
+
+.em-native-login .em-titlebar {
+  flex-shrink: 0;
+  cursor: default;
+  user-select: none;
+}
+
+.em-native-login .em-window-controls
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 04D - NATIVE BUDDY LIST
+   ========================================== */
+
+html:has(.em-native-buddy),
+html:has(.em-native-buddy) body,
+html:has(.em-native-buddy) #root {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+
+  margin: 0;
+  padding: 0;
+
+  overflow: hidden;
+  text-align: left;
+}
+
+.em-app.em-native-buddy {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  margin: 0;
+  padding: 0;
+
+  overflow: hidden;
+
+  background: #f8fbff;
+}
+
+/* Development-only elements remain available
+   in the browser preview. */
+
+.em-native-buddy .em-dev-strip,
+.em-native-buddy .em-login-window,
+.em-native-buddy .em-chat-window,
+.em-native-buddy .em-toast {
+  display: none;
+}
+
+/* Remove the simulated desktop host. */
+
+.em-native-buddy .em-desktop-preview {
+  display: block;
+  position: static;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+  overflow: hidden;
+}
+
+/* The buddy list now fills the actual
+   native Windows application window. */
+
+.em-native-buddy .em-buddy-window {
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+  top: auto;
+  left: auto;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+
+  flex: none;
+
+  margin: 0;
+
+  box-shadow: none;
+  overflow: hidden;
+}
+
+/* Preserve the approved title bar and toolbars. */
+
+.em-native-buddy .em-buddy-window .em-titlebar {
+  flex-shrink: 0;
+  user-select: none;
+  cursor: default;
+}
+
+.em-native-buddy .em-window-controls
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+.em-native-buddy .em-buddy-window .em-menubar {
+  position: relative;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.em-native-buddy .em-buddy-window .em-profile,
+.em-native-buddy .em-buddy-window .em-buddy-tools {
+  flex-shrink: 0;
+}
+
+/* Resize only the contact-list area,
+   not the approved toolbar artwork. */
+
+.em-native-buddy .em-buddy-window .em-groups {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Leave the existing Classic skin menu above
+   the profile and contact list. */
+
+.em-native-buddy .em-skin-menu-popup {
+  z-index: 100;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 05A - FUNCTIONAL MENUS AND SOUNDS
+   ========================================== */
+
+.em-app .em-menubar.em-functional-menu {
+  position: relative;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+
+  gap: 3px;
+  min-height: 28px;
+  padding: 2px 6px;
+
+  overflow: visible;
+
+  background: linear-gradient(
+    #ffffff,
+    #f5f5ee
+  );
+
+  border-bottom: 1px solid #a3b9d6;
+}
+
+.em-app .em-functional-menu .em-menu-top {
+  min-width: 0;
+  min-height: 22px;
+
+  padding: 2px 6px;
+  margin: 0;
+
+  border: 1px solid transparent;
+  border-radius: 0;
+
+  background: transparent;
+  box-shadow: none;
+
+  color: #151515;
+  font: 12px Tahoma, Arial, sans-serif;
+
+  cursor: pointer;
+}
+
+.em-app .em-functional-menu
+.em-menu-top:hover,
+.em-app .em-functional-menu
+.em-menu-selected {
+  border-color: #89abd3;
+  background: #dceaff;
+}
+
+.em-app .em-functional-menu .em-menu-popup {
+  position: absolute;
+
+  top: 100%;
+  left: 4px;
+
+  z-index: 101;
+
+  width: 240px;
+  max-width: calc(100% - 8px);
+  max-height: min(350px, calc(100vh - 80px));
+
+  padding: 3px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  border: 1px solid #8298b0;
+  border-radius: 0;
+
+  background: #fffef7;
+  box-shadow: 2px 3px 4px #0003;
+
+  color: #151515;
+  text-align: left;
+}
+
+.em-app .em-functional-menu
+.em-menu-align-right {
+  left: auto;
+  right: 4px;
+}
+
+.em-app .em-menu-popup button,
+.em-app .em-menu-popup summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  min-height: 24px;
+
+  gap: 3px;
+  padding: 4px 7px;
+  margin: 0;
+
+  border: 1px solid transparent;
+  border-radius: 0;
+
+  background: transparent;
+  box-shadow: none;
+
+  color: #161616;
+  font: 12px Tahoma, Arial, sans-serif;
+
+  text-align: left;
+  list-style: none;
+
+  cursor: pointer;
+}
+
+.em-app .em-menu-popup
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.em-app .em-menu-popup summary::after {
+  content: "\25B8";
+  margin-left: auto;
+  color: #294c77;
+}
+
+.em-app .em-menu-popup
+details[open] > summary::after {
+  content: "\25BE";
+}
+
+.em-app .em-menu-popup
+button:hover:not(:disabled),
+.em-app .em-menu-popup summary:hover,
+.em-app .em-menu-popup button:focus-visible {
+  background: #cfe5ff;
+  border-color: #86a9d1;
+}
+
+.em-app .em-menu-popup button:disabled {
+  color: #939393;
+  opacity: 1;
+  cursor: default;
+}
+
+.em-app .em-menu-popup button small {
+  margin-left: auto;
+  color: #6a7686;
+  font-size: 10px;
+}
+
+.em-app .em-menu-popup hr {
+  height: 1px;
+
+  border: 0;
+  margin: 3px 5px;
+
+  background: #c9cbd0;
+}
+
+.em-app .em-menu-heading {
+  padding: 5px 8px 3px;
+
+  color: #45617f;
+  font: bold 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-menu-check {
+  display: inline-block;
+  flex: 0 0 17px;
+
+  width: 17px;
+
+  color: #164f97;
+}
+
+.em-app .em-menu-popup .em-menu-indented {
+  padding-left: 19px;
+}
+
+.em-app .em-menu-volume {
+  padding: 6px 8px;
+}
+
+.em-app .em-menu-volume label {
+  display: block;
+
+  color: #202020;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-menu-volume label span {
+  float: right;
+}
+
+.em-app .em-menu-volume input[type="range"] {
+  display: block;
+
+  width: 100%;
+  height: 20px;
+
+  padding: 0;
+  margin: 5px 0;
+
+  accent-color: #3679cb;
+  cursor: pointer;
+}
+
+.em-app .em-menu-volume .em-menu-preview {
+  justify-content: center;
+
+  margin: 4px 0 0;
+
+  border: 1px solid #83a1c4;
+  border-radius: 3px;
+
+  background: linear-gradient(
+    #ffffff,
+    #d7e8fa
+  );
+
+  box-shadow: inset 0 0 0 1px #ffffff;
+}
+
+/* Classic About panel */
+
+.em-app .em-menu-about {
+  position: absolute;
+
+  top: 100%;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 102;
+
+  width: 250px;
+  max-width: calc(100% - 8px);
+
+  padding: 2px;
+
+  border: 2px solid #0751b7;
+  border-radius: 6px;
+
+  background: #f7f9fc;
+  box-shadow: 2px 4px 8px #0003;
+}
+
+.em-app .em-menu-about-title {
+  padding: 6px 8px;
+
+  background: linear-gradient(
+    #5b9ff1,
+    #0753c4
+  );
+
+  color: white;
+  font: bold 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-menu-about-content {
+  padding: 14px 10px;
+
+  color: #172b4d;
+  text-align: center;
+}
+
+.em-app .em-menu-about-logo {
+  display: block;
+
+  width: 50px;
+  height: 50px;
+
+  margin: 0 auto 8px;
+
+  background:
+    url("/approved/glass-butterfly.png")
+    center / contain no-repeat;
+}
+
+.em-app .em-menu-about-content p {
+  margin: 5px 0;
+
+  font-size: 11px;
+}
+
+.em-app .em-menu-about-content small {
+  display: block;
+
+  margin-top: 8px;
+
+  color: #667386;
+  font-size: 10px;
+}
+
+.em-app .em-menu-about-content button {
+  display: block;
+
+  min-width: 75px;
+  min-height: 24px;
+
+  margin: 12px auto 0;
+
+  border: 1px solid #7694b9;
+  border-radius: 3px;
+
+  color: #172b4d;
+
+  background: linear-gradient(
+    #ffffff,
+    #d9e8f9
+  );
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 05A.2 - EXPANDED TYPING SOUND LIBRARY
+   ========================================== */
+
+.em-app .em-typing-sound-list {
+  display: block;
+
+  max-height: 158px;
+
+  margin: 3px 2px;
+  padding: 2px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  border: 1px solid #a7b9ce;
+
+  background: #ffffff;
+
+  scrollbar-width: auto;
+  scrollbar-color: #a8bfdf #edf1f7;
+}
+
+.em-app .em-typing-sound-list button {
+  min-height: 24px;
+  flex-shrink: 0;
+}
+
+.em-app .em-typing-sound-list::-webkit-scrollbar {
+  width: 15px;
+}
+
+.em-app .em-typing-sound-list::-webkit-scrollbar-track {
+  background: #edf1f7;
+  border-left: 1px solid #bdcadd;
+}
+
+.em-app .em-typing-sound-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    90deg,
+    #dceafa,
+    #9dbce3
+  );
+
+  border: 1px solid #7898c1;
+  border-radius: 2px;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | CLASSIC
+   BATCH 05B - SOUND SETTINGS
+   ========================================== */
+
+.em-app .em-sound-settings {
+  position: absolute;
+
+  top: 100%;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 110;
+
+  width: 292px;
+  max-width: calc(100% - 6px);
+  max-height: calc(100vh - 76px);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border: 2px solid #0750b9;
+  border-radius: 6px;
+
+  background: #f4f3ed;
+
+  box-shadow: 2px 4px 7px #0003;
+
+  font: 11px Tahoma, Arial, sans-serif;
+  color: #172337;
+  text-align: left;
+}
+
+.em-app .em-sound-settings-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  flex-shrink: 0;
+
+  min-height: 26px;
+  padding: 3px 5px 3px 8px;
+
+  background: linear-gradient(
+    #70b3ff,
+    #267ae0 26%,
+    #0751c2 80%,
+    #397fe0
+  );
+
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.em-app .em-sound-settings-title button {
+  width: 20px;
+  height: 20px;
+
+  padding: 0;
+  margin: 0;
+
+  border: 1px solid #ffd2c5;
+  border-radius: 3px;
+
+  background: linear-gradient(
+    #ffad91,
+    #e43e27
+  );
+
+  color: #ffffff;
+  font: bold 17px/17px Arial, sans-serif;
+}
+
+.em-app .em-sound-settings-body {
+  min-height: 0;
+
+  padding: 8px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.em-app .em-sound-settings fieldset {
+  min-width: 0;
+
+  padding: 7px;
+  margin: 0 0 9px;
+
+  border: 1px solid #a4adb9;
+  border-radius: 3px;
+
+  background: transparent;
+}
+
+.em-app .em-sound-settings legend {
+  padding: 0 4px;
+
+  color: #16488b;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-sound-select-label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  color: #202020;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-sound-settings select {
+  box-sizing: border-box;
+
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+
+  margin: 0;
+  padding: 2px 4px;
+
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+
+  background: #ffffff;
+  box-shadow: none;
+
+  color: #202020;
+  color-scheme: light;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-sound-channel {
+  padding-bottom: 7px;
+  margin-bottom: 7px;
+
+  border-bottom: 1px solid #d3d6dc;
+}
+
+.em-app .em-sound-channel:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+
+  border-bottom: 0;
+}
+
+.em-app .em-sound-settings
+.em-sound-preview-button,
+.em-app .em-sound-settings-footer button {
+  min-height: 23px;
+
+  padding: 3px 9px;
+
+  border: 1px solid #7899c2;
+  border-radius: 3px;
+
+  background: linear-gradient(
+    #ffffff,
+    #dce9f8
+  );
+
+  box-shadow: inset 0 0 0 1px #ffffff;
+
+  color: #173a68;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-sound-settings
+.em-sound-preview-button {
+  display: block;
+  margin: 5px 0 0 auto;
+}
+
+.em-app .em-sound-settings
+button:disabled {
+  color: #909090;
+  opacity: 0.65;
+}
+
+.em-app .em-sound-master-volume {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.em-app .em-sound-master-volume span {
+  width: 30px;
+  flex-shrink: 0;
+}
+
+.em-app .em-sound-master-volume
+input[type="range"] {
+  flex: 1;
+
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+
+  margin: 0;
+  padding: 0;
+
+  accent-color: #3079cf;
+}
+
+.em-app .em-sound-settings-note {
+  margin: 5px 1px 10px;
+
+  color: #66717d;
+  font: 10px/1.4 Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-sound-settings-footer {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 6px;
+}
+
+
+/* BATCH 05E - SHARED RETRO EMOTICONS */
+
+.em-app .em-emoticon-menu {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  width: 210px;
+  max-width: calc(100vw - 24px);
+  max-height: 152px;
+
+  padding: 4px;
+  gap: 3px;
+
+  overflow: auto;
+}
+
+.em-app .em-emoticon-menu button {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 29px;
+
+  padding: 2px;
+}
+
+.em-app .em-classic-emoticon.em-symbol-emoticon {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+
+/* BATCH 05E.1 - BUTTON-ANCHORED EMOTICONS */
+
+.em-anchored-emoticons {
+  position: fixed !important;
+
+  right: auto !important;
+  bottom: auto !important;
+
+  transform: none !important;
+
+  z-index: 2147483000 !important;
+
+  box-sizing: border-box;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+
+  max-width: calc(100vw - 12px);
+
+  gap: 3px;
+  padding: 5px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.em-anchored-emoticons button {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 29px;
+
+  padding: 2px;
+
+  cursor: pointer;
+}
+
+
+.em-app .em-anchored-emoticons {
+  border: 1px solid #8298b0;
+  border-radius: 3px;
+
+  background: #fffef7;
+
+  box-shadow: 2px 3px 5px #0004;
+}
+
+.em-app .em-anchored-emoticons button {
+  border: 1px solid transparent;
+  border-radius: 2px;
+
+  background: transparent;
+  box-shadow: none;
+}
+
+.em-app .em-anchored-emoticons button:hover,
+.em-app .em-anchored-emoticons button:focus-visible {
+  border-color: #86add5;
+  background: #d4e7fc;
+}
+
+
+/* BATCH 05F - CLASSIC PRESENCE */
+
+.em-app .em-presence-select {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  min-width: 85px;
+  font: 12px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-presence-select:has(
+  .em-presence-options
+) {
+  z-index: 150;
+}
+
+.em-app .em-presence-trigger {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  width: 100%;
+  min-height: 23px;
+  padding: 3px 5px;
+
+  color: #173355;
+  background: linear-gradient(#ffffff, #e0edfc);
+
+  border: 1px solid #7f9ec5;
+  border-radius: 2px;
+
+  font: 12px Tahoma, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.em-app .em-presence-arrow {
+  width: 0;
+  height: 0;
+  margin-left: auto;
+
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid #254c77;
+}
+
+.em-app .em-presence-options {
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 0;
+  z-index: 151;
+
+  box-sizing: border-box;
+  min-width: 100%;
+  width: 102px;
+  padding: 2px;
+
+  border: 1px solid #799abd;
+  background: #fffef7;
+
+  box-shadow: 2px 3px 5px #0004;
+}
+
+.em-app .em-presence-options button {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  width: 100%;
+  min-height: 24px;
+  margin: 0;
+  padding: 3px 5px;
+
+  border: 1px solid transparent;
+  border-radius: 0;
+
+  color: #182b43;
+  background: transparent;
+
+  text-align: left;
+  font: 12px Tahoma, Arial, sans-serif;
+}
+
+.em-app .em-presence-options
+button[aria-selected="true"],
+.em-app .em-presence-options button:hover,
+.em-app .em-presence-options button:focus-visible {
+  background: #d3e7fc;
+  border-color: #92b3d9;
+  outline: none;
+}
+
+.em-app .em-presence-dot {
+  display: inline-block;
+  flex: 0 0 12px;
+
+  width: 12px;
+  height: 12px;
+
+  box-sizing: border-box;
+  border-radius: 50%;
+
+  border: 1px solid var(--presence-edge);
+  background: radial-gradient(
+    ellipse at 34% 25%,
+    var(--presence-light) 0%,
+    var(--presence-color) 42%,
+    var(--presence-edge) 100%
+  );
+
+  box-shadow: inset 0 1px #ffffff99;
+}
+
+.em-app .em-presence-online {
+  --presence-light: #e8ffb5;
+  --presence-color: #75c845;
+  --presence-edge: #39851e;
+}
+
+.em-app .em-presence-away {
+  --presence-light: #fff6b0;
+  --presence-color: #efbd35;
+  --presence-edge: #a47716;
+}
+
+.em-app .em-presence-busy {
+  --presence-light: #ffd1bc;
+  --presence-color: #f25c46;
+  --presence-edge: #a82c20;
+}
+
+.em-app .em-presence-invisible {
+  --presence-light: #f3f7fc;
+  --presence-color: #aab5bf;
+  --presence-edge: #717d89;
+}
+
+
+/* BATCH 05F - SOUND PACK LIBRARY */
+
+.ew-sound-pack-manager {
+  min-width: 0;
+}
+
+.ew-sound-pack-manager input[type="text"],
+.ew-sound-pack-manager input[type="file"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+
+  padding: 4px;
+  margin: 2px 0;
+
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.ew-sound-pack-manager small {
+  display: block;
+  margin: 5px 0;
+  opacity: .8;
+  line-height: 1.4;
+}
+
+.ew-pack-selected,
+.ew-pack-section {
+  margin-top: 9px;
+  padding-top: 7px;
+
+  border-top: 1px solid currentColor;
+}
+
+.ew-pack-section summary {
+  cursor: pointer;
+  font-weight: bold;
+  padding: 3px 0;
+}
+
+.ew-pack-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ew-pack-buttons,
+.ew-pack-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  margin: 6px 0;
+}
+
+.ew-pack-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin: 10px 0 5px;
+}
+
+.ew-pack-checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.ew-pack-notice {
+  padding: 6px;
+  margin: 6px 0;
+
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.ew-sound-pack-manager button {
+  min-height: 23px;
+  padding: 3px 7px;
+
+  font: 11px Tahoma, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.ew-sound-pack-manager button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+
+.em-app .ew-sound-pack-manager input[type="text"] {
+  border: 1px solid #7f9db9;
+  background: #fff;
+  color: #172b46;
+}
+
+.em-app .ew-sound-pack-manager button {
+  border: 1px solid #7899c2;
+  border-radius: 3px;
+
+  color: #173a68;
+  background: linear-gradient(#fff, #dce9f8);
+}
+
+.em-app .ew-pack-notice {
+  border: 1px solid #9db8d5;
+  background: #e2effc;
+  color: #173a68;
+}
+
+.em-app .ew-pack-section,
+.em-app .ew-pack-selected {
+  border-top-color: #c5cbd4;
+}

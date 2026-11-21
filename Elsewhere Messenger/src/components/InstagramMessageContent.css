@@ -1,0 +1,19 @@
+.ig-content{display:grid;gap:7px;min-width:0}.ig-content p{margin:4px 0;white-space:pre-wrap}.ig-asset{display:grid;gap:5px;padding:8px;border:1px solid currentColor;border-radius:6px;opacity:.95;max-width:360px}.ig-asset strong{font-size:12px}.ig-asset span,.ig-asset small{font-size:11px;opacity:.75}.ig-asset img,.ig-asset video{display:block;width:100%;max-height:300px;object-fit:contain;border-radius:4px}.ig-asset audio{max-width:100%;width:250px}.ig-asset a{font-size:11px;overflow-wrap:anywhere}.ig-content-fallback{font-style:italic;opacity:.75}.ig-content-reactions{opacity:.8}
+
+.ig-content-reply{display:block;opacity:.7;border-left:2px solid currentColor;padding:4px 7px;margin-bottom:5px}
+
+.ew-ig-reply-target{display:block;text-align:left;border:0;border-left:3px solid #83d2ec;background:#638e9d23;color:inherit;margin:4px 0;padding:5px 8px;max-width:100%;cursor:pointer;font:inherit}.ew-ig-reply-target:disabled{opacity:.7;cursor:default}.ew-ig-inspector{border:1px solid #86bbc6;border-radius:4px;background:#162a37;color:#e5f4ff;padding:8px;display:grid;gap:3px;z-index:5;max-width:330px;box-shadow:0 3px 12px #0008}.ew-ig-reply-target:hover:not(:disabled){text-decoration:underline}.ew-reply-highlight{outline:2px solid #8acbdf;outline-offset:3px;transition:outline-color 1.5s}
+
+.ew-ig-inspector button{cursor:pointer;text-align:left;color:inherit;background:#37505b;border:1px solid #7997a6;border-radius:3px;padding:5px 8px}.ew-ig-inspector button:hover{background:#476b7b}
+.ew-ig-compose-reply{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-left:3px solid #79c5e5;background:#587e9122;color:inherit;font-size:12px}.ew-ig-compose-reply button{cursor:pointer}
+
+/* 24-hour reply window notice above the composer (chat windows). */
+.ew-ig-window-notice{margin:4px 0 6px;padding:7px 9px;border:1px solid #f0c36d;border-radius:5px;background:#fff6dd;color:#4a3500;font:11px/1.4 Tahoma,sans-serif}
+
+/* Latest-message preview under Instagram contacts in the buddy list. */
+.ew-contact-preview{display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11px;font-weight:normal;opacity:.7;margin-top:1px}
+.ds-contact .ew-contact-preview{flex:1 1 100%;order:9}
+
+/* Beta label next to the app name in window titles. */
+.ew-beta-badge{display:inline;margin-left:6px;font-size:10px;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;color:inherit;background:none;border:0;padding:0}
+.ew-beta-inline{margin:0 2px 0 0;font-style:normal}

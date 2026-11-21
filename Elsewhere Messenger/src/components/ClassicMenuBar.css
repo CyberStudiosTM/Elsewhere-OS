@@ -1,0 +1,29 @@
+.em-functional-menu .em-menu-about-content {
+  max-height: max(90px, calc(100vh - 145px));
+  overflow: auto;
+}
+
+.em-functional-menu .em-menu-about-content .em-menu-about-description {
+  margin-top: 12px;
+  text-align: left;
+  line-height: 1.45;
+}
+
+.em-functional-menu .em-menu-about-help a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.ew-tools-menu .ew-tools-label {
+  padding: 5px 8px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  opacity: .8;
+}
+.ew-tools-menu details[open] > .em-menu-indented { padding-left: 18px; }
+
+/* Narrow windows: keep each menu name on one line and let extra menus wrap to a second row. */
+.em-functional-menu{flex-wrap:wrap;row-gap:0}
+.em-functional-menu .em-menu-top{white-space:nowrap}

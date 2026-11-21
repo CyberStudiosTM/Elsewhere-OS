@@ -1,0 +1,39 @@
+/* Elsewhere Account dialog. The window frame comes from ToolbarDialog, so it
+   matches the Classic and Dead Signal dialogs; these rules only lay out the body. */
+.ew-account { display: grid; gap: 10px; }
+.ew-account p { margin: 0; line-height: 1.4; }
+.ew-toolbar-body .ew-account-form, .ew-toolbar-body .ew-account-search { display: grid; align-items: stretch; gap: 8px; }
+.ew-account-form label, .ew-account-search label { display: grid; gap: 3px; font-weight: bold; }
+.ew-account-form input:not([type="checkbox"]), .ew-account-search input, .ew-account-form textarea {
+  box-sizing: border-box; width: 100%; padding: 4px 5px; font: 13px Tahoma, sans-serif;
+  border: 1px solid #7f9db9; border-radius: 2px; background: #fff; color: #142e4a;
+}
+.ew-account-form textarea { resize: vertical; }
+.ew-toolbar-body .ew-account-search { grid-template-columns: 1fr auto; align-items: end; }
+.ew-account-check { display: flex !important; align-items: center; gap: 6px; font-weight: normal !important; }
+.ew-account-actions, .ew-account-bar, .ew-account-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ew-account-signed { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; }
+.ew-account-list { display: grid; gap: 4px; margin: 0; padding: 6px 8px 8px; border: 1px solid #9ab8da; border-radius: 4px; min-width: 0; }
+.ew-account-list legend { padding: 0 4px; font-weight: bold; }
+.ew-account-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.ew-account-row > strong, .ew-account-person { margin-right: auto; overflow-wrap: anywhere; }
+.ew-account-name, .ew-account-muted { opacity: .75; font-size: 12px; }
+.ew-account-name { margin-right: auto; }
+.ew-account-row > strong + .ew-account-name { margin-left: -2px; }
+.ew-toolbar-dialog .ew-account-person { background: transparent; border-color: transparent; text-align: left; font-weight: bold; text-decoration: underline; }
+.ew-account-found { padding: 6px; border-radius: 4px; background: #d6e7fa; }
+.ew-account-links a { color: #1d58a8; }
+.ew-account-error { color: #b00020; }
+.ew-account-footer { justify-content: space-between; }
+
+.ew-toolbar-dead-signal .ew-account-form input:not([type="checkbox"]),
+.ew-toolbar-dead-signal .ew-account-search input,
+.ew-toolbar-dead-signal .ew-account-form textarea { background: #0b1218; color: #edf4f6; border-color: #536779; }
+.ew-toolbar-dead-signal .ew-account-list { border-color: #536779; }
+.ew-toolbar-dead-signal .ew-account-found { background: #1d2a34; }
+.ew-toolbar-dead-signal .ew-account-links a { color: #bdd9e3; }
+.ew-toolbar-dead-signal .ew-account-error { color: #ffb4b4; }
+
+.ew-account-danger { color: #a01818; }
+.ew-account-danger:disabled { color: GrayText; }
+.ew-account-check { display: flex; align-items: center; gap: 6px; }

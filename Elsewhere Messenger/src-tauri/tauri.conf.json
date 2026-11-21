@@ -1,0 +1,63 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Elsewhere Messenger",
+  "version": "0.2.21",
+  "identifier": "com.cyberstudiostm.elsewhere",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Elsewhere Messenger",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "visible": false,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    },
+    "resources": {
+      "icons/icon.ico": "ElsewhereDesktop.ico"
+    },
+    "windows": {
+      "nsis": {
+        "template": "installer/elsewhere.nsi",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE5MjdGQTg5NjY3NjE1N0IKUldSN0ZYWm1pZm9uR2ZOUFZSaFhQWjNNL21OTmZ1OVFMczdseXdSOEYrcmUzZXEzNmtkYytST2gK",
+      "endpoints": [
+        "https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-updates/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

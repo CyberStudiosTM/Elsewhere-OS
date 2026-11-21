@@ -1,0 +1,137 @@
+/* ELSEWHERE MESSENGER
+   Shared skin selection controls
+*/
+
+/* Classic buddy-list Tools menu */
+
+.em-buddy-window .em-skin-menu {
+  position: relative;
+  flex: 0 0 auto;
+  font: 13px Tahoma, Arial, sans-serif;
+  color: #101010;
+}
+
+.em-buddy-window .em-skin-menu summary {
+  display: block;
+  list-style: none;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+}
+
+.em-buddy-window .em-skin-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.em-buddy-window .em-skin-menu[open] summary,
+.em-buddy-window .em-skin-menu summary:hover {
+  background: #d0e5fc;
+  border-color: #82a9d8;
+}
+
+.em-buddy-window .em-skin-menu-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+
+  width: 184px;
+  padding: 3px;
+
+  border: 1px solid #7891b0;
+  background: #fffef7;
+
+  box-shadow: 2px 3px 4px #0004;
+}
+
+.em-buddy-window .em-skin-menu-heading {
+  padding: 5px 8px;
+  margin-bottom: 3px;
+
+  border-bottom: 1px solid #c4c7ca;
+  color: #45617f;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.em-buddy-window .em-skin-menu-popup button {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 26px;
+  padding: 4px 7px;
+
+  border: 1px solid transparent;
+  border-radius: 0;
+
+  background: transparent;
+  color: #111827;
+  box-shadow: none;
+
+  text-align: left;
+  font: 12px Tahoma, Arial, sans-serif;
+}
+
+.em-buddy-window .em-skin-menu-popup button:hover:not(:disabled),
+.em-buddy-window .em-skin-menu-popup button:focus-visible {
+  background: #d2e6ff;
+  border-color: #92b4e2;
+}
+
+.em-buddy-window .em-skin-menu-check {
+  display: inline-block;
+  width: 19px;
+  flex-shrink: 0;
+  color: #154b98;
+}
+
+/* Temporary Dead Signal return / selection control.
+   Not part of Classic's interface.
+*/
+
+.ew-dead-skin-switcher {
+  position: fixed;
+  top: 10px;
+  right: 14px;
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 5px 8px;
+
+  border: 1px solid #8797a0;
+  border-radius: 4px;
+
+  color: #f0f2f4;
+
+  background: linear-gradient(
+    #53616a,
+    #20282f 30%,
+    #101419
+  );
+
+  box-shadow:
+    inset 0 1px #9aa9b355,
+    0 2px 8px #0009;
+
+  font: 12px Tahoma, Arial, sans-serif;
+  color-scheme: dark;
+}
+
+.ew-dead-skin-switcher select {
+  min-width: 150px;
+  padding: 3px 6px;
+
+  border: 1px solid #a54a4d;
+  border-radius: 2px;
+
+  color: #f0f2f4;
+  background: #1b242b;
+
+  font: inherit;
+  cursor: pointer;
+}

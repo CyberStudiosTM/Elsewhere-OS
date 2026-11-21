@@ -1,0 +1,33 @@
+.ew-own-photo {
+  display: block;
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+button.ew-own-photo { cursor: pointer; }
+.ew-own-photo-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.em-avatar.ew-own-photo > .em-avatar-self { width: 100%; height: 100%; background-size: cover; }
+.em-chat-sidebar .em-my-photo .ew-own-photo { width: 100%; height: 100%; margin: 0; border: 0; border-radius: 5px; }
+.ds-profile .ew-own-photo, .ds-own-avatar .ew-own-photo { border: 1px solid #485964; border-radius: 4px; }
+.ew-photo-picker {
+  box-sizing: border-box;
+  width: min(340px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  padding: 10px;
+  border: 1px solid #397bb8;
+  border-radius: 7px;
+  background: #e9f4ff;
+  color: #17304d;
+  font: 12px Tahoma, Arial, sans-serif;
+}
+.ew-photo-picker::backdrop { background: rgb(10 20 37 / 50%); }
+.ew-photo-picker-dead-signal { background: #181f26; color: #e3edf4; border-color: #617480; }
+.ew-photo-picker header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.ew-photo-picker button { cursor: pointer; }
+.ew-photo-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.ew-photo-options button { padding: 4px; border: 1px solid #779dc4; border-radius: 5px; }
+.ew-photo-options button[aria-pressed="true"] { outline: 2px solid #327ace; }
+.ew-photo-options img { display: block; width: 44px; height: 44px; object-fit: cover; margin: 0 auto 3px; }
+.ew-photo-picker label { display: grid; gap: 4px; margin-bottom: 8px; }
+.ew-photo-picker input { max-width: 100%; }

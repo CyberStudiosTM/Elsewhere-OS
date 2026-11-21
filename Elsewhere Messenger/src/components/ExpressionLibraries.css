@@ -1,0 +1,81 @@
+/* Batch 07B: expression-suite UI, scoped to the popover and its triggers. */
+.em-composer-frame .em-formatting .ew-expression-trigger,
+.ds-formatting .ew-expression-trigger {
+  width: auto; min-width: 28px; flex: 0 0 auto; padding: 2px 5px;
+  font-size: 13px; line-height: 20px; white-space: nowrap;
+}
+.em-composer-frame .em-formatting,
+.ds-formatting { flex-wrap: wrap; }
+.ew-expression-panel {
+  position: fixed; z-index: 2147483640; box-sizing: border-box;
+  display:flex; flex-direction:column; overflow:hidden;
+  border:1px solid #7889a6; border-radius:5px;
+  background:#f0f4fb;color:#172746;font:12px Tahoma,Arial,sans-serif;
+  box-shadow:0 9px 24px #0007;
+}
+.ew-expression-panel-dead-signal {
+  border-color:#98585d;background:#1d2730;color:#e7e7e7;
+}
+.ew-expression-panel *, .ew-expression-panel *::before, .ew-expression-panel *::after {box-sizing:border-box;}
+.ew-expression-panel input,.ew-expression-panel select,.ew-expression-panel textarea,
+.ew-expression-panel button { font:inherit; }
+.ew-expression-panel button {cursor:pointer;}
+.ew-expression-panel button:disabled {cursor:default; opacity:.55;}
+.ew-expression-head {display:flex;align-items:center;justify-content:space-between;
+  flex:0 0 auto; padding:7px 10px;
+  background:linear-gradient(#e2eeff,#b5d6fb);color:#173768;border-bottom:1px solid #7190b5;}
+.ew-expression-panel-dead-signal .ew-expression-head {
+  background:linear-gradient(#4a3338,#2b1921);color:#fff;border-bottom-color:#824b51;}
+.ew-expression-head button {width:24px;height:24px;}
+.ew-expression-body {flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;
+  min-height:0;padding:9px;display:flex;flex-direction:column;gap:7px;}
+.ew-expression-body>input,.ew-expression-body textarea {width:100%;min-width:0;}
+.ew-expression-controls {display:flex;align-items:center;gap:5px;min-width:0;}
+.ew-expression-controls>* {min-width:0; flex:1 1 auto;}
+.ew-expression-controls button {flex:0 0 auto;}
+.ew-expression-controls label {display:flex;align-items:center;gap:3px;}
+.ew-expression-controls label input {min-width:0;max-width:110px;}
+.ew-expression-controls input[type=color] {width:38px;max-width:38px;height:32px;flex:0 0 auto;}
+.ew-color-editor {display:flex;flex-direction:column;gap:5px;}
+.ew-color-numbers,.ew-color-preview {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;}
+.ew-color-numbers label {display:flex;align-items:center;gap:3px;min-width:0;}
+.ew-color-numbers input {width:100%;min-width:0;}
+.ew-color-preview {grid-template-columns:repeat(2,minmax(0,1fr));}
+.ew-color-preview div {border:1px solid #8b98a7;min-height:42px;padding:6px;overflow-wrap:anywhere;}
+.ew-color-preview small {display:block;}
+.ew-expression-entries {display:grid;grid-template-columns:1fr;gap:3px;}
+.ew-expression-swatches {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;}
+.ew-expression-entry {min-width:0;display:flex;gap:2px;align-items:stretch;}
+.ew-expression-choice {flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;
+  text-align:left;padding:4px;overflow-wrap:anywhere;color:inherit;background:transparent;border:1px solid #8a9cad;}
+.ew-expression-choice[aria-pressed=true] {border-color:#6090e9;background:#a1c4f350;}
+.ew-expression-panel-dead-signal .ew-expression-choice[aria-pressed=true] {border-color:#cd777f;background:#8b445750;}
+.ew-expression-choice span {font-size:15px;line-height:1.35;max-width:100%;}
+.ew-expression-choice small {font-size:10px;opacity:.75;}
+.ew-expression-choice i {display:block;width:100%;height:22px;border:1px solid #777;}
+.ew-expression-choice img {max-width:100%;max-height:55px;object-fit:contain;}
+.ew-expression-swatches .ew-expression-entry {flex-direction:column;}
+.ew-expression-swatches .ew-expression-choice {text-align:center;align-items:center;}
+.ew-expression-swatches .ew-expression-choice small {font-size:9px;}
+.ew-expression-favorite {border:1px solid #94a7bc;background:transparent;color:inherit;flex:0 0 auto;padding:2px 5px;}
+.ew-expression-pages,.ew-expression-actions {display:flex;justify-content:space-between;align-items:center;gap:5px;}
+.ew-expression-empty {display:flex;flex-direction:column;gap:7px;text-align:center;padding:20px 6px;}
+.ew-expression-credit {display:grid;justify-items:start;gap:2px;}
+.ew-expression-credit img {max-width:170px;max-height:80px;object-fit:contain;}
+.ew-expression-body details {border-top:1px solid #8b9bab;padding-top:6px;}
+.ew-expression-body summary {cursor:pointer;}
+.ew-expression-footer {flex:0 0 auto;display:flex;flex-direction:column;gap:5px;padding:7px 9px;
+  border-top:1px solid #8399b9;background:#dceafa;}
+.ew-expression-panel-dead-signal .ew-expression-footer {background:#26333b;border-top-color:#84494f;}
+.ew-expression-chosen {overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ew-expression-chosen strong {overflow:hidden;text-overflow:ellipsis;}
+.ew-expression-actions {justify-content:flex-end;flex-wrap:wrap;}
+.ew-expression-actions button {padding:4px 7px;}
+.ew-treasure-message {display:grid;gap:2px;justify-items:start;}
+.ew-treasure-unavailable {font-size:12px;}
+
+/* Legacy placeholder controls are replaced by five actual library triggers. */
+.em-composer-frame .em-formatting .em-font-picker[disabled],
+.em-composer-frame .em-formatting button[title="Font color is not implemented yet"],
+.ds-formatting > button[title="Font"],
+.ds-formatting > button.ds-font-color {display:none;}

@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "toolbar-actions",
+  "description": "Open official messaging inboxes and system mail or phone handlers.",
+  "windows": ["main", "classic-chat", "dead-signal-chat"],
+  "permissions": [{
+    "identifier": "opener:allow-open-url",
+    "allow": [
+      { "url": "mailto:" },
+      { "url": "tel:*" },
+      { "url": "microsoft.windows.camera:" },
+      { "url": "https://discord.com/channels/@me" },
+      { "url": "https://www.instagram.com/direct/inbox/" }
+    ]
+  }]
+}

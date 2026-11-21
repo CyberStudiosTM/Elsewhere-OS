@@ -1,0 +1,8 @@
+.ew-discord-message-content{display:grid;gap:5px;max-width:100%;overflow-wrap:anywhere}
+.ew-discord-attachment img,.ew-discord-embed img{display:block;max-width:min(260px,100%);max-height:180px;object-fit:contain}
+.ew-discord-attachment video{max-width:100%;max-height:220px}
+.ew-discord-embed{padding:7px;border-left:3px solid #8facc7;background:rgba(100,120,160,.1)}
+.ew-discord-embed p{margin:4px 0}
+.ew-discord-reply-preview{padding:4px 7px;border-left:3px solid #9db9d2;opacity:.85}
+.ew-discord-reply-button{justify-self:start;font-size:10px;opacity:.85;cursor:pointer}
+.ew-discord-reactions{display:flex;gap:7px;flex-wrap:wrap}

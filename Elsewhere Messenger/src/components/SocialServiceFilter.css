@@ -1,0 +1,37 @@
+/* Uses inherited typography and theme colors rather than altering either approved skin. */
+.ew-social-services {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px 7px;
+  border-bottom: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 16%, transparent);
+}
+.ew-social-service {
+  appearance: none;
+  font: inherit;
+  font-size: 11px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 4px;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+.ew-social-service:hover, .ew-social-service:focus-visible {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+.ew-social-service.is-selected {
+  background: color-mix(in srgb, currentColor 19%, transparent);
+  border-color: currentColor;
+}
+.ew-social-service-upcoming {
+  font-size: 10px;
+  opacity: .6;
+  padding: 3px 2px;
+  cursor: default;
+}
+
+/* Shown but not clickable, so its tooltip still appears on hover. */
+.ew-social-service.is-unavailable{opacity:.5;cursor:not-allowed}

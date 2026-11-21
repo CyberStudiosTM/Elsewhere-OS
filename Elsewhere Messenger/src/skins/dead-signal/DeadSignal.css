@@ -1,0 +1,2206 @@
+body {
+  margin: 0;
+  background:
+    linear-gradient(rgba(8, 10, 14, 0.30), rgba(8, 10, 14, 0.55)),
+    url('/approved/dead-signal/wallpaper/dead-signal-bg.png') center center / cover no-repeat fixed;
+}
+
+#root {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.dead-signal-shell {
+  min-height: 100vh;
+  background: transparent;
+}
+/* =========================================
+   ELSEWHERE MESSENGER
+   DEAD SIGNAL / FRUTIGER EVIL
+   Steven's Edition
+   ========================================= */
+
+.ds-desktop {
+  --ds-black: #101419;
+  --ds-metal: #303d46;
+  --ds-steel: #8597a0;
+  --ds-bone: #e3dad1;
+  --ds-oxblood: #680e12;
+  --ds-red: #ed2528;
+  --ds-cyan: #54dce8;
+  --ds-amber: #d99b32;
+
+  position: relative;
+  min-height: 100vh;
+  padding: 24px 24px 100px;
+  box-sizing: border-box;
+  color: #e8edf0;
+  font: 13px Tahoma, Arial, sans-serif;
+  font-synthesis: style weight;
+  color-scheme: dark;
+
+  background:
+    radial-gradient(ellipse at 75% 12%, #192c35aa, transparent 45%),
+    radial-gradient(ellipse at 20% 90%, #4b0b10aa, transparent 38%),
+    repeating-linear-gradient(
+      0deg,
+      #ffffff03 0,
+      #ffffff03 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(135deg, #090c0f, #172027 55%, #06080a);
+}
+
+.ds-desktop *,
+.ds-desktop *::before,
+.ds-desktop *::after {
+  box-sizing: border-box;
+}
+
+.ds-desktop button,
+.ds-desktop input,
+.ds-desktop select,
+.ds-desktop textarea {
+  font: inherit;
+}
+
+.ds-desktop button {
+  cursor: pointer;
+  color: inherit;
+}
+
+.ds-desktop button:focus-visible,
+.ds-desktop input:focus-visible,
+.ds-desktop select:focus-visible,
+.ds-desktop textarea:focus-visible {
+  outline: 1px solid var(--ds-cyan);
+  outline-offset: 2px;
+}
+
+.ds-desktop button:disabled,
+.ds-desktop input:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.ds-icon,
+.ds-presence,
+.ds-fish {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ds-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 4px 0 32px;
+}
+
+.ds-preview-header > img {
+  width: 230px;
+  height: auto;
+  object-fit: contain;
+}
+
+.ds-preview-header > div {
+  display: grid;
+  gap: 5px;
+  border-left: 1px solid #52616a;
+  padding-left: 16px;
+}
+
+.ds-preview-header span {
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.ds-preview-header small {
+  color: #8ea6b0;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+/* ---------- Workspace ---------- */
+
+.ds-workspace {
+  display: grid;
+  grid-template-columns: 270px 302px minmax(490px, 630px);
+  align-items: start;
+  justify-content: center;
+  gap: 18px;
+  max-width: 1440px;
+  margin: auto;
+}
+
+/* ---------- Industrial window chrome ---------- */
+
+.ds-window {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid #87969f;
+  border-radius: 15px;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      #ffffff04 3px 4px
+    ),
+    linear-gradient(
+      145deg,
+      #a4b0b8 0%,
+      #414c55 3%,
+      #11171d 9%,
+      #303b44 48%,
+      #14191e 88%,
+      #687984 100%
+    );
+
+  box-shadow:
+    inset 0 1px 1px #d2dee5,
+    inset 0 -1px 2px #020304,
+    0 0 0 2px #05080a,
+    0 0 0 3px #384651,
+    0 8px 22px #000c;
+}
+
+.ds-window.ds-active {
+  z-index: 10;
+  box-shadow:
+    inset 0 1px 1px #e3edf1,
+    0 0 0 2px #05080a,
+    0 0 0 3px #576873,
+    0 10px 30px #000d,
+    0 3px 12px #a7141835;
+}
+
+.ds-login-window {
+  margin-top: 74px;
+}
+
+.ds-chat-window {
+  margin-top: 48px;
+}
+
+.ds-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 31px;
+  padding: 3px 6px;
+  border: 1px solid #4a5963;
+  border-radius: 11px 11px 4px 4px;
+
+  background: linear-gradient(
+    180deg,
+    #53616a 0%,
+    #20282f 13%,
+    #11171b 52%,
+    #080b0e 100%
+  );
+
+  box-shadow:
+    inset 0 1px #81909a55,
+    inset 0 -1px #000;
+
+  touch-action: none;
+  user-select: none;
+  cursor: move;
+}
+
+.ds-titlebar .ds-fish {
+  width: 36px;
+  height: 19px;
+}
+
+.ds-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: #f5f6f7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px #000;
+}
+
+.ds-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ds-window-controls button,
+.ds-titlebar > .ds-close {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 23px;
+  padding: 0;
+  border: 1px solid #82909b;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    #6e7d87,
+    #303a43 30%,
+    #131a20 66%,
+    #29343b
+  );
+
+  box-shadow:
+    inset 0 1px #b0bac6,
+    inset 0 -1px #030507,
+    0 1px 2px #000;
+
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: 1px 1px #000;
+}
+
+.ds-window-controls button:hover {
+  filter: brightness(1.3);
+}
+
+.ds-window-controls .ds-close,
+.ds-titlebar > .ds-close {
+  border-color: #d56b6e;
+  background: linear-gradient(
+    #d25356,
+    #7c1015 42%,
+    #35070a
+  );
+
+  font-size: 20px;
+}
+
+.ds-window-content {
+  padding: 3px;
+  border: 1px solid #070a0c;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #ffffff02 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(#20292f, #151c22 55%, #252e36);
+}
+
+.ds-window.ds-minimized {
+  padding-bottom: 4px;
+}
+
+.ds-window.ds-maximized {
+  position: fixed;
+  inset: 24px;
+  z-index: 100;
+  margin: 0;
+  overflow: auto;
+}
+
+.ds-maximized .ds-window-content {
+  min-height: calc(100vh - 120px);
+}
+
+/* ---------- Decorative hardware ---------- */
+
+.ds-hardware-trim {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+  margin-top: 3px;
+  overflow: hidden;
+  border: 1px solid #424f57;
+  border-radius: 2px 2px 9px 9px;
+
+  background: linear-gradient(
+    #252d33,
+    #14191f 70%,
+    #373f45
+  );
+}
+
+.ds-screw {
+  width: 9px;
+  height: 9px;
+  margin-left: 9px;
+  border: 1px solid #65717a;
+  border-radius: 50%;
+
+  background:
+    linear-gradient(135deg, transparent 42%, #050607 43% 58%, transparent 59%),
+    radial-gradient(circle, #6d7981, #20272d);
+}
+
+.ds-signal-light {
+  position: absolute;
+  bottom: 2px;
+  left: 37%;
+  width: 27%;
+  height: 3px;
+  border-radius: 2px;
+  background: #ff4b45;
+  box-shadow: 0 0 6px #ff1616, 0 0 12px #c81a17;
+}
+
+.ds-hazard {
+  align-self: stretch;
+  width: 88px;
+  border-left: 1px solid #4d463c;
+
+  background: repeating-linear-gradient(
+    125deg,
+    #151a1f 0 10px,
+    #725538 10px 17px,
+    #b08b5044 17px 18px
+  );
+
+  opacity: 0.75;
+}
+
+/* ---------- Menus and toolbar ---------- */
+
+.ds-menu {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 25px;
+  padding: 0 5px;
+  border-bottom: 1px solid #59656d;
+  background: linear-gradient(#202a30, #10151a);
+}
+
+.ds-menu button {
+  padding: 4px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+
+.ds-menu button:hover {
+  border-color: #697681;
+  background: #3c4852;
+}
+
+.ds-toolbar {
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  padding: 5px 3px;
+  border: 1px solid #52616b;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    #3a454f,
+    #252e36 45%,
+    #141b21
+  );
+
+  box-shadow: inset 0 1px #7a899333;
+}
+
+.ds-toolbar > button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 1px;
+  border: 1px solid transparent;
+  border-right-color: #8697a017;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.ds-toolbar > button:last-child {
+  border-right-color: transparent;
+}
+
+.ds-toolbar > button:hover {
+  border-color: #a2393b;
+  background: linear-gradient(#55292d, #210f13);
+}
+
+.ds-toolbar > button:active {
+  box-shadow: inset 0 2px 5px #000;
+  background: #13090c;
+}
+
+.ds-toolbar > button > span {
+  color: #f2f3f3;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.ds-compact-toolbar {
+  padding: 3px;
+}
+
+.ds-compact-toolbar > button {
+  padding: 3px;
+}
+
+/* ---------- Shared recessed surfaces ---------- */
+
+.ds-crt {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 2px,
+      #ffffff04 2px 3px
+    ),
+    linear-gradient(#080c0f, #10171d);
+
+  border: 1px solid #667985;
+  box-shadow:
+    inset 0 0 0 2px #040608,
+    inset 0 0 12px #0008;
+}
+
+.ds-avatar {
+  position: relative;
+  flex-shrink: 0;
+  padding: 3px;
+  overflow: hidden;
+  border: 1px solid #a3b0b8;
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    #becbd2,
+    #323d45 18%,
+    #090d11 55%,
+    #71818a 100%
+  );
+
+  box-shadow:
+    0 0 0 1px #050708,
+    0 2px 5px #0009,
+    inset 0 1px #d9e0e5;
+}
+
+.ds-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #07090c;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.ds-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 6px #0009;
+  pointer-events: none;
+}
+
+/* ---------- Sign-in window ---------- */
+
+.ds-login {
+  padding: 18px 13px 20px;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      #71889709 3px 4px
+    ),
+    radial-gradient(ellipse at 50% 0%, #26343e, transparent 65%),
+    linear-gradient(#10171c, #19242c 70%, #11171c);
+}
+
+.ds-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 7px 0 24px;
+}
+
+.ds-brand > img {
+  width: 98px;
+  height: auto;
+}
+
+.ds-brand > div {
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1.03;
+  color: #f3f3f3;
+  text-shadow: 1px 2px #000;
+}
+
+.ds-brand sup {
+  font-size: 8px;
+}
+
+.ds-login-picture {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.ds-field {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 10px;
+  color: #e8edf0;
+}
+
+.ds-field input {
+  width: 100%;
+  height: 27px;
+  padding: 4px 7px;
+  border: 1px solid #9aa6af;
+  border-radius: 4px;
+  color: #ecf0f3;
+  background: linear-gradient(#05080a, #182128);
+  box-shadow: inset 0 2px 5px #000;
+}
+
+.ds-login-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.ds-status-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ds-status-select select {
+  max-width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #f0f2f4;
+  font-size: 12px;
+}
+
+.ds-status-select select:hover {
+  border-color: #8998a2;
+}
+
+.ds-status-select option {
+  background: #151d23;
+  color: #fff;
+}
+
+.ds-checkboxes {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ds-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.ds-checkboxes input {
+  margin: 0;
+  accent-color: #9e2027;
+}
+
+/* ---------- Illuminated buttons ---------- */
+
+.ds-red-button {
+  padding: 7px 16px;
+  border: 1px solid #f56a6b;
+  border-radius: 6px;
+
+  background: linear-gradient(
+    #bd4547,
+    #821418 20%,
+    #480b0e 53%,
+    #2a080a 85%,
+    #6d1618
+  );
+
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
+
+  box-shadow:
+    inset 0 1px #ffaaa5,
+    inset 0 -2px 3px #100203,
+    0 0 0 2px #08090a,
+    0 0 7px #d41b2440;
+}
+
+.ds-red-button:hover {
+  background: linear-gradient(#e15c5e, #9b1c22 40%, #430709);
+  box-shadow: 0 0 8px #ed252866;
+}
+
+.ds-red-button:active {
+  box-shadow: inset 0 2px 6px #000;
+}
+
+.ds-signin {
+  display: block;
+  width: 76%;
+  margin: 0 auto 15px;
+  font-size: 17px !important;
+}
+
+.ds-login-links {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+}
+
+.ds-login-links button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: #bdd9e3;
+  text-decoration: underline;
+  font-size: 12px;
+}
+
+.ds-login-note {
+  display: block;
+  margin-top: 14px;
+  color: #8297a3;
+  text-align: center;
+  font-size: 10px;
+}
+
+/* ---------- Buddy list ---------- */
+
+.ds-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 5px;
+  margin-bottom: 3px;
+  background: linear-gradient(#1b242b, #0e1317);
+  border: 1px solid #38464f;
+  border-radius: 5px;
+}
+
+.ds-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ds-profile-info > strong {
+  font-size: 16px;
+}
+
+.ds-music {
+  color: #b6c9d3;
+  font-size: 11px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.ds-contact-panel {
+  min-height: 350px;
+  margin-top: 5px;
+  padding: 4px;
+  border-radius: 6px;
+  overflow: auto;
+  scrollbar-color: #a92930 #10171c;
+  scrollbar-width: thin;
+}
+
+.ds-group + .ds-group {
+  margin-top: 13px;
+}
+
+.ds-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid #b16b69;
+  border-radius: 4px;
+  background: linear-gradient(#8b262b, #431318 45%, #1a1014);
+  color: #fff;
+  text-align: left;
+  font-size: 13px;
+  box-shadow: inset 0 1px #d2838255;
+}
+
+.ds-group-heading > span {
+  color: #ff7979;
+  font-size: 10px;
+}
+
+.ds-contact {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 27px;
+  padding: 4px 12px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  text-align: left;
+  background: transparent;
+}
+
+.ds-contact:hover {
+  background: #33414b;
+}
+
+.ds-contact.ds-selected {
+  border-color: #8f383d;
+  background: linear-gradient(90deg, #811c22, #34151b 75%, #20151b);
+  box-shadow: inset 0 1px #cb5d5d33;
+}
+
+/* ---------- Conversation ---------- */
+
+.ds-chat-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 7px;
+  margin-top: 5px;
+}
+
+.ds-chat-main {
+  min-width: 0;
+}
+
+.ds-recipient {
+  padding: 6px 7px;
+  overflow: hidden;
+  border: 1px solid #637580;
+  border-radius: 4px;
+  background: linear-gradient(#33414b, #111920);
+  box-shadow: inset 0 1px #899da755;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.ds-recipient span {
+  color: #bdcbd3;
+}
+
+.ds-transcript {
+  height: 220px;
+  margin-top: 4px;
+  padding: 10px;
+  overflow: auto;
+  border-radius: 4px;
+  scrollbar-color: #9c292d #111820;
+  scrollbar-width: thin;
+}
+
+.ds-message {
+  margin: 0 0 10px;
+}
+
+.ds-message-heading {
+  color: #a8b5c0;
+  font-size: 12px;
+}
+
+.ds-sender-own {
+  color: var(--ds-cyan);
+}
+
+.ds-sender-other {
+  color: #ff7774;
+}
+
+.ds-message-text {
+  margin: 3px 0 0 12px;
+  color: #f0f1f2;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.ds-muted {
+  color: #83949e;
+}
+
+.ds-chat-avatars {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid #53636e;
+  border-radius: 6px;
+  background: linear-gradient(#28343d, #131a20 60%, #253039);
+}
+
+.ds-avatar-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin-top: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.ds-chat-avatars > small {
+  color: #bbc9d1;
+  text-transform: capitalize;
+  font-size: 11px;
+}
+
+.ds-own-avatar {
+  margin-top: 27px;
+}
+
+/* ---------- Message composer ---------- */
+
+.ds-composer {
+  margin-top: 5px;
+  border: 1px solid #7a8b97;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #1a242c;
+}
+
+.ds-formatting {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-bottom: 1px solid #64757f;
+  background: linear-gradient(#40515d, #24303a 52%, #141d24);
+}
+
+.ds-formatting button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 23px;
+  height: 24px;
+  padding: 2px 4px;
+  background: transparent;
+  color: #e7edf0;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  text-shadow: 1px 1px #030406;
+}
+
+.ds-formatting button:hover,
+.ds-formatting .ds-format-active {
+  background: #552127;
+  border-color: #a45d60;
+}
+
+.ds-formatting .ds-font-color {
+  text-decoration: underline;
+  text-decoration-color: #ee393e;
+  text-decoration-thickness: 3px;
+}
+
+.ds-separator {
+  align-self: stretch;
+  width: 1px;
+  margin: 3px 2px;
+  background: #82919b55;
+  box-shadow: 1px 0 #0008;
+}
+
+.ds-compose-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  background: linear-gradient(#1c252d, #11191f);
+}
+
+.ds-compose-row textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 57px;
+  padding: 7px;
+  resize: vertical;
+  border: 1px solid #778994;
+  border-radius: 4px;
+  color: #ecf2f5;
+  background: linear-gradient(#080b0d, #10191e);
+  box-shadow: inset 0 2px 6px #000;
+  caret-color: #ff5255;
+}
+
+.ds-send {
+  min-width: 63px;
+  font-size: 14px !important;
+}
+
+.ds-chat-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 2px 3px;
+  color: #b6c5d0;
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* ---------- Notification ---------- */
+
+.ds-notification {
+  position: fixed;
+  right: 28px;
+  bottom: 76px;
+  z-index: 50;
+  width: 320px;
+  padding: 4px;
+  border: 1px solid #9eabb4;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    145deg,
+    #788892,
+    #1b242b 12%,
+    #12191e 70%,
+    #54646e
+  );
+
+  box-shadow:
+    0 0 0 2px #07090b,
+    0 0 0 3px #4f5c65,
+    0 5px 20px #000b,
+    0 3px 9px #f2242455;
+}
+
+.ds-notification .ds-titlebar {
+  cursor: default;
+}
+
+.ds-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 5px;
+  font-size: 12px;
+}
+
+.ds-notification-content > span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Preview launcher ---------- */
+
+.ds-preview-dock {
+  position: fixed;
+  z-index: 110;
+  inset: auto 0 0;
+  min-height: 47px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 7px 15px;
+  border-top: 1px solid #778791;
+  background: linear-gradient(#333f48, #10171c 65%, #1b242b);
+  box-shadow: 0 -2px 10px #0008;
+}
+
+.ds-preview-dock .ds-fish {
+  width: 38px;
+  height: 19px;
+}
+
+.ds-preview-dock > strong {
+  color: #ff7774;
+  margin-right: 12px;
+}
+
+.ds-preview-dock button {
+  min-height: 28px;
+  padding: 4px 12px;
+  border: 1px solid #62717c;
+  border-radius: 5px;
+  background: linear-gradient(#45545f, #192229);
+  box-shadow: inset 0 1px #8999a333;
+  font-size: 12px;
+}
+
+.ds-preview-dock button:hover {
+  border-color: #d44b50;
+  background: #56232a;
+}
+
+/* ---------- Responsive preview ---------- */
+
+@media (max-width: 1220px) {
+  .ds-workspace {
+    grid-template-columns: 270px 302px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .ds-desktop {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ds-chat-layout {
+    grid-template-columns: minmax(0, 1fr) 90px;
+  }
+
+  .ds-chat-avatars .ds-avatar {
+    max-width: 78px;
+    max-height: 78px;
+  }
+
+  .ds-toolbar > button > span {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .ds-workspace {
+    grid-template-columns: 270px 302px;
+    justify-content: center;
+    gap: 22px;
+  }
+
+  .ds-login-window,
+  .ds-chat-window {
+    margin-top: 0;
+  }
+
+  .ds-chat-window {
+    grid-column: 1 / -1;
+  }
+
+  .ds-chat-layout {
+    grid-template-columns: minmax(0, 1fr) 112px;
+  }
+
+  .ds-notification {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 24px auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .ds-workspace {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ds-login-window,
+  .ds-buddy-window {
+    width: min(100%, 320px);
+    align-self: center;
+  }
+
+  .ds-preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ds-chat-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ds-chat-avatars {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .ds-own-avatar {
+    margin: 0 0 0 auto;
+  }
+
+  .ds-toolbar > button > span {
+    display: none;
+  }
+
+  .ds-toolbar .ds-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ds-preview-dock {
+    position: static;
+    margin-top: 25px;
+  }
+
+  .ds-notification {
+    max-width: 100%;
+  }
+}
+.ds-desktop {
+  background: #101419
+    url('/approved/dead-signal/wallpaper/dead-signal-bg.png')
+    center center / cover no-repeat fixed;
+}
+
+/* ==========================================
+   ELSEWHERE MESSENGER | DEAD SIGNAL
+   BATCH 05C - FUNCTIONAL MENUS
+   ========================================== */
+
+/* Keep menu overlays above the hardware frame.
+   Normal window styling is unchanged. */
+
+.ds-desktop .ds-window:has(
+  .em-menu-popup,
+  .em-menu-about,
+  .em-sound-settings
+) {
+  z-index: 120;
+  overflow: visible;
+}
+
+.ds-desktop .ds-window:has(
+  .em-menu-popup,
+  .em-menu-about,
+  .em-sound-settings
+) .ds-window-content {
+  overflow: visible;
+}
+
+.ds-desktop .ds-menu.em-functional-menu {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  overflow: visible;
+}
+
+.ds-desktop .ds-menu .em-menu-top {
+  padding: 3px 6px;
+  min-width: 0;
+  min-height: 23px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #e6edf1;
+  font: 12px Tahoma, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.ds-desktop .ds-menu .em-menu-top:hover,
+.ds-desktop .ds-menu .em-menu-selected {
+  border-color: #a04b51;
+
+  background: linear-gradient(
+    #793239,
+    #42171c,
+    #250e12
+  );
+
+  color: #fff;
+  box-shadow: inset 0 1px #d6888855;
+}
+
+/* Brushed-metal dropdowns */
+
+.ds-desktop .em-menu-popup {
+  position: absolute;
+  top: 100%;
+  left: 3px;
+  z-index: 102;
+
+  box-sizing: border-box;
+
+  width: 242px;
+  max-width: calc(100% - 6px);
+  max-height: min(340px, calc(100vh - 85px));
+
+  padding: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  border: 1px solid #8798a3;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    #2e3a43,
+    #151d24 25%,
+    #11171d
+  );
+
+  box-shadow:
+    inset 0 1px #9aabb24d,
+    0 0 0 1px #06090c,
+    3px 5px 12px #000b;
+
+  scrollbar-color: #9c3038 #11181e;
+  color: #e5edf1;
+  text-align: left;
+  color-scheme: dark;
+}
+
+.ds-desktop .em-menu-align-right {
+  left: auto;
+  right: 3px;
+}
+
+.ds-desktop .em-menu-popup button,
+.ds-desktop .em-menu-popup summary {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  min-height: 25px;
+  gap: 4px;
+  margin: 0;
+  padding: 4px 7px;
+
+  border: 1px solid transparent;
+  border-radius: 3px;
+
+  background: transparent;
+
+  color: #e5edf1;
+  font: 12px Tahoma, Arial, sans-serif;
+  text-align: left;
+  list-style: none;
+  cursor: pointer;
+}
+
+.ds-desktop .em-menu-popup summary::-webkit-details-marker {
+  display: none;
+}
+
+.ds-desktop .em-menu-popup summary::after {
+  content: "\25B8";
+  margin-left: auto;
+  color: #ff7774;
+}
+
+.ds-desktop .em-menu-popup details[open] > summary::after {
+  content: "\25BE";
+}
+
+.ds-desktop .em-menu-popup button:hover:not(:disabled),
+.ds-desktop .em-menu-popup summary:hover,
+.ds-desktop .em-menu-popup button:focus-visible {
+  border-color: #a3474d;
+  background: linear-gradient(#682930, #35141a);
+  color: #fff;
+}
+
+.ds-desktop .em-menu-popup button:disabled {
+  color: #73818a;
+  opacity: 1;
+  cursor: default;
+}
+
+.ds-desktop .em-menu-popup button small {
+  margin-left: auto;
+  font-size: 10px;
+  color: #98aab6;
+}
+
+.ds-desktop .em-menu-popup hr {
+  height: 1px;
+  margin: 4px;
+  border: 0;
+  background: #4b5a64;
+  box-shadow: 0 1px #05080a;
+}
+
+.ds-desktop .em-menu-heading {
+  padding: 5px 8px;
+  color: #f17979;
+  font: bold 11px Tahoma, Arial, sans-serif;
+}
+
+.ds-desktop .em-menu-check {
+  display: inline-block;
+  flex: 0 0 17px;
+  width: 17px;
+  color: #ff7774;
+}
+
+.ds-desktop .em-menu-popup .em-menu-indented {
+  padding-left: 20px;
+}
+
+/* Scrollable typing sound catalog */
+
+.ds-desktop .em-typing-sound-list {
+  max-height: 158px;
+  margin: 3px 2px;
+  padding: 2px;
+  overflow: auto;
+
+  border: 1px solid #687b88;
+  background: #0b1015;
+
+  box-shadow: inset 0 1px 5px #000;
+  scrollbar-color: #a3343c #141c23;
+}
+
+.ds-desktop .em-menu-volume {
+  padding: 6px 8px;
+}
+
+.ds-desktop .em-menu-volume label {
+  display: block;
+  color: #d9e1e7;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.ds-desktop .em-menu-volume label span {
+  float: right;
+}
+
+.ds-desktop .em-menu-volume input[type="range"],
+.ds-desktop .em-sound-settings input[type="range"] {
+  box-sizing: border-box;
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+
+  padding: 0;
+  margin: 5px 0;
+
+  accent-color: #bd383e;
+  cursor: pointer;
+}
+
+/* Shared dark hardware button treatment */
+
+.ds-desktop .em-menu-volume .em-menu-preview,
+.ds-desktop .em-sound-preview-button,
+.ds-desktop .em-sound-settings-footer button,
+.ds-desktop .em-menu-about-content button {
+  box-sizing: border-box;
+
+  justify-content: center;
+
+  min-height: 25px;
+  padding: 3px 8px;
+
+  border: 1px solid #768b99;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    #495b67,
+    #28343e 35%,
+    #151e25
+  );
+
+  color: #ecf1f4;
+  font: 11px Tahoma, Arial, sans-serif;
+
+  box-shadow: inset 0 1px #aab9c344;
+
+  cursor: pointer;
+}
+
+.ds-desktop .em-sound-preview-button:hover:not(:disabled),
+.ds-desktop .em-sound-settings-footer button:hover,
+.ds-desktop .em-menu-about-content button:hover {
+  border-color: #b85055;
+  background: linear-gradient(#763139, #2d1218);
+}
+
+/* Dead Signal Sound Settings and About */
+
+.ds-desktop .em-sound-settings,
+.ds-desktop .em-menu-about {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 103;
+
+  box-sizing: border-box;
+
+  width: 292px;
+  max-width: calc(100% - 6px);
+  max-height: min(470px, calc(100vh - 74px));
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 3px;
+  overflow: hidden;
+
+  border: 1px solid #92a3ae;
+  border-radius: 7px;
+
+  background: linear-gradient(
+    135deg,
+    #596b77,
+    #202b33 9%,
+    #141d24 85%,
+    #485863
+  );
+
+  box-shadow:
+    0 0 0 1px #050709,
+    0 0 0 2px #596b77,
+    3px 6px 14px #000c;
+
+  color: #e2ebf1;
+  color-scheme: dark;
+  font: 11px Tahoma, Arial, sans-serif;
+  text-align: left;
+}
+
+.ds-desktop .em-sound-settings-title,
+.ds-desktop .em-menu-about-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+
+  min-height: 28px;
+  padding: 3px 6px 3px 8px;
+
+  border: 1px solid #b35459;
+  border-radius: 4px 4px 0 0;
+
+  background: linear-gradient(
+    #a44449,
+    #692128 35%,
+    #290c11
+  );
+
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 1px 1px #000;
+}
+
+.ds-desktop .em-sound-settings-title button {
+  width: 21px;
+  height: 21px;
+
+  padding: 0;
+  margin: 0;
+
+  border: 1px solid #e68f8b;
+  border-radius: 3px;
+
+  background: linear-gradient(#9b373c, #450c12);
+  color: #fff;
+
+  font: bold 17px/17px Arial, sans-serif;
+}
+
+.ds-desktop .em-sound-settings-body {
+  min-height: 0;
+  padding: 8px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  background: #172129;
+  scrollbar-color: #a3343c #141c23;
+}
+
+.ds-desktop .em-sound-settings fieldset {
+  min-width: 0;
+
+  margin: 0 0 9px;
+  padding: 7px;
+
+  border: 1px solid #586b79;
+  border-radius: 4px;
+
+  background: #111920;
+}
+
+.ds-desktop .em-sound-settings legend {
+  padding: 0 4px;
+  color: #f47f7e;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.ds-desktop .em-sound-select-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  color: #d6e0e7;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.ds-desktop .em-sound-settings select {
+  box-sizing: border-box;
+
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+
+  margin: 0;
+  padding: 3px 5px;
+
+  border: 1px solid #758995;
+  border-radius: 3px;
+
+  background: #0c1319;
+  color: #e9eff3;
+
+  box-shadow: inset 0 1px 4px #000;
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.ds-desktop .em-sound-settings option {
+  background: #111920;
+  color: #e9eff3;
+}
+
+.ds-desktop .em-sound-channel {
+  padding-bottom: 7px;
+  margin-bottom: 7px;
+
+  border-bottom: 1px solid #3d4d58;
+}
+
+.ds-desktop .em-sound-channel:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.ds-desktop .em-sound-preview-button {
+  display: block;
+  margin: 5px 0 0 auto;
+}
+
+.ds-desktop .em-sound-settings button:disabled,
+.ds-desktop .em-menu-preview:disabled {
+  color: #83929d;
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ds-desktop .em-sound-master-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ds-desktop .em-sound-master-volume span {
+  flex: 0 0 32px;
+  color: #f17979;
+}
+
+.ds-desktop .em-sound-settings-note {
+  margin: 5px 1px 10px;
+  color: #a9b8c2;
+  font: 10px/1.4 Tahoma, Arial, sans-serif;
+}
+
+.ds-desktop .em-sound-settings-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* Dead Signal About panel */
+
+.ds-desktop .em-menu-about {
+  width: 250px;
+}
+
+.ds-desktop .em-menu-about-content {
+  padding: 14px 10px;
+
+  background: #172129;
+  color: #e2ebf1;
+
+  text-align: center;
+}
+
+.ds-desktop .em-menu-about-logo {
+  display: block;
+  width: 74px;
+  height: 60px;
+  margin: 0 auto 8px;
+
+  background:
+    url("/approved/dead-signal/branding/skeletal-fish.png")
+    center / contain no-repeat;
+}
+
+.ds-desktop .em-menu-about-content p {
+  margin: 5px 0;
+  font-size: 11px;
+}
+
+.ds-desktop .em-menu-about-content small {
+  display: block;
+  margin-top: 8px;
+
+  color: #a9bbc7;
+  font-size: 10px;
+}
+
+.ds-desktop .em-menu-about-content button {
+  display: block;
+  min-width: 75px;
+  margin: 12px auto 0;
+}
+
+
+/* ==========================================
+   ELSEWHERE MESSENGER | DEAD SIGNAL
+   BATCH 05D - NATIVE WINDOWS
+   ========================================== */
+
+html:has(.ds-native),
+html:has(.ds-native) body,
+html:has(.ds-native) #root {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+
+  margin: 0;
+  padding: 0;
+
+  overflow: hidden;
+}
+
+.ds-desktop.ds-native {
+  box-sizing: border-box;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+
+  margin: 0;
+  padding: 0;
+
+  overflow: hidden;
+}
+
+/* The approved hardware frame fills the
+   actual native window. */
+
+.ds-native .ds-workspace {
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.ds-native .ds-window {
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+  inset: auto;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  max-width: none;
+  max-height: none;
+
+  flex: 1;
+
+  margin: 0;
+  align-self: stretch;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+.ds-native .ds-titlebar {
+  flex-shrink: 0;
+  user-select: none;
+  cursor: default;
+}
+
+.ds-native .ds-window-controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ds-native .ds-hardware-trim {
+  flex-shrink: 0;
+}
+
+.ds-native .ds-window-content {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+}
+
+.ds-native .ds-window:has(
+  .em-menu-popup,
+  .em-menu-about,
+  .em-sound-settings
+) .ds-window-content {
+  overflow: visible;
+}
+
+.ds-native .ds-menu,
+.ds-native .ds-toolbar,
+.ds-native .ds-profile {
+  flex-shrink: 0;
+}
+
+/* Buddy list */
+
+.ds-native-main .ds-contact-panel {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Native login */
+
+.ds-native-login .ds-window-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ds-native-login .ds-login {
+  flex: 1 0 auto;
+}
+
+/* Native conversation */
+
+.ds-native-chat .ds-chat-layout {
+  flex: 1 1 auto;
+
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) 112px;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+.ds-native-chat .ds-chat-main {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+.ds-native-chat .ds-recipient,
+.ds-native-chat .ds-composer,
+.ds-native-chat .ds-chat-footer {
+  flex-shrink: 0;
+}
+
+.ds-native-chat .ds-transcript {
+  flex: 1 1 auto;
+
+  height: auto;
+  min-height: 70px;
+
+  overflow-y: auto;
+}
+
+.ds-native-chat .ds-chat-avatars {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.ds-native-chat .ds-own-avatar {
+  margin: 27px 0 0;
+}
+
+.ds-native-chat .ds-toolbar > button > span {
+  display: inline;
+  font-size: 9px;
+}
+
+.ds-native-chat .ds-chat-avatars .ds-avatar {
+  max-width: 96px;
+  max-height: 96px;
+}
+
+/* Keep native overlays inside their
+   compact application viewport. */
+
+.ds-native .em-sound-settings {
+  max-height: calc(100vh - 82px);
+}
+
+.ds-native .em-menu-popup {
+  max-height: calc(100vh - 82px);
+}
+
+.ds-native .ds-notification {
+  box-sizing: border-box;
+
+  position: fixed;
+
+  right: 8px;
+  bottom: 16px;
+
+  width: min(320px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+
+  margin: 0;
+}
+
+
+/* BATCH 05E - SHARED RETRO EMOTICONS */
+
+.ds-desktop .ds-emoticon-anchor {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.ds-desktop .ds-emoticon-picker {
+  position: absolute;
+
+  top: 100%;
+  right: 2px;
+
+  z-index: 30;
+
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  width: 210px;
+  max-width: calc(100% - 4px);
+  max-height: 152px;
+
+  gap: 3px;
+  padding: 5px;
+
+  overflow: auto;
+
+  border: 1px solid #81939e;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    #33424c,
+    #151e25 35%,
+    #0d141a
+  );
+
+  box-shadow:
+    inset 0 1px #a3b3bf55,
+    0 0 0 1px #07090c,
+    2px 4px 8px #000a;
+
+  scrollbar-color: #923037 #11191f;
+}
+
+.ds-desktop .ds-emoticon-picker button {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 29px;
+
+  padding: 2px;
+
+  border: 1px solid transparent;
+  border-radius: 3px;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.ds-desktop .ds-emoticon-picker button:hover,
+.ds-desktop .ds-emoticon-picker button:focus-visible {
+  border-color: #ac555b;
+  background: linear-gradient(#632930, #301318);
+}
+
+.ds-desktop .em-classic-emoticon {
+  display: inline-flex;
+
+  box-sizing: border-box;
+
+  width: 20px;
+  height: 20px;
+
+  margin: 0 1px;
+
+  align-items: center;
+  justify-content: center;
+
+  vertical-align: middle;
+
+  border: 1px solid #b27a16;
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle at 36% 25%,
+    #fffbb1,
+    #ffdf64 39%,
+    #f2aa27 76%,
+    #cc8616
+  );
+
+  box-shadow:
+    inset 0 1px #fff7c5,
+    0 1px 1px #0005;
+}
+
+.ds-desktop .em-classic-emoticon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ds-desktop .em-classic-emoticon.em-symbol-emoticon {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+
+/* BATCH 05E.1 - BUTTON-ANCHORED EMOTICONS */
+
+.em-anchored-emoticons {
+  position: fixed !important;
+
+  right: auto !important;
+  bottom: auto !important;
+
+  transform: none !important;
+
+  z-index: 2147483000 !important;
+
+  box-sizing: border-box;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+
+  max-width: calc(100vw - 12px);
+
+  gap: 3px;
+  padding: 5px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.em-anchored-emoticons button {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 29px;
+
+  padding: 2px;
+
+  cursor: pointer;
+}
+
+
+/* BATCH 05F - SOUND PACK LIBRARY */
+
+.ew-sound-pack-manager {
+  min-width: 0;
+}
+
+.ew-sound-pack-manager input[type="text"],
+.ew-sound-pack-manager input[type="file"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+
+  padding: 4px;
+  margin: 2px 0;
+
+  font: 11px Tahoma, Arial, sans-serif;
+}
+
+.ew-sound-pack-manager small {
+  display: block;
+  margin: 5px 0;
+  opacity: .8;
+  line-height: 1.4;
+}
+
+.ew-pack-selected,
+.ew-pack-section {
+  margin-top: 9px;
+  padding-top: 7px;
+
+  border-top: 1px solid currentColor;
+}
+
+.ew-pack-section summary {
+  cursor: pointer;
+  font-weight: bold;
+  padding: 3px 0;
+}
+
+.ew-pack-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ew-pack-buttons,
+.ew-pack-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  margin: 6px 0;
+}
+
+.ew-pack-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin: 10px 0 5px;
+}
+
+.ew-pack-checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.ew-pack-notice {
+  padding: 6px;
+  margin: 6px 0;
+
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.ew-sound-pack-manager button {
+  min-height: 23px;
+  padding: 3px 7px;
+
+  font: 11px Tahoma, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.ew-sound-pack-manager button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+
+.ds-desktop .ew-sound-pack-manager input[type="text"] {
+  border: 1px solid #758995;
+  border-radius: 3px;
+
+  background: #0c1319;
+  color: #e9eff3;
+}
+
+.ds-desktop .ew-sound-pack-manager input[type="file"] {
+  color: #b9cbd5;
+}
+
+.ds-desktop .ew-sound-pack-manager button {
+  border: 1px solid #768b99;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    #495b67,
+    #28343e,
+    #151e25
+  );
+
+  color: #ecf1f4;
+}
+
+.ds-desktop .ew-pack-notice {
+  border: 1px solid #687b88;
+  background: #101820;
+  color: #f47f7e;
+}
+
+.ds-desktop .ew-pack-section,
+.ds-desktop .ew-pack-selected {
+  border-top-color: #586b79;
+}
+
+.ds-desktop .ew-sound-pack-manager
+input[type="checkbox"] {
+  accent-color: #ad353c;
+}
+
+/* Contact names in bold. */
+.ds-contact > span:not(.ew-ig-contact-indicator):not(.ew-unread) { font-weight: bold; }

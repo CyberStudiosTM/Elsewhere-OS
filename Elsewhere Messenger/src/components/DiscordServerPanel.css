@@ -1,0 +1,9 @@
+.ew-discord-server{border-top:1px solid #506476;padding-top:12px;display:grid;gap:10px}
+.ew-discord-server h3{font-size:13px;margin:0}
+.ew-discord-server label{display:grid;gap:4px}
+.ew-discord-server select,.ew-discord-server textarea{width:100%;box-sizing:border-box;color:inherit;background:#0e1c26;border:1px solid #829eb7;padding:7px}
+.ew-discord-bot-login{display:grid;gap:8px}
+.ew-discord-history{max-height:220px;overflow:auto;background:#101e29;border:1px solid #48657a;padding:7px;display:grid;gap:7px}
+.ew-discord-msg{line-height:1.5;overflow-wrap:anywhere}
+.ew-discord-msg button{font-size:10px;margin-left:7px}
+.ew-discord-server form{display:grid;gap:6px}

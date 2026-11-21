@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "spotify-now-playing",
+  "description": "Spotify OAuth PKCE and current playback for main Elsewhere window only",
+  "windows": ["main"],
+  "permissions": [
+    {"identifier":"http:default", "allow": [
+      {"url":"https://accounts.spotify.com/api/token"},
+      {"url":"https://api.spotify.com/v1/me/player/currently-playing"}
+    ]},
+    {"identifier":"opener:allow-open-url", "allow": [
+      {"url":"https://accounts.spotify.com/authorize*"}
+    ]}
+  ]
+}

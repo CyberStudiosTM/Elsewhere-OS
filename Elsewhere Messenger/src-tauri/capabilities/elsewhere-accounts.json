@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "elsewhere-accounts",
+  "description": "Open Elsewhere's official account signup in the browser.",
+  "windows": ["main"],
+  "permissions": [{
+    "identifier": "opener:allow-open-url",
+    "allow": [
+      { "url": "https://cyberthreed.github.io/CyberStudios/elsewhere-accounts/" },
+      { "url": "https://cyberthreed.github.io/CyberStudios/elsewhere-accounts/terms.html" },
+      { "url": "https://cyberthreed.github.io/CyberStudios/elsewhere-accounts/privacy.html" },
+      { "url": "https://cyberthreed.github.io/CyberStudios/elsewhere-accounts/license.html" }
+    ]
+  }]
+}

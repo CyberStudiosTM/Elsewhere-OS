@@ -1,0 +1,10 @@
+project_id = "elsewhere-accounts"
+
+[functions.elsewhere-instagram-auth]
+verify_jwt = false
+
+[functions.elsewhere-instagram-webhook]
+verify_jwt = false
+
+[functions.elsewhere-account-delete]
+verify_jwt = false

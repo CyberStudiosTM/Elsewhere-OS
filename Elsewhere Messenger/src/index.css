@@ -1,0 +1,42 @@
+
+:root {
+  font-family: Tahoma, Verdana, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #18263d;
+  background: #dcefff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0755d1;
+  outline-offset: 2px;
+}
+
+.ew-ig-contact-indicator{width:11px;height:11px;min-width:11px;display:inline-block;border:1px solid #55636b;border-radius:50%;box-shadow:0 0 0 1px #121820}.ew-ig-contact-avatar{width:24px;height:24px;object-fit:cover;border-radius:4px;vertical-align:middle}.ew-ig-chat-avatar{width:96px;height:96px;object-fit:cover;border-radius:7px;display:block;max-width:100%}

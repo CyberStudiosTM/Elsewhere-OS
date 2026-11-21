@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "elsewhere-toast",
+  "description": "Elsewhere's corner notification pop-up: talk to the main window and close itself",
+  "windows": ["elsewhere-toast"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-close"
+  ]
+}

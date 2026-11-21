@@ -1,0 +1,12 @@
+import {useNativeInstagram,instagramContactName} from '../services/instagramNativeBridge'
+import {useState} from 'react'
+import {readInstagramAppearance,writeInstagramAppearance} from '../services/instagramContactPreferences'
+export default function InstagramContactSettings({onClose}:{onClose:()=>void}){
+ const [appearance,setAppearance]=useState(readInstagramAppearance)
+ const ig=useNativeInstagram(null)
+ const [selected,setSelected]=useState('')
+ const [hex,setHex]=useState(appearance.defaultColor)
+ const good=/^#[0-9a-fA-F]{6}$/.test(hex)
+ const update=(value:string)=>{setHex(value);if(!/^#[0-9a-fA-F]{6}$/.test(value))return;setAppearance(old=>{const next={...old,defaultColor:selected?old.defaultColor:value,contacts:{...old.contacts}};if(selected)next.contacts[selected]={color:value,favorite:old.contacts[selected]?.favorite||false};writeInstagramAppearance(next);return next})}
+ return <div className="ew-ig-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)onClose()}}><section className="ew-ig-connection" role="dialog" aria-modal="true" aria-label="Instagram contact appearance"><header><strong>Instagram Contact Appearance</strong><button onClick={onClose} aria-label="Close">×</button></header><p>Cosmetic indicator colors. Instagram does not guarantee real-time presence.</p><label>Contact<select value={selected} onChange={e=>{setSelected(e.target.value);setHex(e.target.value?appearance.contacts[e.target.value]?.color||appearance.defaultColor:appearance.defaultColor)}}><option value="">All Instagram contacts</option>{ig.threads.map(thread=><option key={thread.id} value={thread.id}>{instagramContactName(thread,ig.account)}</option>)}</select></label><label>Hex color<input value={hex} onChange={e=>update(e.target.value)} aria-invalid={!good} placeholder="#87E7C0" /></label><label>Color picker<input type="color" value={good?hex:'#87E7C0'} onChange={e=>update(e.target.value)} /></label>{selected&&<label><input type="checkbox" checked={appearance.contacts[selected]?.favorite||false} onChange={event=>{const next={...appearance,contacts:{...appearance.contacts,[selected]:{color:good?hex:appearance.defaultColor,favorite:event.target.checked}}};writeInstagramAppearance(next);setAppearance(next)}} /> Pin contact to Buddies</label>}<p className="ew-ig-note">Mutual follows appear in Buddies only if Meta confirms both relationship fields. You can also manually favorite contacts here.</p></section></div>
+}

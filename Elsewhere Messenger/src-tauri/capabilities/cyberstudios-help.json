@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "cyberstudios-help",
+  "description": "Open the official Elsewhere help link from either skin.",
+  "windows": ["main", "classic-chat", "dead-signal-chat"],
+  "permissions": [
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://cyberthreed.github.io/CyberStudios/" }]
+    }
+  ]
+}
