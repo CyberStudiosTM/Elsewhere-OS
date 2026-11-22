@@ -9,10 +9,10 @@
 
 **A nostalgic desktop experience inspired by early-2000s Microsoft interfaces, Frutiger Aero, and the internet we grew up loving.**
 
-<img src="https://img.shields.io/badge/PLATFORM-WINDOWS-ABD8F0?style=flat-square&labelColor=484848" alt="Platform: Windows">
-<img src="https://img.shields.io/badge/STYLE-FRUTIGER_AERO-D7C3F2?style=flat-square&labelColor=484848" alt="Style: Frutiger Aero">
-<img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=flat-square&labelColor=484848" alt="License: MIT">
-<img src="https://img.shields.io/badge/STATUS-IN_DEVELOPMENT-F4C4DD?style=flat-square&labelColor=484848" alt="Status: In Development">
+<img src="https://img.shields.io/badge/PLATFORM-WINDOWS-ABD8F0?style=for-the-badge" alt="Platform: Windows">
+<img src="https://img.shields.io/badge/STYLE-FRUTIGER_AERO-D7C3F2?style=for-the-badge" alt="Style: Frutiger Aero">
+<img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=for-the-badge" alt="License: MIT">
+<img src="https://img.shields.io/badge/STATUS-IN_DEVELOPMENT-F4C4DD?style=for-the-badge" alt="Status: In Development">
 
 *An imaginative little universe from [CyberStudios™](https://github.com/CyberStudiosTM).*
 
@@ -129,8 +129,8 @@ it's to capture a feeling and build something new around it.
 
 ## 🛠️ development status
 
-<img src="https://img.shields.io/badge/ELSEWHERE_OS-IN_DEVELOPMENT-F4C4DD?style=flat-square&labelColor=484848" alt="Elsewhere OS: In Development">
-<img src="https://img.shields.io/badge/MESSENGER-BETA-C7B3F1?style=flat-square&labelColor=484848" alt="Elsewhere Messenger: Beta">
+<img src="https://img.shields.io/badge/ELSEWHERE_OS-IN_DEVELOPMENT-F4C4DD?style=for-the-badge" alt="Elsewhere OS: In Development">
+<img src="https://img.shields.io/badge/MESSENGER-BETA-C7B3F1?style=for-the-badge" alt="Elsewhere Messenger: Beta">
 
 Elsewhere is an evolving CyberStudios project.
 
