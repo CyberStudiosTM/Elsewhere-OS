@@ -9,14 +9,14 @@
 
 **A nostalgic desktop messaging experience bringing the magic of early-2000s instant messaging into the modern internet.**
 
-<img src="https://img.shields.io/badge/VERSION-v0.2.21-C7B3F1?style=for-the-badge" alt="Version: 0.2.21">
+<img src="https://img.shields.io/badge/VERSION-v0.2.48-C7B3F1?style=for-the-badge" alt="Version: 0.2.48">
 <img src="https://img.shields.io/badge/PLATFORM-WINDOWS_x64-ABD8F0?style=for-the-badge" alt="Platform: Windows x64">
 <img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=for-the-badge" alt="License: MIT">
 <img src="https://img.shields.io/badge/STATUS-BETA-F4C4DD?style=for-the-badge" alt="Status: Beta">
 
 *A little piece of yesterday, reimagined by [CyberStudios™](https://github.com/CyberStudiosTM).*
 
-[Download](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.21) · [What's New](#-whats-new-in-v0221) · [The Vision](#-the-elsewhere-experience) · [Releases](https://github.com/CyberStudiosTM/Elsewhere-OS/releases)
+[Download](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.48) · [What's New](#-whats-new-in-v0248) · [The Vision](#-the-elsewhere-experience) · [Releases](https://github.com/CyberStudiosTM/Elsewhere-OS/releases)
 
 </div>
 
@@ -83,36 +83,45 @@ not every planned integration is available in the public beta.
 
 ---
 
-## 💿 what's new in v0.2.21?
+## 💿 what's new in v0.2.48?
 
-<img src="https://img.shields.io/badge/UPDATE-AUTOMATIC_UPDATES-ABD8F0?style=for-the-badge" alt="Automatic Updates">
-<img src="https://img.shields.io/badge/NEW-DELETE_ACCOUNT-F4C4DD?style=for-the-badge" alt="Delete Account">
+<img src="https://img.shields.io/badge/NEW-CREATIVE_STUDIO-F4C4DD?style=for-the-badge" alt="Creative Studio">
+<img src="https://img.shields.io/badge/NEW-PIXEL_DOLL_STUDIO-C7B3F1?style=for-the-badge" alt="Pixel Doll Studio">
+<img src="https://img.shields.io/badge/NEW-SKINS-ABD8F0?style=for-the-badge" alt="Skins">
 
-this update introduces two quality-of-life improvements.
+a *lot* has happened since v0.2.21. ♡
 
-### ☁️ automatic updates
+### 🎨 creative studio
 
-Elsewhere Messenger v0.2.21 introduces automatic update support.
+a blank canvas for making anything: collages, stationery, little graphics and decorated photos, with 9 tools, a **Camera Booth** for photos and photo strips, **My Gallery**, and a **Skin Wardrobe** of 23 workspace looks.
 
-you can also check manually through:
+**Activities → Creative Studio…**
 
-**Help → Check for Updates**
+### ✿ pixel doll studio (beta)
 
-you'll need to install v0.2.21 manually once to enable the update system.
+a layered dress-up studio for pixel dolls: bodies, skin tones, poses, hair, makeup, clothes and accessories, all stacked in proper layers. save your dolls, export crisp PNGs, or send them to Creative Studio.
 
-subsequent versions are intended to be delivered automatically.
+*the doll art is still being drawn, so the beta uses simple placeholder shapes for now.*
 
-### ♡ account deletion
+**Activities → Pixel Doll Studio…**
 
-an account deletion option is now accessible through:
+### 💅 skins & skinmapper (beta)
 
-**Tools → Elsewhere Accounts & Messages**
+- design your own Messenger skin in **SkinMapper** and share it as an `.eskin` file
+- wear official skins straight from **Tools → Skins**, sorted into collections: **Neapolitan Dream**, **Mint Choco Diary** and the dark-glass **Frutiger Evil** (Eclipse Relay, Blackwater, Dead Signal, Infernal Paradise, Abyssal)
+- a skin dresses *every* part of Messenger: sign-in, chats, menus, pickers and Web Treasures
 
-this gives users an in-app option for managing account removal.
+### 💬 chatting
 
-for the full release details, see:
+group chats, photos and GIFs, online / away / busy status, **typing…**, unread counts, and per-contact colors for Instagram contacts (right-click a contact).
 
-[**✧ Elsewhere Messenger v0.2.21 Release Notes**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.21)
+### 🌐 web treasures
+
+the old Winks button is now **Web Treasures**, with the Elsewhere Collection and your own **My Treasures** shelf. every graphic credits its creator.
+
+for every detail, see the release notes:
+
+[**✧ Elsewhere Messenger v0.2.48 Release Notes**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.48)
 
 ---
 
@@ -120,9 +129,9 @@ for the full release details, see:
 
 ### ୨୧ Windows x64
 
-**Current documented beta: v0.2.21**
+**Current documented beta: v0.2.48**
 
-[**☁️ Download Elsewhere Messenger Setup**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-v0.2.21/Elsewhere-Messenger_0.2.21_x64-setup.exe)
+[**☁️ Download Elsewhere Messenger Setup**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-v0.2.48/Elsewhere-Messenger_0.2.48_x64-setup.exe)
 
 ### ✧ getting started
 
@@ -133,30 +142,26 @@ for the full release details, see:
 
 **Please note:** Elsewhere Messenger is beta software. Features may change, and occasional issues are possible.
 
-the automatic update behavior for future releases is described by the v0.2.21 release; it is not a guarantee that every future update will install successfully on every system.
+already on v0.2.21 or newer? updates arrive automatically. automatic updates aren't a guarantee that every future update will install successfully on every system.
 
 ---
 
-## 📸 coming to elsewhere: photo studio
+## 📸 creative studio
 
 ### ♡ decorate your little memories.
 
-Elsewhere Photo Studio is an approved creative feature design for Messenger, intended to make photo editing feel like discovering a collection of cute digital stationery inside an early-2000s computer.
-
-### ✧ the approved creative vision
+what started as the approved Photo Studio design is now **Creative Studio**, available in the beta.
 
 | Feature | Description |
 |:---|:---|
-| 📸 **Camera Booth** | Capture or import photos through a nostalgic camera interface. |
-| 🎀 **Sticker Drawer** | Browse stickers, frames, and decorative collections. |
-| 💗 **Photo Editor** | Create layered photo compositions with text, stickers, filters, and more. |
-| 💿 **Web Treasures** | Organize your own collection of old-web graphics and digital stationery. |
-| ☁️ **Skin Wardrobe** | Customize the editor with seven approved visual themes. |
-| ♡ **My Gallery** | Organize finished pictures, editable projects, and photo strips. |
-
-**Photo Studio is an approved design project, not a confirmed feature of v0.2.21.**
-
-its implementation and availability will be announced separately.
+| 📸 **Camera Booth** | Take photos or 2- and 4-shot photo strips, or import your own |
+| 🎀 **Sticker Drawer** | Stickers, frames, stationery and decorative collections, with Favorites and a Photo Tray |
+| 💗 **Editor** | Layered compositions with text, stickers, filters, drawing and more |
+| 💿 **Web Treasures** | Old-web graphics from the Elsewhere Collection and your own My Treasures |
+| ☁️ **Skin Wardrobe** | 23 workspace looks in 4 collections. Classic is the default |
+| ♡ **My Gallery** | Finished pictures, editable projects and photo strips, with a Trash you can restore from |
+| 💅 **SkinMapper** | Design your own Messenger skins (beta) |
+| ✿ **Pixel Doll Studio** | Layered pixel dress-up (beta) |
 
 ---
 
@@ -164,7 +169,7 @@ its implementation and availability will be announced separately.
 
 Elsewhere Messenger is an active beta project.
 
-the public repository currently hosts release information and project documentation, but does not include the complete application source.
+the public repository hosts release information, project documentation, and an earlier snapshot of the Messenger source (v0.2.21). newer source isn't published yet.
 
 ### ✧ current priorities
 

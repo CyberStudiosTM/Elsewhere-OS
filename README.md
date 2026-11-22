@@ -83,19 +83,19 @@ its goal is to bring the charm of classic instant messaging into a modern applic
 - old-school interactions and playful details
 - a growing set of creative tools and companion features
 
-### 🎀 elsewhere photo studio
+### 🎀 creative studio
 
-also part of the creative vision is **Elsewhere Photo Studio**, a purikura-inspired photo decorating workspace.
+**Creative Studio** (once the Photo Studio design) is now in the Messenger beta: a purikura-inspired workspace for making anything, from decorated photos to collages and stationery.
 
-think stickers, scrapbook frames, cute stationery, photo strips, personal collections of old-web treasures, and seven themed editor skins.
+think stickers, scrapbook frames, cute stationery, photo strips, personal collections of old-web treasures, and 23 themed workspace looks. **SkinMapper** (design your own Messenger skins) and **Pixel Doll Studio** (layered pixel dress-up) live alongside it, both in beta.
 
-the Photo Studio design is approved, but design approval does not mean the feature has already shipped.
+all three are beta features and still growing.
 
 ### ☁️ get elsewhere messenger
 
 Elsewhere Messenger has its own beta release available for Windows.
 
-[**♡ Download Elsewhere Messenger v0.2.21**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.21)
+[**♡ Download Elsewhere Messenger v0.2.48**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.48)
 
 ---
 
