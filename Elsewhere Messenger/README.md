@@ -9,10 +9,10 @@
 
 **A nostalgic desktop messaging experience bringing the magic of early-2000s instant messaging into the modern internet.**
 
-<img src="https://img.shields.io/badge/VERSION-v0.2.21-C7B3F1?style=flat-square&labelColor=484848" alt="Version: 0.2.21">
-<img src="https://img.shields.io/badge/PLATFORM-WINDOWS_x64-ABD8F0?style=flat-square&labelColor=484848" alt="Platform: Windows x64">
-<img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=flat-square&labelColor=484848" alt="License: MIT">
-<img src="https://img.shields.io/badge/STATUS-BETA-F4C4DD?style=flat-square&labelColor=484848" alt="Status: Beta">
+<img src="https://img.shields.io/badge/VERSION-v0.2.21-C7B3F1?style=for-the-badge" alt="Version: 0.2.21">
+<img src="https://img.shields.io/badge/PLATFORM-WINDOWS_x64-ABD8F0?style=for-the-badge" alt="Platform: Windows x64">
+<img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=for-the-badge" alt="License: MIT">
+<img src="https://img.shields.io/badge/STATUS-BETA-F4C4DD?style=for-the-badge" alt="Status: Beta">
 
 *A little piece of yesterday, reimagined by [CyberStudios™](https://github.com/CyberStudiosTM).*
 
@@ -85,8 +85,8 @@ not every planned integration is available in the public beta.
 
 ## 💿 what's new in v0.2.21?
 
-<img src="https://img.shields.io/badge/UPDATE-AUTOMATIC_UPDATES-ABD8F0?style=flat-square&labelColor=484848" alt="Automatic Updates">
-<img src="https://img.shields.io/badge/NEW-DELETE_ACCOUNT-F4C4DD?style=flat-square&labelColor=484848" alt="Delete Account">
+<img src="https://img.shields.io/badge/UPDATE-AUTOMATIC_UPDATES-ABD8F0?style=for-the-badge" alt="Automatic Updates">
+<img src="https://img.shields.io/badge/NEW-DELETE_ACCOUNT-F4C4DD?style=for-the-badge" alt="Delete Account">
 
 this update introduces two quality-of-life improvements.
 
