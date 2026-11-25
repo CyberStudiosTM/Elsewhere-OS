@@ -9,14 +9,14 @@
 
 **A nostalgic desktop messaging experience bringing the magic of early-2000s instant messaging into the modern internet.**
 
-<img src="https://img.shields.io/badge/VERSION-v0.2.49-C7B3F1?style=for-the-badge" alt="Version: 0.2.49">
+<img src="https://img.shields.io/badge/VERSION-v0.2.50-C7B3F1?style=for-the-badge" alt="Version: 0.2.50">
 <img src="https://img.shields.io/badge/PLATFORM-WINDOWS_x64-ABD8F0?style=for-the-badge" alt="Platform: Windows x64">
 <img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=for-the-badge" alt="License: MIT">
 <img src="https://img.shields.io/badge/STATUS-BETA-F4C4DD?style=for-the-badge" alt="Status: Beta">
 
 *A little piece of yesterday, reimagined by [CyberStudios™](https://github.com/CyberStudiosTM).*
 
-[Download](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.49) · [What's New](#-whats-new-in-v0249) · [The Vision](#-the-elsewhere-experience) · [Releases](https://github.com/CyberStudiosTM/Elsewhere-OS/releases)
+[Download](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.50) · [What's New](#-whats-new-in-v0250) · [The Vision](#-the-elsewhere-experience) · [Releases](https://github.com/CyberStudiosTM/Elsewhere-OS/releases)
 
 </div>
 
@@ -83,15 +83,17 @@ not every planned integration is available in the public beta.
 
 ---
 
-## 💿 what's new in v0.2.49?
+## 💿 what's new in v0.2.50?
 
-<img src="https://img.shields.io/badge/NEW-ELSEWHERE_PROFILES-F4C4DD?style=for-the-badge" alt="Elsewhere Profiles">
+<img src="https://img.shields.io/badge/NEW-ELSEWHAERO_PROFILES-F4C4DD?style=for-the-badge" alt="Elsewhaero profiles">
 <img src="https://img.shields.io/badge/NEW-15_SKINS-ABD8F0?style=for-the-badge" alt="15 new skins">
 <img src="https://img.shields.io/badge/CREATIVE_STUDIO-✓-C7B3F1?style=for-the-badge" alt="Creative Studio">
 <img src="https://img.shields.io/badge/NEW-PIXEL_DOLL_STUDIO-C7B3F1?style=for-the-badge" alt="Pixel Doll Studio">
 <img src="https://img.shields.io/badge/NEW-SKINS-ABD8F0?style=for-the-badge" alt="Skins">
 
 a *lot* has happened since v0.2.21. ♡
+
+> **✦ fresh in v0.2.50:** profiles got their glow-up. the **Elsewhere Original** layout now sits on the real Elsewhere desktop wallpaper (rolling hills, rainbow, bubbles) with frosted glass panels and glossy headers, and **Classic Profile** gets glossy title bars too. in **Creative Studio**, click a treasure to **preview it before placing**, previews always show the whole picture, and new layers start unnamed with no file names on hover. ♡
 
 ### 🦋 elsewhere profiles
 
@@ -129,7 +131,7 @@ the old Winks button is now **Web Treasures**, with the Elsewhere Collection and
 
 for every detail, see the release notes:
 
-[**✧ Elsewhere Messenger v0.2.49 Release Notes**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.49)
+[**✧ Elsewhere Messenger v0.2.50 Release Notes**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.50)
 
 ---
 
@@ -137,9 +139,9 @@ for every detail, see the release notes:
 
 ### ୨୧ Windows x64
 
-**Current documented beta: v0.2.49**
+**Current documented beta: v0.2.50**
 
-[**☁️ Download Elsewhere Messenger Setup**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-v0.2.49/Elsewhere-Messenger_0.2.49_x64-setup.exe)
+[**☁️ Download Elsewhere Messenger Setup**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-v0.2.50/Elsewhere-Messenger_0.2.50_x64-setup.exe)
 
 ### ✧ getting started
 

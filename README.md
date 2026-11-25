@@ -95,7 +95,7 @@ all three are beta features and still growing.
 
 Elsewhere Messenger has its own beta release available for Windows.
 
-[**♡ Download Elsewhere Messenger v0.2.49**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.49)
+[**♡ Download Elsewhere Messenger v0.2.50**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.50)
 
 ---
 
