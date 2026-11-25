@@ -20,7 +20,7 @@ describe('Elsewhere Profiles renderer safety', () => {
     expect(doc.layout).toBe('classic')
     expect(doc.theme.bg).toBe(blankDoc('classic').theme.bg)
     expect(doc.theme.font).toBe('Verdana')
-    expect(doc.theme.pattern).toBe('none')
+    expect(doc.theme.pattern).toBe(blankDoc('classic').theme.pattern)
     expect(doc.about).toBe('')
     expect(doc.links).toEqual([{ label: 'ok', url: 'https://a.example/' }])
     expect(doc.topFriends).toEqual(['a', 'b'])

@@ -65,6 +65,18 @@ export function studioParams() {
   return { photo: params.get('photo'), photos: (params.get('photos') || '').split(',').filter(Boolean), layout: params.get('layout'), project: params.get('project'), source: params.get('source'), sourceName: params.get('sourceName') || undefined }
 }
 
+/** What the Layers list shows for a layer the user hasn't named (never a file name). */
+function layerLabel(layer: Layer) {
+  if (layer.name) return layer.name
+  return layer.type === 'image' ? (layer.mediaKind === 'treasure' ? 'Web Treasure' : 'Picture') : layer.type === 'text' ? 'Text' : layer.type === 'sticker' ? 'Sticker'
+    : layer.type === 'frame' ? 'Frame' : layer.type === 'draw' ? 'Drawing' : layer.type === 'stationery' ? 'Stationery' : layer.type === 'mini-ui' ? 'Mini window' : 'Layer'
+}
+/** A treasure's credit for tooltips: only who made it, never the file name or import notes. */
+function creditLine(creator?: string) {
+  const who = (creator || '').replace(/\s*\(from download info\)\s*/gi, '').trim()
+  return who ? 'by ' + who : ''
+}
+
 export default function StudioApp() {
   const params = useMemo(studioParams, [])
   const [project, setProject] = useState<StudioProject | null>(null)
@@ -210,7 +222,7 @@ export default function StudioApp() {
     else if (item.kind === 'photo' || item.kind === 'studio-sticker') {
       if (doc) {
         const source = item.kind === 'photo' ? 'local' : 'studio-sticker'
-        addLayer(imageLayer(doc, item.id, source, item.w, item.h, item.name))
+        addLayer(imageLayer(doc, item.id, source, item.w, item.h, ''))
         remember(item)
       }
     }
@@ -226,7 +238,7 @@ export default function StudioApp() {
   function addText(style: TextStyle) { if (doc) { const made = textLayer(doc); made.style = style; addLayer(made) } }
   async function addTreasure(item: Treasure) {
     if (!doc) return
-    addLayer({ ...imageLayer(doc, item.id, 'treasure', item.width || 200, item.height || 200, item.name), pixelated: /pixel|blinkie|8-?bit/i.test(item.tags.join(' ') + item.name) })
+    addLayer({ ...imageLayer(doc, item.id, 'treasure', item.width || 200, item.height || 200, ''), pixelated: /pixel|blinkie|8-?bit/i.test(item.tags.join(' ') + item.name) })
     remember({ kind: 'treasure', id: item.id, name: item.name })
   }
   async function addImageFiles(files: FileList | null) {
@@ -237,7 +249,7 @@ export default function StudioApp() {
         const media = await saveLocalImage(file)
         if (media.kind !== 'local') continue
         const bitmap = await createImageBitmap(file)
-        addLayer(imageLayer(doc, media.id, 'local', bitmap.width, bitmap.height, file.name.slice(0, 60)))
+        addLayer(imageLayer(doc, media.id, 'local', bitmap.width, bitmap.height, ''))
         remember({ kind: 'photo', id: media.id, name: file.name.slice(0, 60), w: bitmap.width, h: bitmap.height })
         bitmap.close()
       } catch (cause) { setNotice(`${file.name}: ${cause instanceof Error ? cause.message : 'couldn’t be added.'}`) }
@@ -298,7 +310,7 @@ export default function StudioApp() {
     if (added) setNotice(`Saved ${added} image${added === 1 ? '' : 's'} to My Treasures. Click one to add it to your photo.`)
   }
   function addMine(item: MyTreasure) {
-    if (doc) { addLayer({ ...imageLayer(doc, item.id, 'local', item.width, item.height, item.name), pixelated: Math.max(item.width, item.height) <= 160 }); remember({ kind: 'photo', id: item.id, name: item.name, w: item.width, h: item.height }) }
+    if (doc) { addLayer({ ...imageLayer(doc, item.id, 'local', item.width, item.height, ''), pixelated: Math.max(item.width, item.height) <= 160 }); remember({ kind: 'photo', id: item.id, name: item.name, w: item.width, h: item.height }) }
   }
 
   async function importMainPhoto(file: File | undefined) {
@@ -317,7 +329,7 @@ export default function StudioApp() {
   }
   function duplicateSelected() {
     if (!layer) return
-    const copy = { ...layer, id: newId(), name: layer.name + ' copy', x: layer.x + 24, y: layer.y + 24, locked: false } as Layer
+    const copy = { ...layer, id: newId(), name: layer.name ? layer.name + ' copy' : '', x: layer.x + 24, y: layer.y + 24, locked: false } as Layer
     commit(current => ({ ...current, layers: [...current.layers, copy] }))
     setSelected(copy.id)
   }
@@ -726,7 +738,7 @@ export default function StudioApp() {
           {!drawerItems.length && <span className="ew-studio-hint">{DRAWER_EMPTY[drawerTab]}</span>}
           {drawerItems.map((item, index) => <div key={index} className="ew-studio-chip-wrap">
             <button type="button" className="ew-studio-chip"
-              title={item.kind === 'sticker' ? 'Sticker' : item.kind === 'frame' ? FRAMES[item.style] + ' frame' : item.name}
+              title={item.kind === 'sticker' ? 'Sticker' : item.kind === 'frame' ? FRAMES[item.style] + ' frame' : item.kind === 'treasure' ? 'Web Treasure' : 'Picture'}
               onClick={() => useDrawerItem(item)}>
               {item.kind === 'sticker' ? item.glyph : item.kind === 'frame' ? '🖼️' : <StudioImage id={item.id} kind={item.kind === 'photo' ? 'local' : item.kind} className="ew-studio-chip-img" />}
             </button>
@@ -852,23 +864,38 @@ function Library({ category, doc, treasures, onStudioSticker, onSticker, onFrame
   useEffect(() => watchMyTreasures(() => setMine(listMyTreasures())), [])
   const [search, setSearch] = useState('')
   const [thumb, setThumb] = useState(64)
+  // Click shows a big preview first (Place it / Cancel); double-click places straight away.
+  const [preview, setPreview] = useState<{ image: React.ReactNode; credit: string; place: () => void } | null>(null)
+  useEffect(() => setPreview(null), [category])
+  const pick = (image: React.ReactNode, credit: string, place: () => void) => ({
+    onClick: () => setPreview({ image, credit, place }),
+    onDoubleClick: () => { setPreview(null); place() },
+  })
+  const previewCard = preview && <div className="ew-studio-preview" role="dialog" aria-label="Preview">
+    <div className="ew-studio-preview-img">{preview.image}</div>
+    {preview.credit && <small>{preview.credit}</small>}
+    <div className="ew-studio-preview-actions">
+      <button type="button" className="is-primary" onClick={() => { preview.place(); setPreview(null) }}>Place it ♡</button>
+      <button type="button" onClick={() => setPreview(null)}>Cancel</button>
+    </div>
+  </div>
   const info = CATEGORIES.find(item => item.id === category)!
   if (!info.ready) return <div className="ew-studio-empty"><span aria-hidden="true">{info.icon}</span>
     <p><strong>{info.label}</strong> is coming in Phase 2, along with your own asset packs.</p></div>
   if (category === 'stickers') {
     const list = STARTER_STICKERS.filter(glyph => !search || glyph.includes(search))
     return <>
+      {previewCard}
       <input type="search" className="ew-studio-search" aria-label="Search stickers" placeholder="Search stickers or packs"
         value={search} onChange={event => setSearch(event.target.value)} />
       <div className="ew-studio-grid" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumb}px, 1fr))` }}>
         {Array.from(studioStickers.values()).filter(art => (art.pack + ' ' + art.name).toLowerCase().includes(search.trim().toLowerCase())).map(art => (
           <button key={art.id} type="button" className="ew-studio-tile" style={{ height: thumb }}
-            title={art.pack + ' / ' + art.name} aria-label={art.name} onClick={event => {
-              const img = event.currentTarget.querySelector('img')
-              if (img?.naturalWidth && img.naturalHeight) {
-                onStudioSticker({ kind: 'studio-sticker', id: art.id, name: art.name, w: img.naturalWidth, h: img.naturalHeight })
-              }
-            }}>
+            title={art.pack} aria-label={'Sticker from ' + art.pack} {...pick(<img src={art.url} alt="" draggable={false} />, '', () => {
+              const img = new Image(); img.src = art.url
+              const go = () => { if (img.naturalWidth && img.naturalHeight) onStudioSticker({ kind: 'studio-sticker', id: art.id, name: '', w: img.naturalWidth, h: img.naturalHeight }) }
+              if (img.complete) go(); else img.onload = go
+            })}>
             <img src={art.url} alt="" className="ew-studio-tile-img" draggable={false} />
           </button>
         ))}
@@ -920,6 +947,7 @@ function Library({ category, doc, treasures, onStudioSticker, onSticker, onFrame
   const own = mine.filter(item => !term || item.name.toLowerCase().includes(term))
   const grid = { gridTemplateColumns: `repeat(auto-fill, minmax(${thumb}px, 1fr))` }
   return <>
+    {previewCard}
     <input className="ew-studio-search" type="search" placeholder="Search Web Treasures" aria-label="Search Web Treasures" value={search} onChange={event => setSearch(event.target.value)} />
 
     <section className="ew-studio-section" aria-labelledby="ew-collection-heading">
@@ -929,7 +957,7 @@ function Library({ category, doc, treasures, onStudioSticker, onSticker, onFrame
         : !collection.length ? <p className="ew-studio-empty-note">{treasures.length ? 'Nothing in the collection matches.' : 'The Elsewhere Collection is coming soon.'}</p>
           : <div className="ew-studio-grid" style={grid}>
             {collection.map(item => <button key={item.id} type="button" className="ew-studio-tile" style={{ height: thumb }}
-              title={item.name + (item.creator ? ' · by ' + item.creator : '')} onClick={() => onTreasure(item)}>
+              title={creditLine(item.creator)} aria-label={creditLine(item.creator) || 'Web Treasure'} {...pick(<StudioImage id={item.id} kind="treasure" />, creditLine(item.creator), () => onTreasure(item))}>
               <StudioImage id={item.id} kind="treasure" className="ew-studio-tile-img" /></button>)}
           </div>}
     </section>
@@ -941,10 +969,10 @@ function Library({ category, doc, treasures, onStudioSticker, onSticker, onFrame
       {!own.length ? <p className="ew-studio-empty-note">{mine.length ? 'None of your treasures match.' : 'Nothing here yet. Upload blinkies, stamps or any PNG, JPEG, GIF or WebP.'}</p>
         : <div className="ew-studio-grid" style={grid}>
           {own.map(item => <div key={item.id} className="ew-studio-tile-wrap">
-            <button type="button" className="ew-studio-tile" style={{ height: thumb }} title={item.name} onClick={() => onMine(item)}>
+            <button type="button" className="ew-studio-tile" style={{ height: thumb }} aria-label="My Treasure" {...pick(<StudioImage id={item.id} kind="local" />, '', () => onMine(item))}>
               <StudioImage id={item.id} kind="local" className="ew-studio-tile-img" /></button>
-            <button type="button" className="ew-studio-tile-remove" aria-label={`Remove ${item.name} from My Treasures`} title="Remove from My Treasures"
-              onClick={() => { if (window.confirm(`Remove “${item.name}” from My Treasures? Photos that already use it keep it.`)) removeMyTreasure(item.id) }}>×</button>
+            <button type="button" className="ew-studio-tile-remove" aria-label="Remove from My Treasures" title="Remove from My Treasures"
+              onClick={() => { if (window.confirm('Remove this from My Treasures? Photos that already use it keep it.')) removeMyTreasure(item.id) }}>×</button>
           </div>)}
         </div>}
       <button type="button" className="ew-studio-link" onClick={onAddImage}>Use an image once without saving it</button>
@@ -959,7 +987,7 @@ function EditPanel({ layer, onChange, onDuplicate, onDelete, onForward, onBackwa
 }) {
   if (!layer) return <div className="ew-studio-empty"><p>Select something on your photo to edit it, or add a sticker, frame or text from the Library.</p></div>
   return <div className="ew-studio-edit">
-    <label className="ew-studio-field">Name<input value={layer.name} maxLength={60} onChange={event => onChange({ name: event.target.value })} /></label>
+    <label className="ew-studio-field">Name<input value={layer.name} maxLength={60} placeholder="(optional)" onChange={event => onChange({ name: event.target.value })} /></label>
     {layer.type === 'text' && <>
       <label className="ew-studio-field">Text<textarea rows={3} value={layer.text} maxLength={400} onChange={event => onChange({ text: event.target.value })} /></label>
       <label className="ew-studio-field">Style<select value={layer.style} onChange={event => onChange({ style: event.target.value as TextStyle })}>
@@ -1006,12 +1034,12 @@ function LayersPanel({ doc, selected, onSelect, onToggle, onRename, onMove }: {
   if (!doc.layers.length) return <div className="ew-studio-empty"><p>No layers yet. Your photo is the bottom layer and is never changed.</p></div>
   return <ol className="ew-studio-layers" reversed>
     {[...doc.layers].reverse().map(item => <li key={item.id} className={item.id === selected ? 'is-active' : ''}>
-      <button type="button" className="ew-studio-layer-name" onClick={() => onSelect(item.id)} title="Select">{item.name}</button>
+      <button type="button" className="ew-studio-layer-name" onClick={() => onSelect(item.id)} title="Select">{layerLabel(item)}</button>
       <button type="button" onClick={() => onToggle(item.id, 'hidden')} aria-pressed={!item.hidden} title={item.hidden ? 'Show' : 'Hide'}>{item.hidden ? '🙈' : '👁️'}</button>
       <button type="button" onClick={() => onToggle(item.id, 'locked')} aria-pressed={item.locked} title={item.locked ? 'Unlock' : 'Lock'}>{item.locked ? '🔒' : '🔓'}</button>
       <button type="button" onClick={() => onMove(item.id, 1)} title="Move up">▲</button>
       <button type="button" onClick={() => onMove(item.id, -1)} title="Move down">▼</button>
-      <button type="button" onClick={() => { const name = window.prompt('Layer name', item.name); if (name) onRename(item.id, name.slice(0, 60)) }} title="Rename">✎</button>
+      <button type="button" onClick={() => { const name = window.prompt('Layer name', item.name || ''); if (name) onRename(item.id, name.slice(0, 60)) }} title="Rename">✎</button>
     </li>)}
     <li className="ew-studio-base-layer">📷 Photo (original, never changed)</li>
   </ol>

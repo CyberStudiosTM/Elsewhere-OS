@@ -92,3 +92,7 @@
 .ew-treasure-shortcut { display: inline-block; position: relative; vertical-align: middle; width: 24px; height: 24px; flex: none; font-size: 0 !important; }
 .ew-treasure-shortcut::before { content: ""; position: absolute; left: 3px; top: 4px; width: 16px; height: 16px; border: 2px solid #b7f4fc; border-radius: 50%; background: radial-gradient(ellipse at 35% 32%, #ecffff 0 11%, #72dacf 15% 35%, #1a809f 50% 85%, #113a70 100%); box-shadow: inset -2px -2px #14546d, 0 1px 2px #0016; }
 .ew-treasure-shortcut::after { content: "✦"; position: absolute; top: -3px; right: -1px; color: #fff4ae; font: 11px/1 Georgia, serif; text-shadow: 1px 1px #344367; }
+
+/* Whole picture in every preview, never cropped. */
+.ew-treasures-thumb, .ew-treasures-detail-img { grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); }
+.ew-treasures-thumb img, .ew-treasures-detail-img img { width: 100%; height: 100%; min-height: 0; }
