@@ -1,5 +1,5 @@
 /** Batch 07C: empty, versioned asset vault. No artwork is bundled or imported. */
-export const TREASURE_CATEGORIES = ['blinkies','buttons','stamps','glitter','dolls','dividers','companions','greetings'] as const
+export const TREASURE_CATEGORIES = ['blinkies','buttons','stamps','glitter','gifs','graphics','dolls','dividers','companions','greetings'] as const
 export type TreasureCategory = typeof TREASURE_CATEGORIES[number]
 export type Approval = 'draft' | 'review' | 'approved' | 'rejected'
 export type TreasureRecord = {

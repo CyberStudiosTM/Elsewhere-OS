@@ -1,3 +1,5 @@
+import { bumpSocialUnread } from '../services/socialUnread'
+import TesterRequest from './TesterRequest'
 import { desktopNotice, desktopNotificationsEnabled } from '../services/desktopNotifications'
 import { historyCacheEnabled, setHistoryCacheEnabled, mergeCachedHistory, clearCachedHistory } from '../services/instagramHistoryCache'
 import { sendInstagramMediaRef } from '../services/instagramMediaSend'
@@ -81,6 +83,7 @@ export default function InstagramInbox({ integrated=false }: { integrated?:boole
   useEffect(() => { selectedRef.current = selected }, [selected])
   const bridgeAccount=useRef('')
   const bridgePhoto = useRef<string | undefined>(undefined)
+  const bridgeUsername = useRef('')
   const bridgeThreads=useRef<IGThread[]>([])
   const profiles=useRef(new Map<string, {updated:number;data:Partial<IGParticipant>}>())
   const enrichedThreads = useCallback(async (items: IGThread[], owner: string, accessToken: string) => {
@@ -136,7 +139,7 @@ export default function InstagramInbox({ integrated=false }: { integrated?:boole
         const accountId=bridgeAccount.current
         if(!currentToken||!accountId) throw new Error('Connect Instagram in Elsewhere Tools first.')
         if(payload.action==='threads') {
-          response.account=accountId;response.accountPhoto=bridgePhoto.current;response.threads=bridgeThreads.current;response.ok=true
+          response.account=accountId;response.accountName=bridgeUsername.current;response.accountPhoto=bridgePhoto.current;response.threads=bridgeThreads.current;response.ok=true
         }else if(payload.action==='messages'||payload.action==='send'||payload.action==='media') {
           const thread=bridgeThreads.current.find(t=>t.id===payload.threadId)
           if(!thread)throw new Error('Choose a real Instagram conversation from the connected inbox.')
@@ -207,6 +210,7 @@ export default function InstagramInbox({ integrated=false }: { integrated?:boole
     seenCursors.current.clear()
     bridgeAccount.current = id
     bridgePhoto.current = profile.photo
+    bridgeUsername.current = profile.username && !/^Instagram account/.test(profile.username) ? profile.username : ''
     bridgeThreads.current = page.data || []
     setAccount(id)
     setAccounts(previous => previous.some(a => a.id === id) ? previous : [...previous, profile])
@@ -424,21 +428,28 @@ export default function InstagramInbox({ integrated=false }: { integrated?:boole
         if (integrated) {
           await publishThreads(latest, account, tokenRef.current)
           await emit(IG_BRIDGE_CONNECTED)
-          const prior = new Map(previous.map(thread => [thread.id, thread.updated_time]))
+          const previousTimes = new Map(previous.map(thread => [thread.id, thread.updated_time]))
           const changed = (page.data || []).filter(thread => thread.updated_time &&
-            (!prior.has(thread.id) || Date.parse(thread.updated_time) > Date.parse(prior.get(thread.id) || '')))
-          for (const thread of changed.slice(0, 3)) {
-            if (canceled || !desktopNotificationsEnabled()) break
+            (!previousTimes.has(thread.id) || Date.parse(thread.updated_time) > Date.parse(previousTimes.get(thread.id) || '')))
+          // The first load only fills the list. After that, new incoming messages in changed threads count as unread.
+          let notified = false
+          for (const thread of previous.length ? changed.slice(0, 5) : []) {
+            if (canceled) break
             const result = await getThreadMessages(HOST, tokenRef.current, thread.id)
-            const newest = (result.data || []).reduce<IGMessage | undefined>((last, item) =>
+            const since = Date.parse(previousTimes.get(thread.id) || '') || 0
+            const incoming = (result.data || []).filter(item => item.from?.id && item.from.id !== account &&
+              Date.parse(item.created_time || '') > since)
+            const newest = incoming.reduce<IGMessage | undefined>((last, item) =>
               !last || Date.parse(item.created_time || '') > Date.parse(last.created_time || '') ? item : last, undefined)
-            if (!canceled && newest?.from?.id && newest.from.id !== account) {
+            if (canceled || !newest?.from) continue
+            for (let count = 0; count < incoming.length; count++) bumpSocialUnread('instagram:' + thread.id)
+            if (!notified && desktopNotificationsEnabled()) {
+              notified = true
               await desktopNotice('instagram', {
                 contactId: 'instagram:' + thread.id,
                 sender: newest.from.username || newest.from.name || externalLabel(thread, account),
                 preview: newest.message || newest.text || (newest.attachments ? 'Sent an attachment' : undefined),
               }).catch(console.error)
-              break
             }
           }
         } else setThreads(latest)
@@ -527,6 +538,7 @@ export default function InstagramInbox({ integrated=false }: { integrated?:boole
             </div>
             <div className="ew-ig-actions"><button type="button" onClick={connectWithInstagram} disabled={busy || ratePaused}>
               {busy ? 'Connecting…' : ratePaused ? `Instagram paused (${rateMinutes}m)` : 'Connect Instagram'}</button></div>
+            <TesterRequest />
             <p className="ew-ig-note">Meta opens in your browser. Sign in, choose your Instagram account and allow access, then come back here. Instagram only lets apps reply within 24 hours of someone’s last message, and shows the newest 20 messages per chat.</p>
             <details className="ew-ig-note"><summary>Advanced: developer token</summary>
               <form onSubmit={connect}>

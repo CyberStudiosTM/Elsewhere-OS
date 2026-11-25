@@ -1,0 +1,100 @@
+/* SkinMapper mapped skin stylesheet. Every visual value comes from a --sm-* variable set by
+   compileTheme(); the fallbacks are Elsewhere's Classic house style. Layout, sizes of real
+   controls and hit areas are fixed here, never by a skin. */
+[data-elsewhere-skin="mapped"] {
+  font: 13px/1.35 Tahoma, Verdana, "Segoe UI", sans-serif;
+  color: #101a31;
+}
+[data-elsewhere-skin="mapped"] * { box-sizing: border-box; }
+
+/* 01 window chrome */
+.sm-window {
+  position: relative; display: grid; grid-template-rows: auto 1fr; overflow: hidden;
+  background: var(--sm-window-frame-active-background-image, linear-gradient(transparent, transparent)), var(--sm-window-frame-active-background, #f5f9ff);
+  border: var(--sm-window-frame-active-border-width, 2px) solid var(--sm-window-frame-active-border-color, #0850b4);
+  border-radius: var(--sm-window-frame-active-border-radius, 9px);
+  box-shadow: var(--sm-window-frame-active-shadow, 0 0 0 1px #88baf6, 0 9px 20px rgba(4, 47, 117, .22));
+
+}
+.sm-titlebar {
+  display: flex; align-items: center; gap: 6px; height: 32px; padding: 4px 6px 4px 8px;
+  color: var(--sm-window-titlebar-text-active-text-color, var(--sm-window-titlebar-active-text-color, #fff));
+  font-weight: var(--sm-window-titlebar-text-active-font-weight, bold);
+  background: var(--sm-window-titlebar-active-background-image, linear-gradient(transparent, transparent)), var(--sm-window-titlebar-active-background, linear-gradient(to bottom, #7bc7ff 0%, #2388ed 9%, #095bd0 29%, #003da5 64%, #1267d6 87%, #6eb8fb 100%));
+  text-shadow: var(--sm-window-titlebar-active-text-shadow, 0 1px 2px #003071);
+}
+.sm-titlebar span { flex: 1; }
+.sm-controls { display: flex; gap: 3px; }
+.sm-controls button {
+  width: 22px; height: 20px; padding: 0; border-radius: var(--sm-window-controls-minimize-border-radius, 4px);
+  border: 1px solid var(--sm-window-controls-minimize-border-color, #b1dcff); color: #fff; font-weight: bold; line-height: 1;
+  background: var(--sm-window-controls-minimize-background, linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%));
+}
+.sm-controls button[data-sm-slot="window.controls.close"] { background: var(--sm-window-controls-close-background, linear-gradient(#ffc5b9, #f75c43 33%, #db2415 65%, #a80c08)); border-color: var(--sm-window-controls-close-border-color, #ffe1d9); }
+.sm-body { display: grid; align-content: start; gap: 6px; padding: 8px; min-height: 0; overflow: hidden; }
+
+/* 02 profile */
+.sm-profile { display: flex; gap: 8px; align-items: center; padding: var(--sm-buddy-profile-padding, 6px); border-radius: var(--sm-buddy-profile-border-radius, 6px); background: var(--sm-buddy-profile-background, linear-gradient(#e0f2ff, #fff 40%, #fff 85%, #cce7ff)); }
+.sm-avatar { width: 48px; height: 48px; border-radius: var(--sm-buddy-profile-avatar-border-radius, 6px); border: var(--sm-buddy-profile-avatar-border-width, 2px) solid var(--sm-buddy-profile-avatar-border-color, #88baf6); background: linear-gradient(135deg, #8fd3ff, #f7b6d8); }
+.sm-name { font-weight: var(--sm-buddy-profile-name-font-weight, bold); color: var(--sm-buddy-profile-name-text-color, #101a31); font-family: var(--sm-buddy-profile-name-font-family, inherit); }
+.sm-status { color: var(--sm-buddy-profile-status-online-text-color, #2a8a2a); font-size: 12px; }
+
+/* 03 toolbar */
+.sm-toolbar { display: flex; flex-wrap: wrap; gap: var(--sm-buddy-toolbar-gap, 4px); padding: 4px; border-radius: 6px; background: var(--sm-buddy-toolbar-background, transparent); }
+.sm-tool {
+  width: 34px; height: 34px; display: grid; place-items: center; font-size: 18px; cursor: pointer;
+  border-radius: var(--sm-buddy-toolbar-button-border-radius, 5px);
+  border: var(--sm-buddy-toolbar-button-border-width, 1px) solid var(--sm-buddy-toolbar-button-border-color, transparent);
+  background: var(--sm-buddy-toolbar-button-background, transparent);
+}
+.sm-tool:hover { background: var(--sm-buddy-toolbar-button-hover-background, #dcebff); }
+
+/* 04-07 services and contacts */
+.sm-services { display: flex; flex-wrap: wrap; gap: 3px; }
+.sm-services button { padding: 2px 8px; border-radius: var(--sm-buddy-services-button-border-radius, 10px); border: 1px solid var(--sm-buddy-services-button-border-color, #88baf6); background: var(--sm-buddy-services-button-background, #fff); color: var(--sm-buddy-services-button-text-color, #06418d); font: inherit; font-size: 11px; }
+.sm-services button.is-selected { background: var(--sm-buddy-services-button-selected-background, #0850b4); color: var(--sm-buddy-services-button-selected-text-color, #fff); }
+.sm-contacts { display: grid; align-content: start; gap: 1px; padding: var(--sm-buddy-contacts-padding, 4px); min-height: 120px; border-radius: var(--sm-buddy-contacts-border-radius, 4px); border: 1px solid var(--sm-buddy-contacts-border-color, #c8dcf4); background: var(--sm-buddy-contacts-background-image, linear-gradient(transparent, transparent)), var(--sm-buddy-contacts-background, #fff); }
+.sm-group { padding: 2px 6px; font-weight: bold; color: var(--sm-buddy-group-heading-text-color, #06418d); background: var(--sm-buddy-group-heading-background, linear-gradient(#f5faff, #e2efff)); border-radius: var(--sm-buddy-group-heading-border-radius, 3px); }
+.sm-row { display: flex; align-items: center; gap: 6px; padding: 2px 6px; border-radius: var(--sm-buddy-contact-row-border-radius, 3px); color: var(--sm-buddy-contact-row-text-color, inherit); background: var(--sm-buddy-contact-row-background, transparent); }
+.sm-row:hover { background: var(--sm-buddy-contact-row-hover-background, #eef6ff); }
+.sm-row.is-selected { background: var(--sm-buddy-contact-row-selected-background, #cfe5ff); }
+.sm-row small { color: var(--sm-buddy-contact-row-muted-text-color, #6a7a92); margin-left: auto; font-size: 11px; }
+.sm-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sm-buddy-contact-presence-online-background, #3cbf3c); }
+.sm-dot.is-away { background: var(--sm-buddy-contact-presence-away-background, #f0b400); }
+.sm-dot.is-offline { background: var(--sm-buddy-contact-presence-offline-background, #b8c2cf); }
+.sm-unread { padding: 0 5px; border-radius: 8px; font-size: 10px; color: var(--sm-buddy-contact-unread-text-color, #fff); background: var(--sm-buddy-contact-unread-background, #e8578a); }
+
+/* 09 conversation */
+.sm-chat-toolbar { display: flex; flex-wrap: wrap; gap: var(--sm-chat-toolbar-gap, 4px); padding: 4px; border-radius: 6px; background: var(--sm-chat-toolbar-background, linear-gradient(#fff, #dceeff)); }
+.sm-transcript { display: grid; align-content: start; gap: 6px; min-height: 120px; padding: var(--sm-chat-transcript-padding, 8px); border-radius: var(--sm-chat-transcript-border-radius, 4px); border: 1px solid var(--sm-chat-transcript-border-color, #c8dcf4); background: var(--sm-chat-transcript-background-image, linear-gradient(transparent, transparent)), var(--sm-chat-transcript-background, #fff); color: var(--sm-chat-transcript-text-color, inherit); }
+.sm-msg { padding: var(--sm-chat-message-incoming-padding, 0); border-radius: var(--sm-chat-message-incoming-border-radius, 0); background: var(--sm-chat-message-incoming-background, transparent); color: var(--sm-chat-message-incoming-text-color, inherit); }
+.sm-msg.is-own { padding: var(--sm-chat-message-own-padding, 0); border-radius: var(--sm-chat-message-own-border-radius, 0); background: var(--sm-chat-message-own-background, transparent); color: var(--sm-chat-message-own-text-color, inherit); }
+.sm-msg b { color: var(--sm-chat-message-incoming-accent-color, #2a8a2a); }
+.sm-msg.is-own b { color: var(--sm-chat-message-own-accent-color, #0850b4); }
+[data-sm-transcript="bubble"] .sm-msg { justify-self: start; max-width: 85%; padding: 6px 10px; border-radius: 12px; background: var(--sm-chat-message-incoming-background, #eef3fa); }
+[data-sm-transcript="bubble"] .sm-msg.is-own { justify-self: end; background: var(--sm-chat-message-own-background, #d9ecff); }
+.sm-notice { font-size: 11px; color: var(--sm-chat-notice-text-color, #3f5677); background: var(--sm-chat-notice-background, #fff7d6); padding: 3px 6px; border-radius: 4px; }
+.sm-composer { display: flex; gap: 6px; align-items: stretch; padding: var(--sm-chat-composer-padding, 4px); border-radius: var(--sm-chat-composer-border-radius, 4px); border: 1px solid var(--sm-chat-composer-border-color, #7f9db9); background: var(--sm-chat-composer-background, #fff); }
+.sm-composer textarea { flex: 1; min-height: 44px; resize: none; border: 0; background: transparent; font: inherit; color: var(--sm-chat-composer-text-color, inherit); }
+.sm-send { min-width: 60px; border-radius: var(--sm-chat-send-border-radius, 6px); border: 1px solid var(--sm-chat-send-border-color, #08419c); color: var(--sm-chat-send-text-color, #fff); font-weight: bold; background: var(--sm-chat-send-background, linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%)); }
+.sm-send:hover { background: var(--sm-chat-send-hover-background, var(--sm-chat-send-background, linear-gradient(#c4e9ff, #4fa3f5 35%, #1a6ad6 65%, #0b4cb6))); }
+
+/* 10 sign-in */
+.sm-signin-header { padding: 10px; text-align: center; font-size: 18px; font-weight: bold; color: var(--sm-signin-header-text-color, #06418d); background: var(--sm-signin-header-background, transparent); }
+.sm-field { width: 100%; padding: 3px 6px; border-radius: var(--sm-signin-field-border-radius, 2px); border: 1px solid var(--sm-signin-field-border-color, #7f9db9); background: var(--sm-signin-field-background, #fff); color: var(--sm-signin-field-text-color, inherit); font: inherit; }
+.sm-signin-button { justify-self: center; padding: 4px 20px; border-radius: var(--sm-signin-button-border-radius, 8px); border: 1px solid var(--sm-signin-button-border-color, #08419c); color: var(--sm-signin-button-text-color, #fff); font: inherit; font-weight: bold; background: var(--sm-signin-button-background, linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%)); }
+.sm-error { color: var(--sm-signin-error-text-color, #b3261e); font-size: 12px; }
+
+/* 12 notification */
+.sm-toast { width: 330px; height: 120px; display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; padding: 10px; border-radius: var(--sm-toast-frame-border-radius, 8px); border: 1px solid var(--sm-toast-frame-border-color, #0850b4); color: var(--sm-toast-frame-text-color, inherit); background: var(--sm-toast-frame-background-image, linear-gradient(transparent, transparent)), var(--sm-toast-frame-background, linear-gradient(#fff, #e6f1ff)); }
+
+/* Editor-only: highlight the selected part in the preview. Never part of a real skin. */
+[data-sm-editor] [data-sm-slot] { cursor: pointer; }
+[data-sm-editor] [data-sm-slot]:hover { outline: 1px dashed rgba(232, 87, 138, .7); outline-offset: 1px; }
+[data-sm-editor] [data-sm-slot].sm-is-picked { outline: 2px solid #e8578a; outline-offset: 1px; }
+
+/* Bubble outlines (e.g. chocolate borders) and outlined toolbar stickers. */
+.sm-msg { border: 1px solid var(--sm-chat-message-incoming-border-color, transparent); }
+.sm-msg.is-own { border: 1px solid var(--sm-chat-message-own-border-color, var(--sm-chat-message-incoming-border-color, transparent)); }
+[data-sm-transcript="classic"] .sm-msg { border-color: transparent; }
+.sm-signin-header, .sm-name { font-family: var(--sm-buddy-profile-name-font-family, inherit); }

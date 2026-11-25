@@ -5,6 +5,9 @@ import { emit, emitTo } from '@tauri-apps/api/event'
 import { INSTAGRAM_OPEN } from '../services/instagramWindow'
 import NotificationClipManager from './NotificationClipManager'
 import { requestUpdateCheck } from './UpdateCheck'
+import { openFeedback } from './FeedbackDialog'
+import { BUILTIN_COLLECTIONS, BUILTIN_PREFIX, builtinSkins, setCustomSkin, useCustomSkinId, useSavedSkins } from '../services/customSkin'
+import { useStudioPreview } from '../services/previewFeatures'
 import './ClassicMenuBar.css'
 
 const HELP_URL = 'https://cyberthreed.github.io/CyberStudios/'
@@ -41,7 +44,7 @@ type MenuName =
   'Actions' |
   'Tools' |
   'Web Treasures' |
-  'Photo Studio' |
+  'Creative Studio' |
   'Skins' |
   'Help'
 
@@ -104,7 +107,7 @@ export default function ClassicMenuBar(
           'Contacts',
           'Actions',
           'Web Treasures',
-          // The buddy window is narrow: Photo Studio and Skins live under Tools here.
+          // The buddy window is narrow: Creative Studio and Skins live under Tools here.
           'Tools',
           'Help',
         ]
@@ -113,7 +116,7 @@ export default function ClassicMenuBar(
           'Edit',
           'Actions',
           'Web Treasures',
-          'Photo Studio',
+          'Creative Studio',
           'Skins',
           'Tools',
           'Help',
@@ -168,21 +171,28 @@ export default function ClassicMenuBar(
     }
   }, [])
 
+  const customSkin = useCustomSkinId()
+  const savedSkins = useSavedSkins(open === 'Skins' || open === 'Tools')
+  // The skin being worn: an official (built-in) skin or one of My Skins.
+  const studioPreview = useStudioPreview()
+  const wearing = props.skin !== 'dead-signal' && customSkin && (customSkin.startsWith(BUILTIN_PREFIX) || savedSkins.some(item => item.id === customSkin)) ? customSkin : null
+
   function run(action?: () => void) {
     setOpen(null)
     action?.()
   }
 
   // Skin switcher: its own menu in conversation windows, a submenu of Tools in the buddy window.
+  // Saved SkinMapper skins are listed under "My Skins" and are worn on top of Classic.
   const skinChoices = (
     <>
 
                 <button
                   type="button"
-                  onClick={() => run(props.onClassic)}
+                  onClick={() => run(() => { setCustomSkin(null); props.onClassic?.() })}
                 >
                   <span className="em-menu-check">
-                    {props.skin !== 'dead-signal'
+                    {props.skin !== 'dead-signal' && !wearing
                       ? '\u2713'
                       : ''}
                   </span>
@@ -190,20 +200,32 @@ export default function ClassicMenuBar(
                   Classic Messenger
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    run(props.onDeadSignal)
-                  }
-                >
-                  <span className="em-menu-check">
-                    {props.skin === 'dead-signal'
-                      ? '\u2713'
-                      : ''}
-                  </span>
-
-                  Dead Signal
-                </button>
+                {BUILTIN_COLLECTIONS.map(collection => {
+                  const skins = builtinSkins(collection.family)
+                  // Dead Signal is its own full skin (not an overlay) but belongs to the Frutiger Evil collection.
+                  const withDeadSignal = collection.family === 'Frutiger Evil'
+                  const inside = skins.some(item => item.id === wearing) || (withDeadSignal && props.skin === 'dead-signal')
+                  // Each collection is its own fold, so the menu stays short; the one you're wearing starts open.
+                  return <details key={collection.family} className="ew-skin-collection" open={inside || undefined}>
+                    <summary><span className="em-menu-check">{inside ? '✓' : ''}</span>{collection.name} ({skins.length + (withDeadSignal ? 1 : 0)})</summary>
+                    {withDeadSignal && <button type="button" className="em-menu-indented" title="The full Dead Signal skin" onClick={() => run(() => { setCustomSkin(null); props.onDeadSignal?.() })}>
+                      <span className="em-menu-check">{props.skin === 'dead-signal' ? '✓' : ''}</span>
+                      Dead Signal
+                    </button>}
+                    {skins.map(item => <button key={item.id} type="button" className="em-menu-indented" title="An Elsewhere skin, worn on top of Classic"
+                      onClick={() => run(() => { props.onClassic?.(); setCustomSkin(item.id) })}>
+                      <span className="em-menu-check">{wearing === item.id ? '✓' : ''}</span>
+                      {item.name}
+                    </button>)}
+                  </details>
+                })}
+                {savedSkins.length > 0 && <div className="ew-tools-label">My Skins</div>}
+                {savedSkins.map(item => <button key={item.id} type="button" title="Made in SkinMapper, worn on top of Classic"
+                  onClick={() => run(() => { props.onClassic?.(); setCustomSkin(item.id) })}>
+                  <span className="em-menu-check">{wearing === item.id ? '✓' : ''}</span>
+                  {item.name}
+                </button>)}
+                <button type="button" className="em-menu-indented" onClick={() => run(() => toolbarAction({ kind: 'skinmapper' }))}>Make your own skin…</button>
     </>
   )
 
@@ -340,6 +362,9 @@ export default function ClassicMenuBar(
           {open === 'Contacts' && (
             <>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'add-contact' }))}>Add Contact...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile' }))}>My Profile...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile', edit: true }))}>Edit My Profile...</button>
+              <button type="button" onClick={() => run(() => { const handle = window.prompt('Whose profile? Type their @handle')?.trim().replace(/^@/, ''); if (handle) toolbarAction({ kind: 'profile', handle }) })}>View a Profile...</button>
               <hr />
               <button
                 type="button"
@@ -466,15 +491,21 @@ export default function ClassicMenuBar(
             }}>Open Web Treasures...</button>
           )}
 
-          {open === 'Photo Studio' && (
-            <button type="button" onClick={() => run(() => toolbarAction({ kind: 'photo' }))}>Open Photo Studio...</button>
+          {open === 'Creative Studio' && (
+            <>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'photo' }))}>Open Creative Studio...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'skinmapper' }))}>SkinMapper... (beta)</button>
+              <button type="button" disabled={!studioPreview} title={studioPreview ? undefined : 'Coming soon'} onClick={() => run(() => toolbarAction({ kind: 'pixel-doll' }))}>{studioPreview ? 'Pixel Doll Studio... (beta)' : 'Pixel Doll Studio (coming soon)'}</button>
+            </>
           )}
 
           {open === 'Skins' && skinChoices}
 
           {open === 'Tools' && props.kind === 'buddy' && (
             <>
-              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'photo' }))}>Photo Studio...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'photo' }))}>Creative Studio...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'skinmapper' }))}>SkinMapper... (beta)</button>
+              <button type="button" disabled={!studioPreview} title={studioPreview ? undefined : 'Coming soon'} onClick={() => run(() => toolbarAction({ kind: 'pixel-doll' }))}>{studioPreview ? 'Pixel Doll Studio... (beta)' : 'Pixel Doll Studio (coming soon)'}</button>
               <details>
                 <summary>Skins</summary>
                 {skinChoices}
@@ -497,10 +528,6 @@ export default function ClassicMenuBar(
                   if (isTauri()) void emit(INSTAGRAM_OPEN).catch(console.error)
                   else window.dispatchEvent(new Event(INSTAGRAM_OPEN))
                 })}>Instagram Connection...</button>
-                <button className="em-menu-indented" type="button" onClick={() => run(() => {
-                  if (isTauri()) void emitTo('main', 'elsewhere:instagram:settings').catch(console.error)
-                  else window.dispatchEvent(new Event('elsewhere:instagram:settings'))
-                })}>Instagram Contact Appearance...</button>
                 <button className="em-menu-indented" type="button" onClick={() => run(() => {
                   if (isTauri()) void emitTo('main', 'elsewhere:x:open').catch(console.error)
                   else window.dispatchEvent(new Event('elsewhere:x:open'))
@@ -633,6 +660,11 @@ export default function ClassicMenuBar(
             </>
           )}
 
+          {open === 'Help' && (
+            <button type="button" onClick={() => { setOpen(null); openFeedback() }}>
+              Send Feedback...
+            </button>
+          )}
           {open === 'Help' && (
             <button type="button" onClick={() => { setOpen(null); requestUpdateCheck() }}>
               Check for Updates...

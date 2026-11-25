@@ -1,6 +1,17 @@
 import { ELSEWHERE_BUDDY_PREFIX, type CloudProfile } from '../../services/connectedClient'
+import { useReportChatFocus, useSocialUnread } from '../../services/socialUnread'
+import { sendElsewhereTyping, useElsewhereLive } from '../../services/elsewhereLive'
+import ElsewhereMediaMessage from '../../components/ElsewhereMediaMessage'
+import StagedPhotoBar from '../../components/StagedPhotoBar'
+import ActivitiesMenu from '../../components/ActivitiesMenu'
+import { openInstagramContactSettings } from '../../components/InstagramContactSettings'
+import InviteDialog from '../../components/InviteDialog'
+import { GroupHeaderTools, GroupTranscript, groupChatTitle } from '../../components/GroupConversation'
+import { ELSEWHERE_GROUP_PREFIX, elsewhereGroupId, useCloudGroupList } from '../../services/elsewhereGroups'
+import { useElsewhereGroupChat } from '../../services/elsewhereNativeBridge'
+import { openPhotoBooth } from '../../services/photoBooth'
 import { OPEN_TOOLBAR_CONTACT } from '../../components/ToolbarDialogs'
-import { NUDGE_LOCAL_ONLY, openCamera, toolbarAction } from '../../services/toolbarActions'
+import { NUDGE_LOCAL_ONLY, openWebTreasures, toolbarAction } from '../../services/toolbarActions'
 import OwnProfilePhoto from '../../components/OwnProfilePhoto'
 import { useDiscordProfilePhoto } from '../../services/discordConnection'
 import InstagramAvatar from '../../components/InstagramAvatar'
@@ -120,9 +131,9 @@ const conversationTools = [
   ["toolbar-webcam", "Webcam"],
   ["toolbar-audio", "Audio"],
   ["toolbar-lightning", "Nudge"],
-  ["toolbar-activities", "Activities"],
   ["toolbar-emoticons", "Emoticons"],
-  ["toolbar-winks", "Winks"],
+  ["toolbar-activities", "Activities"],
+  ["toolbar-gift", "Web Treasures"],
 ];
 
 const buddyTools = [
@@ -130,8 +141,8 @@ const buddyTools = [
   ["toolbar-mail", "Mail"],
   ["toolbar-call", "Call"],
   ["buddy-webcam", "Webcam"],
-  ["toolbar-lightning", "Nudge"],
   ["toolbar-gift", "Web Treasures"],
+  ["toolbar-activities", "Activities"],
 ];
 
 
@@ -604,6 +615,10 @@ function DeadSignalView({
   // Elsewhere friends chat in the native chat window, which reaches the account through main.
   const cloudPerson = nativeMain ? null : elsewherePersonId(selected);
   const cloudChat = useElsewhereChat(cloudPerson);
+  const cloudGroup = nativeMain ? null : elsewhereGroupId(selected);
+  const groupChat = useElsewhereGroupChat(cloudGroup);
+  const groupList = useCloudGroupList();
+  const [inviteOpen, setInviteOpen] = useState(false);
   const discordPhoto = useDiscordProfilePhoto()
   const headerService = socialService === 'all' ? 'elsewhere' : socialService
   const chatService = igThreadId ? 'instagram' : discordId ? 'discord' : 'elsewhere'
@@ -613,13 +628,14 @@ function DeadSignalView({
   const [discordReply,setDiscordReply]=useState<{id:string;summary:string}|null>(null);
   useEffect(()=>setDiscordReply(null),[discordId]);
   const history = useCoreHistory(coreOwner);
+  const live = useElsewhereLive();
 
   const contacts = [
     ...contactDirectory(history, coreOwner).map(contact=>({...contact,avatarUrl:undefined as string|undefined})),
     ...(buddies || []).map(profile => ({
       id: ELSEWHERE_BUDDY_PREFIX + profile.id, name: '@' + profile.handle,
-      group: 'Buddies' as const, status: 'offline' as const, avatar: 'red-sunset-palm',
-      avatarUrl: undefined, online: false,
+      group: 'Buddies' as const, status: live.status[profile.id] || 'offline', avatar: 'red-sunset-palm',
+      avatarUrl: undefined, online: (live.status[profile.id] || 'offline') !== 'offline',
     })),
     ...sortInstagramThreads(ig.threads, appearance).map(thread => ({
       id: instagramContactId(thread.id),
@@ -633,6 +649,12 @@ function DeadSignalView({
     ...pinnedDiscord.map(channel=>({
       id: discordContactId(channel.id), name: `#${channel.name}`,
       group: 'Other Contacts' as const, status: 'offline' as const,
+      avatar: 'red-sunset-palm', avatarUrl: undefined as string|undefined,
+    })),
+    ...groupList.groups.map(group => ({
+      id: ELSEWHERE_GROUP_PREFIX + group.id, name: groupList.titles[group.id] || 'Group chat',
+      group: 'Buddies' as const,
+      status: (group.members.some(id => id !== groupList.me && (live.status[id] || 'offline') !== 'offline') ? 'online' : 'offline') as 'online' | 'offline',
       avatar: 'red-sunset-palm', avatarUrl: undefined as string|undefined,
     })),
   ];
@@ -657,6 +679,8 @@ function DeadSignalView({
       role === "chat" || role === "preview"
     ),
   );
+  useReportChatFocus(selected, activeSkin && (role === "chat" || role === "preview"));
+  const socialUnread = useSocialUnread();
 
   const [active, setActive] = useState<WindowId>(
     role === "main"
@@ -968,7 +992,7 @@ function DeadSignalView({
     item => item.name === selected || item.id === selected
   ) ?? {
     id: selected,
-    name: cloudPerson ? (cloudChat.profile ? '@' + cloudChat.profile.handle : 'Elsewhere friend') : selected,
+    name: cloudGroup ? (groupChat.group ? groupChatTitle(groupChat) : 'Group chat') : cloudPerson ? (cloudChat.profile ? '@' + cloudChat.profile.handle : 'Elsewhere friend') : selected,
     group: "Other Contacts" as const,
     status: "offline" as const,
     avatar: "red-sunset-palm",
@@ -1020,7 +1044,7 @@ function DeadSignalView({
     if (!activeSkin || nativeChild) return
     const open = (event: Event) => {
       const contact = (event as CustomEvent<string>).detail
-      if (!contact.startsWith('instagram:') && !contact.startsWith('discord:') && !contact.startsWith(ELSEWHERE_BUDDY_PREFIX)) return
+      if (!contact.startsWith('instagram:') && !contact.startsWith('discord:') && !contact.startsWith(ELSEWHERE_BUDDY_PREFIX) && !contact.startsWith(ELSEWHERE_GROUP_PREFIX)) return
       setSelected(contact)
       if (nativeMain) {
         if (getLocalSession().signedIn) void openDeadSignalWindow('chat').catch(reportNativeError)
@@ -1036,6 +1060,11 @@ function DeadSignalView({
   const externalBuddy = (socialService === 'instagram' || socialService === 'discord') ||
     (socialService === 'all' && chatService !== 'elsewhere')
   function nudgeSelected() {
+    if (cloudGroup) {
+      void groupChat.send('Nudge', 'nudge').then(() => playNotificationSound('outgoing', preferences))
+        .catch(error => setNotification(error instanceof Error ? error.message : String(error)));
+      return;
+    }
     if (cloudPerson) {
       void cloudChat.nudge().then(() => playNotificationSound('outgoing', preferences))
         .catch(error => setNotification(error instanceof Error ? error.message : String(error)));
@@ -1052,6 +1081,8 @@ function DeadSignalView({
     openWindow('chat')
   }
 
+  const [activitiesAnchor, setActivitiesAnchor] = useState<HTMLElement | null>(null);
+
   function previewAction(action: string, anchor?: HTMLButtonElement) {
     if (action === "Send Files" && anchor) {
       openMedia(anchor, "local");
@@ -1067,12 +1098,14 @@ function DeadSignalView({
     setNotification(`${action}: unavailable.`);
   }
 
-  function buddyAction(action: string) {
+  const [buddyActivities, setBuddyActivities] = useState<HTMLElement | null>(null);
+  function buddyAction(action: string, anchor?: HTMLElement) {
     switch (action) {
+      case 'Activities': setBuddyActivities(previous => previous ? null : anchor || null); break
       case 'Add Contact': toolbarAction({ kind: 'add-contact' }); break
       case 'Mail': toolbarAction({ kind: 'mail' }); break
       case 'Call': toolbarAction({ kind: 'call' }); break
-      case 'Webcam': void openCamera().catch(() => window.alert('Couldn’t open the Windows Camera app. Check that a camera is connected.')); break
+      case 'Webcam': openPhotoBooth({ contactId: null }); break
       case 'Nudge': nudgeSelected(); break
       case 'Web Treasures': window.dispatchEvent(new Event('elsewhere:web-treasures:open')); break
     }
@@ -1161,8 +1194,34 @@ function DeadSignalView({
   }
 
   async function sendMessage(media?: MediaRef) {
+    if (cloudGroup) {
+      if (media) {
+        if (sendingRef.current) return;
+        sendingRef.current = true;
+        try { await groupChat.sendMedia(media); playNotificationSound('outgoing', preferences); }
+        catch (error) { reportNativeError(error); }
+        finally { sendingRef.current = false; }
+        return;
+      }
+      if (!draft.trim() || sendingRef.current) return;
+      sendingRef.current = true;
+      setDraft(previous => previous === draft ? '' : previous);
+      try {
+        await groupChat.send(draft.trim());
+        playNotificationSound('outgoing', preferences);
+      } catch (error) { setDraft(previous => previous || draft); reportNativeError(error); }
+      finally { sendingRef.current = false; }
+      return;
+    }
     if (cloudPerson) {
-      if (media) { reportNativeError(new Error('Photos and files can’t be sent to Elsewhere friends yet.')); return; }
+      if (media) {
+        if (sendingRef.current) return;
+        sendingRef.current = true;
+        try { await cloudChat.sendMedia(media); playNotificationSound('outgoing', preferences); }
+        catch (error) { reportNativeError(error); }
+        finally { sendingRef.current = false; }
+        return;
+      }
       if (!draft.trim() || sendingRef.current) return;
       sendingRef.current = true;
       setDraft(previous => previous === draft ? '' : previous);
@@ -1538,6 +1597,7 @@ function DeadSignalView({
               nudgeLocalOnly={externalBuddy}
               onAction={buddyAction}
             />
+            <ActivitiesMenu anchor={buddyActivities} skin="dead-signal" onClose={() => setBuddyActivities(null)} />
 
             <SocialServiceFilter value={socialService} onChange={setSocialService} instagramConnected={ig.connected} />
             <div className="ds-contact-panel ds-crt">
@@ -1572,14 +1632,15 @@ function DeadSignalView({
                           (selected === member.name || selected === member.id) ? "ds-selected" : ""
                         }`}
                         onClick={() => chooseContact(member.id)}
+                        onContextMenu={member.id.startsWith('instagram:') ? event => { event.preventDefault(); openInstagramContactSettings(member.id.slice('instagram:'.length)) } : undefined}
                       >
-                        {member.id.startsWith('instagram:') ? <span className="ew-ig-contact-indicator" style={{backgroundColor:contactAppearance(appearance,member.id.slice('instagram:'.length)).color}} title="Instagram contact · live presence unavailable" /> : <Status status={member.status} />}
+                        {member.id.startsWith('instagram:') ? <span className="ew-ig-contact-indicator" style={{backgroundColor:contactAppearance(appearance,member.id.slice('instagram:'.length)).color}} title="Instagram contact · right-click to change its color" /> : <Status status={member.status} />}
                         <InstagramAvatar url={member.avatarUrl} className="ew-ig-contact-avatar" />
                         <span>{member.name}</span>
                         {'preview' in member && member.preview && <small className="ew-contact-preview" title={member.preview}>{member.preview}</small>}
-                        {unreadCount(history[member.id]) > 0 && (
+                        {unreadCount(history[member.id]) + (socialUnread[member.id] || 0) > 0 && (
                           <span className="ew-unread">
-                            {unreadCount(history[member.id])}
+                            {unreadCount(history[member.id]) + (socialUnread[member.id] || 0)}
                           </span>
                         )}
                       </button>
@@ -1635,8 +1696,11 @@ function DeadSignalView({
                 tools={conversationTools}
                 nudgeLocalOnly={chatService !== 'elsewhere'}
                 onAction={(action, anchor) => {
-                  if (action === 'Webcam') void openCamera().catch(() => window.alert('Couldn’t open the Windows Camera app. Check that a camera is connected.'))
+                  if (action === 'Webcam') openPhotoBooth({ contactId: selected || null, contactName: contact?.name, useUnavailable: cloudPerson || cloudGroup ? undefined : 'Sending Booth photos works in chats with Elsewhere friends for now. You can still save the photo.' })
                   else if (action === 'Audio') toolbarAction({ kind: 'call' })
+                  else if (action === 'Web Treasures') openWebTreasures()
+                  else if (action === 'Activities') setActivitiesAnchor(previous => previous ? null : anchor || null)
+                  else if (action === 'Invite' && (cloudPerson || cloudGroup)) setInviteOpen(true)
                   else if (action === 'Nudge') nudgeSelected()
                   else previewAction(action, anchor)
                 }}
@@ -1660,7 +1724,11 @@ function DeadSignalView({
               <div className="ds-chat-main">
                 <div className="ds-recipient">
                   To: <strong>{contact.name}</strong>
-                  <span>{cloudPerson ? ' · Elsewhere' : discordId ? ' · Discord bot channel' : igThreadId ? ' · Instagram' : ` <${selected}@elsewhere.net>`}</span>
+                  {cloudGroup && <GroupHeaderTools chat={groupChat} onInvite={() => setInviteOpen(true)} />}
+                  {inviteOpen && (cloudPerson || cloudGroup) && <InviteDialog skin="dead-signal" onClose={() => setInviteOpen(false)}
+                    withPerson={cloudPerson ? { id: cloudPerson, name: contact.name } : undefined}
+                    group={cloudGroup && groupChat.group ? { id: cloudGroup, members: groupChat.group.members, add: groupChat.add } : undefined} />}
+                  <span>{cloudGroup ? ' · Elsewhere group' : cloudPerson ? ' · Elsewhere' : discordId ? ' · Discord bot channel' : igThreadId ? ' · Instagram' : ` <${selected}@elsewhere.net>`}</span>
                 </div>
 
                 <div
@@ -1676,7 +1744,7 @@ function DeadSignalView({
                     </span>
                   )}
 
-                  {cloudPerson ? <>
+                  {cloudGroup ? <GroupTranscript chat={groupChat} skin="dead-signal" /> : cloudPerson ? <>
                     {cloudChat.error && <span role="alert" className="ds-muted">{cloudChat.error}</span>}
                     {!cloudChat.messages.length && !cloudChat.error && <span className="ds-muted">No messages yet.</span>}
                     {cloudChat.messages.map(message => message.kind === 'nudge' ? (
@@ -1689,9 +1757,12 @@ function DeadSignalView({
                           </strong>
                           <span> says ({new Date(message.created_at).toLocaleString()}):</span>
                         </div>
-                        <div className="ds-message-text">{message.text_body}</div>
+                        {message.kind === 'image' || message.kind === 'gif'
+                          ? <ElsewhereMediaMessage message={message} mediaUrl={cloudChat.mediaUrl} />
+                          : <div className="ds-message-text">{message.text_body}</div>}
                       </div>
                     ))}
+                    {live.typing[cloudPerson] && <p className="ew-typing ds-muted" role="status">{contact.name} is typing…</p>}
                   </> : discordId ? <>
                     {discordChat.error && <span role="alert" className="ds-muted">{discordChat.error}</span>}
                     {discordChat.messages.map(message=><div className="ds-message" key={message.id}>
@@ -1846,6 +1917,8 @@ function DeadSignalView({
                   {discordId && discordReply && <div className="ew-ig-compose-reply"><span>↩ Reply to Discord: {discordReply.summary}</span><button type="button" onClick={()=>setDiscordReply(null)}>✕</button></div>}
                   {igThreadId && instagramReplyWindowClosed(ig.messages, ig.account) && <div className="ew-ig-window-notice" role="note">{INSTAGRAM_WINDOW_NOTICE}</div>}
                   {igThreadId && igReply && <div className="ew-ig-compose-reply"><span>↩ Replying to: {igReply.summary}</span><button type="button" onClick={()=>setIgReply(null)} aria-label="Cancel reply">✕</button></div>}
+                  <StagedPhotoBar contactId={selected} onSend={media => sendMessage(media)} />
+                  <ActivitiesMenu anchor={activitiesAnchor} skin="dead-signal" onClose={() => setActivitiesAnchor(null)} />
                   <div className="ds-compose-row">
                     <textarea
                       ref={composerRef}
@@ -1853,7 +1926,7 @@ function DeadSignalView({
                       aria-label="Message"
                       value={draft}
                       style={formatStyle(format)}
-                      onChange={(event) => setDraft(event.target.value)}
+                      onChange={(event) => { setDraft(event.target.value); if (cloudPerson && event.target.value.trim()) sendElsewhereTyping(cloudPerson) }}
                       onKeyDown={(event) => {
                         if (
                           !event.ctrlKey &&

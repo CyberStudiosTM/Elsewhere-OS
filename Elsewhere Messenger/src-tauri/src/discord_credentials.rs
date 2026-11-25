@@ -12,14 +12,14 @@ pub fn require_main(window: &tauri::WebviewWindow) -> Result<(), String> {
     else { Err("Discord connection settings are available in the main window.".into()) }
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 fn entry(name: &str) -> Result<keyring::Entry, String> {
     keyring::Entry::new("com.cyberstudiostm.elsewhere", name)
         .map_err(|_| "Could not open Windows Credential Manager for Discord.".into())
 }
 
 pub fn read(name: &str) -> Result<Option<String>, String> {
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         match entry(name)?.get_password() {
             Ok(value) => Ok(Some(value)),
@@ -27,29 +27,29 @@ pub fn read(name: &str) -> Result<Option<String>, String> {
             Err(_) => Err("Could not read the saved Discord credential.".into()),
         }
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     { let _ = name; Ok(None) }
 }
 
 pub fn save(name: &str, value: &str) -> Result<(), String> {
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         entry(name)?.set_password(value)
             .map_err(|_| "Could not save the Discord credential in Windows Credential Manager.".into())
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     { let _ = (name, value); Err("Remembered Discord connections require Windows.".into()) }
 }
 
 pub fn forget(name: &str) -> Result<(), String> {
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         match entry(name)?.delete_credential() {
             Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
             Err(_) => Err("Could not remove the saved Discord credential.".into()),
         }
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     { let _ = name; Ok(()) }
 }
 

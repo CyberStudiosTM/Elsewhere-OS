@@ -1,7 +1,94 @@
-.ew-treasures-backdrop{position:fixed;inset:0;z-index:99998;background:rgba(4,12,18,.68);display:flex;justify-content:center;align-items:center;padding:24px;font-family:Tahoma,Verdana,sans-serif}.ew-treasures-window{width:min(790px,96vw);height:min(650px,92vh);background:#eaf4fa;color:#15283a;border:2px solid #91b9d3;box-shadow:0 14px 42px #0009;display:flex;flex-direction:column;font-size:13px}.ew-treasures-window header{background:linear-gradient(#d9f3ff,#7dbada);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #799db0}.ew-treasures-window button,.ew-treasures-window select,.ew-treasures-window input{font:inherit}.ew-treasures-window header button{font-size:21px;line-height:1;cursor:pointer}.ew-treasures-controls{padding:10px;display:flex;gap:12px;flex-wrap:wrap}.ew-treasures-controls label{display:flex;gap:5px;align-items:center}.ew-treasures-count{padding:0 10px}.ew-treasures-grid{overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;flex:1;align-content:start}.ew-treasures-grid article{background:#fff;border:1px solid #a1bccd;padding:8px;display:flex;gap:5px;flex-direction:column;min-width:0;overflow-wrap:anywhere}.ew-treasures-grid small{color:#536473}.ew-treasures-thumb{height:96px;display:grid;place-items:center;background:#eef6fd}.ew-treasures-thumb img{max-width:100%;max-height:100%;object-fit:contain}.ew-treasures-window footer{padding:8px 12px;border-top:1px solid #9fbece}.ew-treasures-dead .ew-treasures-window{background:#131b23;color:#e5e9ef;border-color:#79444e}.ew-treasures-dead .ew-treasures-window header{background:linear-gradient(#3e1726,#15131b);border-color:#79444e}.ew-treasures-dead .ew-treasures-grid article{background:#25313b;border-color:#644451}.ew-treasures-dead .ew-treasures-grid small{color:#c1afb8}.ew-treasures-dead .ew-treasures-thumb{background:#141b20}
-.ew-treasure-shortcut{display:inline-flex;align-items:center;justify-content:center;font-size:19px;line-height:1;vertical-align:middle}
+/* Web Treasures: Classic's palette (Elsewhere's house style) with an old-web archive feel. */
+.ew-treasures-backdrop { position: fixed; inset: 0; z-index: 99998; display: grid; place-items: center; padding: 10px; background: rgba(8, 40, 92, .32); font: 13px/1.35 Tahoma, Verdana, "Segoe UI", sans-serif; }
+.ew-treasures-window {
+  width: min(760px, 100%); height: min(620px, 100%); display: grid; grid-template-rows: auto auto auto 1fr auto auto; overflow: hidden;
+  color: #101a31; background: #f5f9ff; border: 2px solid #0850b4; border-radius: 9px;
+  box-shadow: 0 0 0 1px #88baf6, 0 4px 0 rgba(18, 66, 128, .12), 0 9px 20px rgba(4, 47, 117, .22);
+}
+.ew-treasures-window button, .ew-treasures-window input { font: inherit; }
+.ew-treasures-titlebar {
+  display: flex; align-items: center; gap: 6px; height: 34px; padding: 4px 6px 4px 8px; color: #fff; text-shadow: 0 1px 2px #003071;
+  background: linear-gradient(to bottom, #7bc7ff 0%, #2388ed 9%, #095bd0 29%, #003da5 64%, #1267d6 87%, #6eb8fb 100%);
+  border-bottom: 1px solid #063e97;
+}
+.ew-treasures-titlebar strong { flex: 1; }
+.ew-treasures-close {
+  width: 24px; height: 24px; padding: 0; border-radius: 4px; border: 1px solid #ffe1d9; color: #fff; font-size: 20px; line-height: 18px; font-weight: bold; cursor: pointer;
+  background: linear-gradient(#ffc5b9, #f75c43 33%, #db2415 65%, #a80c08); box-shadow: inset 0 1px rgba(255,255,255,.75);
+}
+.ew-treasures-close:hover { filter: brightness(1.12); }
+.ew-treasures-banner {
+  padding: 4px 8px; text-align: center; font: 11px/1.3 "Courier New", monospace; letter-spacing: 1px; color: #06418d;
+  background: repeating-linear-gradient(90deg, #eaf4ff 0 8px, #dcebff 8px 16px); border-bottom: 1px dotted #88baf6;
+}
+.ew-treasures-shelves { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid #88baf6; background: linear-gradient(#fff, #e6f1ff); }
+.ew-treasures-shelves button {
+  padding: 5px 12px; border: 1px solid #88baf6; border-bottom: 0; border-radius: 6px 6px 0 0; cursor: pointer; color: #06418d;
+  background: linear-gradient(#ffffff, #d9ecff); margin-bottom: -1px;
+}
+.ew-treasures-shelves button.is-active { background: #f5f9ff; font-weight: bold; border-color: #0850b4; border-bottom: 1px solid #f5f9ff; }
+.ew-treasures-body { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; min-height: 0; }
+.ew-treasures-categories { display: grid; align-content: start; gap: 2px; padding: 8px 6px; overflow-y: auto; border-right: 1px solid #c8dcf4; background: #eef5ff; min-width: 140px; }
+.ew-treasures-categories button {
+  display: flex; justify-content: space-between; gap: 6px; text-align: left; padding: 4px 8px; border: 1px solid transparent; border-radius: 4px;
+  background: transparent; color: #06418d; cursor: pointer;
+}
+.ew-treasures-categories button::before { content: "▸"; color: #2388ed; margin-right: 2px; }
+.ew-treasures-categories button:hover { background: #dcebff; }
+.ew-treasures-categories button.is-active { background: #fff; border-color: #88baf6; font-weight: bold; }
+.ew-treasures-categories small { color: #3f5677; font-weight: normal; }
+.ew-treasures-main { display: grid; grid-template-rows: auto 1fr; min-width: 0; min-height: 0; }
+.ew-treasures-tools { display: flex; gap: 6px; padding: 8px; }
+.ew-treasures-tools input { flex: 1; min-width: 0; padding: 3px 6px; border: 1px solid #7f9db9; border-radius: 2px; background: #fff; color: #101a31; }
+.ew-treasures-upload {
+  padding: 3px 10px; border: 1px solid #8aafd9; border-radius: 4px; color: #06418d; cursor: pointer; white-space: nowrap;
+  background: linear-gradient(#ffffff, #d9ecff);
+}
+.ew-treasures-upload:hover { border-color: #0850b4; }
+.ew-treasures-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; align-content: start; padding: 0 8px 8px; overflow-y: auto; min-height: 0; }
+.ew-treasures-tile {
+  display: grid; gap: 3px; justify-items: center; padding: 6px 4px; border: 1px solid #c8dcf4; border-radius: 4px; background: #fff; cursor: pointer; color: #101a31;
+}
+.ew-treasures-tile:hover { border-color: #2388ed; background: #f0f7ff; }
+.ew-treasures-tile.is-selected { border-color: #0850b4; box-shadow: 0 0 0 1px #88baf6; }
+.ew-treasures-thumb { width: 100%; height: 64px; display: grid; place-items: center; background: repeating-conic-gradient(#f3f7fc 0 25%, #fff 0 50%) 0 0 / 12px 12px; border-radius: 2px; }
+.ew-treasures-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.ew-treasures-name { font-size: 11px; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ew-treasures-empty { grid-column: 1 / -1; display: grid; gap: 6px; justify-items: center; text-align: center; padding: 28px 16px; margin: 8px 0; color: #3f5677; border: 1px dashed #88baf6; border-radius: 6px; background: #fbfdff; }
+.ew-treasures-empty p { margin: 0; }
+.ew-treasures-detail { display: grid; align-content: start; gap: 6px; width: 190px; padding: 10px; overflow-y: auto; border-left: 1px solid #c8dcf4; background: #fff; }
+.ew-treasures-detail-img { display: grid; place-items: center; height: 120px; background: repeating-conic-gradient(#f3f7fc 0 25%, #fff 0 50%) 0 0 / 12px 12px; border: 1px solid #c8dcf4; }
+.ew-treasures-detail-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.ew-treasures-detail small { color: #3f5677; }
+.ew-treasures-detail a { color: #06418d; }
+.ew-treasures-detail > button:not(.ew-treasures-link) { padding: 3px 8px; border: 1px solid #8aafd9; border-radius: 4px; color: #06418d; cursor: pointer; background: linear-gradient(#ffffff, #d9ecff); }
+.ew-treasures-link { border: 0; background: none; padding: 0; color: #06418d; text-decoration: underline; cursor: pointer; text-align: left; }
+.ew-treasures-notice { margin: 0; padding: 4px 10px; color: #06418d; background: #eaf4ff; border-top: 1px solid #c8dcf4; }
+.ew-treasures-footer { padding: 6px 10px; font-size: 11px; color: #3f5677; border-top: 1px solid #88baf6; background: linear-gradient(#fff, #e6f1ff); }
+.ew-treasures-window button:focus-visible, .ew-treasures-window input:focus-visible { outline: 2px dotted #0850b4; outline-offset: 1px; }
 
-/* Original toolbar footprint, new nostalgic Web Treasures globe. */
-.ew-treasure-shortcut{display:inline-block;position:relative;vertical-align:middle;width:24px;height:24px;flex:none;font-size:0!important}
-.ew-treasure-shortcut::before{content:"";position:absolute;left:3px;top:4px;width:16px;height:16px;border:2px solid #b7f4fc;border-radius:50%;background:radial-gradient(ellipse at 35% 32%,#ecffff 0 11%,#72dacf 15% 35%,#1a809f 50% 85%,#113a70 100%);box-shadow:inset -2px -2px #14546d,0 1px 2px #0016}
-.ew-treasure-shortcut::after{content:"✦";position:absolute;top:-3px;right:-1px;color:#fff4ae;font:11px/1 Georgia,serif;text-shadow:1px 1px #344367}
+/* Small windows (the buddy list is narrow): categories become a scrolling row; details overlay. */
+@media (max-width: 560px) {
+  .ew-treasures-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  .ew-treasures-categories { display: flex; overflow-x: auto; min-width: 0; border-right: 0; border-bottom: 1px solid #c8dcf4; padding: 6px; }
+  .ew-treasures-categories button { flex: none; }
+  .ew-treasures-detail { position: absolute; inset: auto 12px 52px 12px; width: auto; border: 1px solid #0850b4; border-radius: 6px; box-shadow: 0 6px 18px rgba(4,47,117,.3); }
+  .ew-treasures-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+}
+
+/* Dead Signal */
+.ew-treasures-dead .ew-treasures-window { background: #131b23; color: #e5e9ef; border-color: #79444e; box-shadow: 0 0 0 1px #3e1726, 0 9px 20px #0009; }
+.ew-treasures-dead .ew-treasures-titlebar { background: linear-gradient(#3e1726, #15131b); border-color: #79444e; }
+.ew-treasures-dead .ew-treasures-banner, .ew-treasures-dead .ew-treasures-shelves, .ew-treasures-dead .ew-treasures-footer, .ew-treasures-dead .ew-treasures-categories { background: #1a2129; color: #c1afb8; border-color: #3e2a33; }
+.ew-treasures-dead .ew-treasures-shelves button, .ew-treasures-dead .ew-treasures-upload, .ew-treasures-dead .ew-treasures-detail > button:not(.ew-treasures-link) { background: #25313b; color: #e5e9ef; border-color: #644451; }
+.ew-treasures-dead .ew-treasures-shelves button.is-active, .ew-treasures-dead .ew-treasures-categories button.is-active { background: #131b23; color: #fff; border-color: #79444e; }
+.ew-treasures-dead .ew-treasures-categories button, .ew-treasures-dead .ew-treasures-link, .ew-treasures-dead .ew-treasures-detail a { color: #e4b6c4; }
+.ew-treasures-dead .ew-treasures-tile, .ew-treasures-dead .ew-treasures-detail { background: #25313b; color: #e5e9ef; border-color: #644451; }
+.ew-treasures-dead .ew-treasures-thumb, .ew-treasures-dead .ew-treasures-detail-img { background: #141b20; border-color: #3e2a33; }
+.ew-treasures-dead .ew-treasures-empty { background: #1a2129; color: #c1afb8; border-color: #644451; }
+.ew-treasures-dead .ew-treasures-tools input { background: #0f151b; color: #e5e9ef; border-color: #644451; }
+
+/* Original toolbar footprint, nostalgic Web Treasures globe. */
+.ew-treasure-shortcut { display: inline-block; position: relative; vertical-align: middle; width: 24px; height: 24px; flex: none; font-size: 0 !important; }
+.ew-treasure-shortcut::before { content: ""; position: absolute; left: 3px; top: 4px; width: 16px; height: 16px; border: 2px solid #b7f4fc; border-radius: 50%; background: radial-gradient(ellipse at 35% 32%, #ecffff 0 11%, #72dacf 15% 35%, #1a809f 50% 85%, #113a70 100%); box-shadow: inset -2px -2px #14546d, 0 1px 2px #0016; }
+.ew-treasure-shortcut::after { content: "✦"; position: absolute; top: -3px; right: -1px; color: #fff4ae; font: 11px/1 Georgia, serif; text-shadow: 1px 1px #344367; }

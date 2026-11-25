@@ -89,3 +89,24 @@
 .ew-nudge-banner button { background: transparent; color: inherit; border: 0; cursor: pointer; }
 
 .ew-toolbar-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-top: 10px; }
+.ew-toolbar-body form.ew-feedback-form { display: grid; align-items: stretch; gap: 10px; }
+.ew-feedback-intro { line-height: 1.45; }
+.ew-feedback-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.ew-feedback-kinds legend { padding: 0 0 4px; font-weight: bold; }
+.ew-toolbar-body .ew-feedback-kinds label { display: inline-flex; align-items: center; gap: 0; padding: 5px 11px; border: 1px solid #8aafd9; border-radius: 14px; background: linear-gradient(#fff, #dcecff); color: #06418d; cursor: pointer; white-space: nowrap; }
+.ew-feedback-kinds label.is-on { border-color: #08419c; background: linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%); color: #fff; text-shadow: 0 1px #164583; }
+.ew-feedback-kinds input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ew-feedback-kinds label:focus-within { outline: 2px solid #3e95f0; outline-offset: 1px; }
+.ew-toolbar-body .ew-feedback-body { display: grid; gap: 4px; font-weight: bold; }
+.ew-feedback-body textarea { width: 100%; min-height: 110px; box-sizing: border-box; resize: vertical; padding: 7px; border: 1px solid #8aafd9; border-radius: 6px; font: 13px Tahoma, sans-serif; font-weight: normal; }
+.ew-feedback-count { justify-self: end; font-weight: normal; opacity: .7; font-size: 11px; }
+.ew-feedback-note { font-size: 11px; opacity: .8; line-height: 1.4; }
+.ew-feedback-actions { justify-content: flex-end; }
+.ew-welcome ol { padding-left: 20px; display: grid; gap: 10px; }
+.ew-welcome li div { margin-top: 4px; }
+.ew-invite { display: grid; gap: 8px; min-width: min(360px, 80vw); }
+.ew-invite-name { display: grid; gap: 2px; }
+.ew-invite-list { display: grid; gap: 2px; max-height: 240px; overflow-y: auto; border: 1px solid rgba(0,0,0,.15); padding: 4px; }
+.ew-invite-row { display: flex; align-items: center; gap: 6px; padding: 3px 4px; cursor: pointer; }
+.ew-invite-row:hover { background: rgba(120, 170, 230, .15); }
+.ew-invite-note { font-size: .85em; opacity: .8; margin: 0; }

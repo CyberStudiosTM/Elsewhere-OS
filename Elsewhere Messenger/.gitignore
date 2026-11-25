@@ -25,3 +25,4 @@ dist-ssr
 
 # Release builds
 release/
+builds/

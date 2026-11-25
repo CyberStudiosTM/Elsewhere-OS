@@ -17,7 +17,7 @@ export const IG_LIVE_ACTIVITY = 'elsewhere:instagram:live-activity'
 export type IGBridgeOrigin = 'main' | 'classic-chat' | 'dead-signal-chat'
 export type IGBridgeAction = 'threads' | 'messages' | 'send' | 'media'
 export type IGBridgeRequest = { requestId: string; origin: IGBridgeOrigin; action: IGBridgeAction; threadId?: string; text?: string; media?:MediaRef; replyToMid?: string }
-export type IGBridgeResponse = {requestId:string; ok:boolean; account?:string; accountPhoto?:string; threads?:IGThread[]; messages?:IGMessage[]; error?:string; acceptedId?:string}
+export type IGBridgeResponse = {requestId:string; ok:boolean; account?:string; accountName?:string; accountPhoto?:string; threads?:IGThread[]; messages?:IGMessage[]; error?:string; acceptedId?:string}
 export const IG_BRIDGE_ORIGINS: readonly IGBridgeOrigin[] = ['main','classic-chat','dead-signal-chat']
 export const instagramContactId = (id:string) => 'instagram:' + id
 export const instagramThreadId = (id:string) => id.startsWith('instagram:') ? id.slice('instagram:'.length) : null
@@ -49,6 +49,7 @@ export function useNativeInstagram(selectedContact:string|null) {
   const [threads,setThreads]=useState<IGThread[]>([])
   const [account,setAccount]=useState('')
   const [accountPhoto, setAccountPhoto] = useState<string>()
+  const [accountName, setAccountName] = useState('')
   const [messages,setMessages]=useState<IGMessage[]>([])
   const [connected,setConnected]=useState(false)
   const [error,setError]=useState('')
@@ -106,7 +107,7 @@ export function useNativeInstagram(selectedContact:string|null) {
     try{
       const result=await request('threads')
       if(!mounted.current)return
-      setAccount(result.account||'');setAccountPhoto(result.accountPhoto);setThreads(result.threads||[]);setConnected(true);setError('')
+      setAccount(result.account||'');setAccountName(result.accountName||'');setAccountPhoto(result.accountPhoto);setThreads(result.threads||[]);setConnected(true);setError('')
     }catch(e){if(mounted.current){setError(e instanceof Error?e.message:'Instagram unavailable')}}
     finally{threadsRefreshInFlight.current=false}
   },[request])
@@ -172,7 +173,7 @@ export function useNativeInstagram(selectedContact:string|null) {
     let stopDisconnected:UnlistenFn|undefined
     let disposed=false
     void listen(IG_BRIDGE_CONNECTED,()=>{void refreshThreads()}).then(unlisten=>{if(disposed)unlisten();else stopConnected=unlisten}).catch(()=>{})
-    void listen(IG_BRIDGE_DISCONNECTED,()=>{setConnected(false);setThreads([]);setMessages([]);setAccount('');setAccountPhoto(undefined)}).then(unlisten=>{if(disposed)unlisten();else stopDisconnected=unlisten}).catch(()=>{})
+    void listen(IG_BRIDGE_DISCONNECTED,()=>{setConnected(false);setThreads([]);setMessages([]);setAccount('');setAccountName('');setAccountPhoto(undefined)}).then(unlisten=>{if(disposed)unlisten();else stopDisconnected=unlisten}).catch(()=>{})
     return ()=>{disposed=true;stopConnected?.();stopDisconnected?.();window.clearInterval(timer);window.clearInterval(poll)}
   },[refreshThreads])
   useEffect(()=>{setMessages([]);if(selected&&connected)void loadMessages(selected).catch(e=>setError(String(e)))},[selected,connected,loadMessages])
@@ -192,7 +193,7 @@ export function useNativeInstagram(selectedContact:string|null) {
       .then(unlisten=>{if(disposed)unlisten();else stop=unlisten}).catch(()=>{})
     return ()=>{disposed=true;stop?.();timers.forEach(timer=>window.clearTimeout(timer))}
   },[selected,connected,loadMessages,refreshThreads])
-  return {account,accountPhoto,threads,messages,connected,error,sending,refreshThreads,loadMessages,sendText,sendMedia}
+  return {account,accountName,accountPhoto,threads,messages,connected,error,sending,refreshThreads,loadMessages,sendText,sendMedia}
 }
 
 export function instagramOtherParticipant(thread:IGThread,owner:string){return thread.participants?.data?.find(p=>p.id!==owner)}

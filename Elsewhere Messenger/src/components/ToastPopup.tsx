@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useWearCustomSkin } from '../services/customSkin'
 import { emitTo, listen } from '@tauri-apps/api/event'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { TOAST_OPEN, TOAST_READY, TOAST_SHOW, type ToastPayload } from '../services/toastWindow'
@@ -14,6 +15,8 @@ export default function ToastPopup() {
   const [toast, setToast] = useState<ToastPayload | null>(null)
   const timer = useRef<number | undefined>(undefined)
   const skin = (() => { try { return localStorage.getItem('elsewhere.messenger.skin') === 'dead-signal' ? 'dead' : 'classic' } catch { return 'classic' } })()
+  // A saved SkinMapper skin also dresses Classic pop-ups.
+  useWearCustomSkin(skin === 'classic')
 
   useEffect(() => {
     document.documentElement.classList.add('ew-toast-root')

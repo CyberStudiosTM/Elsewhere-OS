@@ -175,7 +175,7 @@ function SignIn({ busy, run, onVerified, onCancel, resetPassword }: {
   }
   return <form className="ew-account-form" onSubmit={submit}>
     <p>{resetPassword
-      ? 'Enter your account’s email and we’ll send you a code. After the code, you’ll choose a new password. First time here? This is also how you set your password.'
+      ? 'Enter your account’s email and we’ll send you a code. After the code, you’ll choose a new password.'
       : 'Enter the email you registered with. We’ll send you a code, then you’ll choose a password for signing in.'}</p>
     <label>Email address: <input type="email" autoComplete="email" value={email}
       onChange={event => setEmail(event.target.value)} maxLength={254} required /></label>
@@ -191,7 +191,7 @@ function SignIn({ busy, run, onVerified, onCancel, resetPassword }: {
       {codeMode && <button type="button" disabled={busy || !email} onClick={() => void run(() => sendLoginCode(email))}>Resend code</button>}
       {onCancel && <button type="button" onClick={onCancel}>Cancel</button>}
     </div>
-    <p className="ew-account-links">New to Elsewhere? <ExternalLink url={ACCOUNT_SIGNUP_URL}>Create an account</ExternalLink></p>
+    <p className="ew-account-links">New to Elsewhere? <ExternalLink url={ACCOUNT_SIGNUP_URL}>Create an account</ExternalLink>. You’ll verify your email and choose your password there.</p>
   </form>
 }
 

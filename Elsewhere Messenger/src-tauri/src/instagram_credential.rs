@@ -30,12 +30,12 @@ pub fn save_instagram_credential(window: tauri::WebviewWindow, credential: Insta
     if credential.token.trim().is_empty() || credential.account_id.is_empty() {
         return Err("Instagram credentials are incomplete.".into());
     }
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         let value = serde_json::to_string(&credential).map_err(|_| "Could not prepare Instagram credentials.")?;
         discord_credentials::social_save(NAME, &value)
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     Err("Remembered Instagram sign-in is available on Windows.".into())
 }
 

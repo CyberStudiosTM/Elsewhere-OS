@@ -2,7 +2,7 @@ import { invoke, isTauri } from '@tauri-apps/api/core'
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js'
 
 export type CloudProfile = { id: string; handle: string; display_name: string; created_at: string }
-export type CloudMessage = { id: string; sender_id: string; recipient_id: string; client_id: string; kind?: 'message' | 'nudge'; text_body: string; created_at: string }
+export type CloudMessage = { id: string; sender_id: string; recipient_id: string; client_id: string; kind?: 'message' | 'nudge' | 'image' | 'gif'; text_body: string; created_at: string }
 export type CloudFriend = { user_a: string; user_b: string; requested_by: string; accepted_at: string | null }
 export type SavedAccount = { id: string; email: string }
 
@@ -136,7 +136,7 @@ export async function signInWithCloudPassword(email: string, password: string, r
   const { data, error } = await required().auth.signInWithPassword({ email: email.trim(), password })
   if (error) {
     if (error.code === 'invalid_credentials') {
-      throw new Error('Email or password is incorrect. If you haven’t set a password yet, use “Forgot your password?”.')
+      throw new Error('Email or password is incorrect. New here? Use “Create an account” to verify your email and choose a password. Signed up before passwords existed? Use “Forgot your password?” to set one.')
     }
     throw error
   }
@@ -224,6 +224,8 @@ export async function loadCloudHistory(userId: string, person: string) {
 }
 export const sendCloudMessage = (person: string, body: string, requestId: string) =>
   rpc<CloudMessage>('send_elsewhere_message', { person, body, request_id: requestId })
+export const sendCloudMedia = (person: string, kind: 'image' | 'gif', body: string, requestId: string) =>
+  rpc<CloudMessage>('send_elsewhere_message', { person, body, request_id: requestId, message_kind: kind })
 export const sendCloudNudge = (person: string, requestId: string) =>
   rpc<CloudMessage>('send_elsewhere_message', { person, body: 'Nudge', request_id: requestId, message_kind: 'nudge' })
 export function watchCloudInbox(userId: string, onMessage: (message: CloudMessage) => void) {

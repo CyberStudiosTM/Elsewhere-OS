@@ -5,7 +5,12 @@ import { listen } from '@tauri-apps/api/event'
 import { connectDiscordBot, restoreDiscordBot, disconnectDiscordBot, getDiscordGuilds, getDiscordChannels, getDiscordMessages, sendDiscordMessage, type BotGuild, type BotChannel, type BotMessage, pinDiscordChannel, unpinDiscordChannel, usePinnedDiscordChannels } from '../services/discordBot'
 import './DiscordServerPanel.css'
 
+const BOT_OPT_IN='elsewhere.discord.bot-opt-in'
+function readOptIn(){try{return localStorage.getItem(BOT_OPT_IN)==='yes'}catch{return false}}
+function writeOptIn(on:boolean){try{if(on)localStorage.setItem(BOT_OPT_IN,'yes');else localStorage.removeItem(BOT_OPT_IN)}catch{/* stays for this session */}}
+
 export default function DiscordServerPanel({clientId}:{clientId:string}) {
+  const [optedIn,setOptedIn]=useState(readOptIn)
   const pins=usePinnedDiscordChannels()
   const [token,setToken]=useState('')
   const [remember, setRemember] = useState(() => /Windows/.test(navigator.userAgent))
@@ -70,6 +75,15 @@ export default function DiscordServerPanel({clientId}:{clientId:string}) {
   const chooseGuild=(id:string)=>run(async()=>{setGuild(id);setChannel('');setMessages([]);setChannels((await getDiscordChannels(id)).filter(c=>c.type===0||c.type===5).sort((a,b)=>(a.position||0)-(b.position||0)))})
   const chooseChannel=(id:string)=>run(async()=>{setChannel(id);setReply(null);setMessages((await getDiscordMessages(id)).reverse())})
   const send=()=>run(async()=>{if(!channel||!draft.trim())return;const result=await sendDiscordMessage(channel,draft,reply?.id);setMessages(old=>[...old.filter(m=>m.id!==result.id),result]);setDraft('');setReply(null)})
+  // The bot is only for people who run their own server. Keep it out of sight until they ask for it
+  // (a saved bot still reconnects in the background so pinned channels keep working).
+  if(!optedIn&&!bot&&!restoreFailed) return <section className="ew-discord-server ew-discord-server-optin" aria-label="Discord server bot">
+    <details>
+      <summary>Run your own Discord server?</summary>
+      <p>You can add an Elsewhere bot to a server you manage and chat in its channels from Messenger. This is optional and separate from your personal Discord account. Most people don’t need it.</p>
+      <button type="button" onClick={()=>{writeOptIn(true);setOptedIn(true)}}>Set up a server bot…</button>
+    </details>
+  </section>
   return <section className="ew-discord-server" aria-label="Discord server chat">
     <h3>Discord server messages</h3>
     <p>Messages in this section are sent as the <strong>Elsewhere bot</strong>, not from your personal account. Personal DMs and friends are not available through this connection.</p>
@@ -82,7 +96,8 @@ export default function DiscordServerPanel({clientId}:{clientId:string}) {
         await disconnectDiscordBot()
         setRestoreFailed(false)
       })}>Forget saved bot</button>}
-      <button disabled={busy||!token.trim()} onClick={()=>void join()}>Connect bot</button></div> : <>
+      <button disabled={busy||!token.trim()} onClick={()=>void join()}>Connect bot</button>
+      {!restoreFailed&&<button type="button" disabled={busy} onClick={()=>{writeOptIn(false);setOptedIn(false);setToken('')}}>Hide server bot</button>}</div> : <>
       <p>Bot connected: <strong>{bot.username}</strong> · Gateway: {gateway}</p>
       <button disabled={busy} onClick={()=>void run(async()=>{await disconnectDiscordBot();setBot(null);setGuilds([]);setGuild('');setChannels([]);setChannel('');setMessages([]);setRestoreFailed(false)})}>Disconnect bot</button>
       <label>Server <select value={guild} disabled={busy} onChange={e=>void chooseGuild(e.target.value)}><option value="">Choose a server</option>{guilds.map(g=><option value={g.id} key={g.id}>{g.name}</option>)}</select></label>

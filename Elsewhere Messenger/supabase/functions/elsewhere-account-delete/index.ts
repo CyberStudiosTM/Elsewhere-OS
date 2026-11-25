@@ -1,6 +1,6 @@
 // Permanently deletes the caller's Elsewhere account and everything stored for it:
 // profile, messages they sent or received, contacts, blocks, reports they filed,
-// and Instagram instant-update links. The caller must re-enter their password.
+// Instagram instant-update links, feedback and DM photos they sent. The caller must re-enter their password.
 import { createClient } from 'npm:@supabase/supabase-js@2.119.0'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
@@ -60,6 +60,17 @@ Deno.serve(async request => {
     await check.auth.signOut({ scope: 'local' }).catch(() => {})
 
     const admin = createClient(supabaseUrl, adminKey, options)
+    // Photos they sent in DMs live at elsewhere-dm-media/<their id>/<friend id>/<file>.
+    const bucket = admin.storage.from('elsewhere-dm-media')
+    const { data: folders } = await bucket.list(user.id, { limit: 1000 })
+    for (const folder of folders || []) {
+      for (;;) {
+        const { data: files } = await bucket.list(`${user.id}/${folder.name}`, { limit: 1000 })
+        if (!files?.length) break
+        const { error: removeError } = await bucket.remove(files.map(file => `${user.id}/${folder.name}/${file.name}`))
+        if (removeError) break
+      }
+    }
     for (const [table, column] of OWNED) {
       await admin.from(table).delete().eq(column, user.id).then(() => {}, () => {})
     }

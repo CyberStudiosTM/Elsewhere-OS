@@ -10,7 +10,7 @@ import {
   hslHex, contrastRatio, type LibraryKind, type Entry,
 } from '../services/expressionCatalog'
 import {
-  treasureCategories, treasureUrl, loadTreasures, type Treasure,
+  treasureCategories, treasureUrl, useTreasureRevision, loadTreasures, type Treasure,
 } from '../services/webTreasures'
 import './ExpressionLibraries.css'
 
@@ -96,6 +96,7 @@ function Panel({ skin, owner, draft, format, setDraft, setFormat,
   const [custom,setCustom] = useState('')
   const [collectionName,setCollectionName] = useState('')
   const [notice,setNotice] = useState('')
+  const revision = useTreasureRevision()
   const [treasures,setTreasures] = useState<Treasure[]>([])
   const [loading,setLoading] = useState(kind === 'treasure')
   const [sending,setSending] = useState(false)
@@ -111,7 +112,7 @@ function Panel({ skin, owner, draft, format, setDraft, setFormat,
       if (!closed) { setNotice(String(error)); setLoading(false) }
     })
     return () => { closed = true }
-  },[kind])
+  },[kind, revision])
 
   useLayoutEffect(() => {
     const box = boxRef.current

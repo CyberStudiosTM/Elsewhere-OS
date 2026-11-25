@@ -48,6 +48,19 @@ writeFileSync(join(out, 'latest.json'), JSON.stringify({
   },
 }, null, 2) + '\n')
 
+// A labeled copy of every batch build, plus LATEST.txt naming the newest one.
+const stamp = new Date()
+const pad = value => String(value).padStart(2, '0')
+const when = `${stamp.getFullYear()}-${pad(stamp.getMonth() + 1)}-${pad(stamp.getDate())} ${pad(stamp.getHours())}${pad(stamp.getMinutes())}`
+const label = (process.env.BUILD_LABEL || notes).replace(/[<>:"/\\|?*\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80)
+const folder = `${version} - ${label} (${when})`
+const builds = join(root, 'builds')
+mkdirSync(join(builds, folder), { recursive: true })
+copyFileSync(built, join(builds, folder, asset))
+writeFileSync(join(builds, folder, 'WHATS-NEW.txt'), `Elsewhere Messenger ${version}\nBuilt ${when}\n\n${notes}\n`)
+writeFileSync(join(builds, 'LATEST.txt'), `Newest build: ${version}\nBuilt: ${when}\nFolder: builds\\${folder}\nInstaller: ${asset}\n\n${notes}\n`)
+console.log(`\nLabeled build: builds/${folder}/${asset}`)
+
 console.log(`\nRelease files are in release/${version}.`)
 console.log(`1. Create a GitHub Release tagged messenger-v${version} on ${repo} and upload ${asset}.`)
 console.log('2. Replace latest.json on the release tagged messenger-updates with the new one.')

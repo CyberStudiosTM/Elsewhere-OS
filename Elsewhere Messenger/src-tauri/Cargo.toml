@@ -34,5 +34,9 @@ tauri-plugin-notification = "2"
 [target.'cfg(windows)'.dependencies]
 keyring = { version = "3.6", features = ["windows-native"] }
 
+# Mac: saved sign-ins go in the macOS Keychain (Windows uses Credential Manager).
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3.6", features = ["apple-native"] }
+
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
 tauri-plugin-updater = "2"

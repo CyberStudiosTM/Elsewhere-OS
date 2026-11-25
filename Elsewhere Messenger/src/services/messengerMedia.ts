@@ -84,25 +84,22 @@ export async function validateImage(file: File) {
     )
   }
 
-  const url = URL.createObjectURL(file)
+  // Read the real size without relying on <img>.decode(), which can stall in a background window.
+  const size = await Promise.race([
+    createImageBitmap(file).then(bitmap => {
+      const result = { width: bitmap.width, height: bitmap.height }
+      bitmap.close()
+      return result
+    }),
+    new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('That image took too long to open. Try again.')), 15000)),
+  ]).catch(error => {
+    throw error instanceof Error && error.message.startsWith('That image') ? error : new Error('That file couldn’t be opened as an image.')
+  })
 
-  try {
-    const image = new Image()
-
-    image.src = url
-
-    await image.decode()
-
-    if (
-      image.naturalWidth > 4096 ||
-      image.naturalHeight > 4096
-    ) {
-      throw new Error(
-        'Images may be up to 4096 pixels per side.'
-      )
-    }
-  } finally {
-    URL.revokeObjectURL(url)
+  if (size.width > 4096 || size.height > 4096) {
+    throw new Error(
+      'Images may be up to 4096 pixels per side.'
+    )
   }
 }
 

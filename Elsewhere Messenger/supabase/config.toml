@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.elsewhere-account-delete]
 verify_jwt = false
+
+[functions.elsewhere-tester-request]
+verify_jwt = false
+
+[functions.elsewhere-signup-notify]
+verify_jwt = false

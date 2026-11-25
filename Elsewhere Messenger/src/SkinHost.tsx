@@ -1,6 +1,17 @@
 import ToolbarDialogs from './components/ToolbarDialogs'
-import PhotoStudio from './components/PhotoStudio'
+import { openStudio } from './services/studioWindow'
+import { openSkinMapper } from './services/skinMapperWindow'
+import { openPixelDoll } from './services/pixelDollWindow'
+import { openProfile } from './services/profiles'
+import { readLocalImage } from './services/messengerMedia'
+import { prepareProfilePhoto, saveProfilePhoto } from './services/profilePhoto'
 import UpdateCheck from './components/UpdateCheck'
+import FeedbackDialog from './components/FeedbackDialog'
+import WelcomeDialog from './components/WelcomeDialog'
+import { bumpSocialUnread, useChatFocusReceiver } from './services/socialUnread'
+import { useElsewhereLiveHost } from './services/elsewhereLive'
+import { useElsewhereGroupHost } from './services/elsewhereGroupHost'
+import { elsewhereMessageSummary } from './services/elsewhereMedia'
 import { TOOLBAR_ACTION, openDefaultMail, type ToolbarRequest } from './services/toolbarActions'
 import { accountKey, nudgeMessage, useCoreHistory } from './services/messagingCore'
 import { cloud, lookupCloudProfiles, loadCloudFriends, watchCloudInbox, type CloudProfile } from './services/connectedClient'
@@ -12,7 +23,7 @@ import DiscordConnectionPanel from './components/DiscordConnectionPanel'
 import SpotifyConnectionPanel from './components/SpotifyConnectionPanel'
 import WebTreasuresPanel from './components/WebTreasuresPanel'
 import InstagramInbox from './components/InstagramInbox'
-import InstagramContactSettings from './components/InstagramContactSettings'
+import InstagramContactSettings, { INSTAGRAM_CONTACT_SETTINGS } from './components/InstagramContactSettings'
 import './components/InstagramContactSettings.css'
 import { listen } from '@tauri-apps/api/event'
 import { INSTAGRAM_OPEN } from './services/instagramWindow'
@@ -124,6 +135,7 @@ export default function SkinHost() {
       const message = payload.message
       if (payload.kind === 'MESSAGE_CREATE' && message?.author && !message.author.bot &&
         getPinnedDiscordChannels().some(channel => channel.id === message.channel_id)) {
+        bumpSocialUnread(discordContactId(message.channel_id))
         void desktopNotice('discord', {
           contactId: discordContactId(message.channel_id),
           sender: message.author.global_name || message.author.username,
@@ -146,6 +158,7 @@ export default function SkinHost() {
       stopInbox?.()
       stopInbox = next ? watchCloudInbox(next, row => {
         forwardElsewhereMessage(row)
+        if (row.sender_id !== next) bumpSocialUnread(ELSEWHERE_BUDDY_PREFIX + row.sender_id)
         const previews = notificationPreviewsEnabled()
         if (!desktopNotificationsEnabled() && row.kind !== 'nudge') return
         if (!previews && row.kind !== 'nudge') {
@@ -155,7 +168,7 @@ export default function SkinHost() {
         void lookupCloudProfiles([row.sender_id]).catch(() => []).then(([sender]) => {
           if (disposed || current !== next) return
           const username = sender?.handle || 'An Elsewhere friend'
-          const preview = row.kind === 'nudge' ? nudgeMessage(username) : row.text_body
+          const preview = row.kind === 'nudge' ? nudgeMessage(username) : elsewhereMessageSummary(row)
           if (row.kind === 'nudge') setNudge({ id: row.id, text: preview })
           if (desktopNotificationsEnabled()) void desktopNotice('elsewhere', {
             contactId: ELSEWHERE_BUDDY_PREFIX + row.sender_id,
@@ -185,8 +198,9 @@ export default function SkinHost() {
     return () => { disposed = true; stop?.(); window.removeEventListener('elsewhere:discord:open', open) }
   }, [])
   const [treasuresOpen, setTreasuresOpen] = useState(false)
-  const [instagramSettingsOpen,setInstagramSettingsOpen]=useState(false)
-  useEffect(()=>{const open=()=>setInstagramSettingsOpen(true);window.addEventListener('elsewhere:instagram:settings',open);let stop:(()=>void)|undefined;let disposed=false;if(isTauri())void listen('elsewhere:instagram:settings',open).then(fn=>{if(disposed)fn();else stop=fn}).catch(()=>{});return()=>{disposed=true;stop?.();window.removeEventListener('elsewhere:instagram:settings',open)}},[])
+  // Per-contact Instagram indicator color: opened by right-clicking an Instagram contact.
+  const [instagramSettingsFor,setInstagramSettingsFor]=useState<string|null>(null)
+  useEffect(()=>{const pick=(detail:unknown)=>{const id=(detail as {threadId?:unknown}|null)?.threadId;if(typeof id==='string'&&id)setInstagramSettingsFor(id)};const open=(event:Event)=>pick((event as CustomEvent).detail);window.addEventListener(INSTAGRAM_CONTACT_SETTINGS,open);let stop:(()=>void)|undefined;let disposed=false;if(isTauri())void listen(INSTAGRAM_CONTACT_SETTINGS,event=>pick(event.payload)).then(fn=>{if(disposed)fn();else stop=fn}).catch(()=>{});return()=>{disposed=true;stop?.();window.removeEventListener(INSTAGRAM_CONTACT_SETTINGS,open)}},[])
   useEffect(() => {
     const open = () => {
       setTreasuresOpen(true)
@@ -206,6 +220,7 @@ export default function SkinHost() {
   const [cloudContacts, setCloudContacts] = useState<{ userId: string; profiles: CloudProfile[] }>()
   const buddies = cloudContacts?.userId === cloudUserId ? cloudContacts.profiles : undefined
   useElsewhereBridgeHost(cloudUserId)
+  useElsewhereGroupHost(cloudUserId, buddies)
   useEffect(() => {
     if (!cloudUserId) return
     let current = true
@@ -237,7 +252,19 @@ export default function SkinHost() {
       }
       if (request.kind === 'accounts' || request.kind === 'add-contact') openInbox(request.kind, request.personId, request.purpose === 'reset-password')
       else if (request.kind === 'new-dm' && request.service === 'elsewhere') openInbox('new-dm')
-      else { setAccountPanel(undefined); setToolbarRequest(request) }
+      else {
+        if (request.kind === 'skinmapper') { void openSkinMapper().catch(console.error); return }
+        if (request.kind === 'pixel-doll') { void openPixelDoll().catch(console.error); return }
+        if (request.kind === 'profile') { void openProfile(request.handle || 'me', Boolean(request.edit)).catch(console.error); return }
+        if (request.kind === 'open-contact' && request.personId) { window.dispatchEvent(new CustomEvent(OPEN_TOOLBAR_CONTACT, { detail: request.personId })); return }
+        if (request.kind === 'photo') {
+          // Studio has its own window.
+          void openStudio({ photo: request.mediaId, photos: request.mediaIds, layout: request.layout, source: request.sourceId, sourceName: request.sourceName }).catch(console.error)
+          return
+        }
+        setAccountPanel(undefined)
+        setToolbarRequest(request)
+      }
     }
     const local = (event: Event) => handle((event as CustomEvent<ToolbarRequest>).detail)
     const open = () => openInbox('accounts')
@@ -257,10 +284,30 @@ export default function SkinHost() {
       window.removeEventListener('elsewhere:open-connected', open)
     }
   }, [])
+  useChatFocusReceiver()
   const [skin, setSkin] = useState<Skin>(readSkin)
   const session = useLocalSession()
   const owner = session.signedIn ? session.profile?.name : undefined
+  useElsewhereLiveHost(cloudUserId, (buddies || []).map(profile => profile.id), session.signedIn ? session.profile?.presence : undefined)
   const localHistory = useCoreHistory(accountKey(owner))
+  // Studio → Finish → Use as Elsewhere Picture.
+  useEffect(() => {
+    const apply = (mediaId: string) => {
+      const key = accountKey(owner)
+      if (!key || !mediaId) return
+      void readLocalImage(mediaId).then(async blob => {
+        if (!blob) return
+        saveProfilePhoto(key, await prepareProfilePhoto(new File([blob], 'elsewhere-picture.png', { type: blob.type })))
+      }).catch(console.error)
+    }
+    const local = (event: Event) => apply((event as CustomEvent<{ mediaId: string }>).detail?.mediaId)
+    window.addEventListener('elsewhere:studio:profile-photo', local)
+    let stop: (() => void) | undefined
+    let disposed = false
+    if (isTauri()) void listen<{ mediaId: string }>('elsewhere:studio:profile-photo', ({ payload }) => apply(payload?.mediaId))
+      .then(unlisten => { if (disposed) unlisten(); else stop = unlisten }).catch(console.error)
+    return () => { disposed = true; stop?.(); window.removeEventListener('elsewhere:studio:profile-photo', local) }
+  }, [owner])
   const newestNudge = Object.values(localHistory).flat().reduce<(typeof localHistory)[string][number] | undefined>(
     (latest, message) => message.kind === 'nudge' && !message.own && !message.read &&
       (!latest || message.createdAt > latest.createdAt) ? message : latest, undefined,
@@ -346,12 +393,13 @@ export default function SkinHost() {
           {notificationStatus && <p role="status">{notificationStatus}</p>}
         </section>
       </div>}
-      {instagramSettingsOpen && <InstagramContactSettings onClose={()=>setInstagramSettingsOpen(false)} />}
+      {instagramSettingsFor && <InstagramContactSettings key={instagramSettingsFor} threadId={instagramSettingsFor} onClose={()=>setInstagramSettingsFor(null)} />}
       <UpdateCheck skin={skin} />
+      <FeedbackDialog skin={skin} />
+      <WelcomeDialog skin={skin} signedIn={Boolean(socialAccount && session.signedIn)} />
       {treasuresOpen && <WebTreasuresPanel skin={skin} onClose={() => setTreasuresOpen(false)} />}
       {accountPanel && <ConnectedMessenger key={accountPanel.resetPassword ? 'reset' : 'accounts'} skin={skin} mode={accountPanel.mode} personId={accountPanel.personId} resetPassword={accountPanel.resetPassword} onClose={() => setAccountPanel(undefined)} />}
-      {toolbarRequest?.kind === 'photo' && <PhotoStudio skin={skin} owner={owner} onClose={() => setToolbarRequest(undefined)} />}
-      {toolbarRequest && toolbarRequest.kind !== 'photo' && <ToolbarDialogs key={toolbarRequest.kind + toolbarRequest.service}
+      {toolbarRequest && <ToolbarDialogs key={toolbarRequest.kind + toolbarRequest.service}
         request={toolbarRequest} skin={skin} onClose={() => setToolbarRequest(undefined)} onElsewhere={() => openInbox('new-dm')} />}
       {nudge && (!nudge.localOwner || nudge.localOwner === owner) && <div key={nudge.id} className="ew-nudge-banner" role="status">
         {nudge.text}<button type="button" onClick={() => setNudge(undefined)} aria-label="Dismiss nudge">×</button>

@@ -22,6 +22,9 @@
                                           },
                                           {
                                               "url":  "https://*.supabase.co/functions/v1/elsewhere-account-delete"
+                                          },
+                                          {
+                                              "url":  "https://*.supabase.co/functions/v1/elsewhere-tester-request"
                                           }
                                       ]
                         },

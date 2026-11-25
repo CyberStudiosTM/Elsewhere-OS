@@ -1,8 +1,12 @@
+import { useSyncExternalStore } from 'react'
+
 export const treasureCategories = {
   blinkies: 'Blinkies',
   buttons: '88×31 buttons',
   stamps: 'Stamps',
   glitter: 'Glitter graphics',
+  gifs: 'GIFs',
+  graphics: 'Graphics',
   dolls: 'Pixel dolls',
   dividers: 'Dividers',
   companions: 'Pixel companions',
@@ -50,6 +54,24 @@ export function treasureUrl(treasure: Treasure) {
 }
 
 let cache: Promise<Treasure[]> | undefined
+
+let revision = 0
+const listeners = new Set<() => void>()
+if (import.meta.hot) {
+  import.meta.hot.on('elsewhere:treasures-changed', () => {
+    cache = undefined
+    revision++
+    for (const listener of listeners) listener()
+  })
+}
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  return () => { listeners.delete(listener) }
+}
+export function treasureRevision() { return revision }
+export function useTreasureRevision() {
+  return useSyncExternalStore(subscribe, treasureRevision)
+}
 
 export function loadTreasures(): Promise<Treasure[]> {
   if (cache) return cache

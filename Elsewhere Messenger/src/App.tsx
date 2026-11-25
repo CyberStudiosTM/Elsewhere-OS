@@ -1,6 +1,18 @@
 import { ELSEWHERE_BUDDY_PREFIX, type CloudProfile } from './services/connectedClient'
+import { useWearCustomSkin } from './services/customSkin'
+import { useReportChatFocus, useSocialUnread } from './services/socialUnread'
+import { sendElsewhereTyping, useElsewhereLive } from './services/elsewhereLive'
+import ElsewhereMediaMessage from './components/ElsewhereMediaMessage'
+import StagedPhotoBar from './components/StagedPhotoBar'
+import ActivitiesMenu from './components/ActivitiesMenu'
+import { openInstagramContactSettings } from './components/InstagramContactSettings'
+import InviteDialog from './components/InviteDialog'
+import { GroupHeaderTools, GroupTranscript, groupChatTitle } from './components/GroupConversation'
+import { ELSEWHERE_GROUP_PREFIX, elsewhereGroupId, useCloudGroupList } from './services/elsewhereGroups'
+import { useElsewhereGroupChat } from './services/elsewhereNativeBridge'
+import { openPhotoBooth } from './services/photoBooth'
 import { OPEN_TOOLBAR_CONTACT } from './components/ToolbarDialogs'
-import { NUDGE_LOCAL_ONLY, openCamera, toolbarAction } from './services/toolbarActions'
+import { NUDGE_LOCAL_ONLY, openWebTreasures, toolbarAction } from './services/toolbarActions'
 import OwnProfilePhoto from './components/OwnProfilePhoto'
 import { useDiscordProfilePhoto } from './services/discordConnection'
 import InstagramAvatar from './components/InstagramAvatar'
@@ -254,6 +266,8 @@ function App({
     setEmoticonAnchor(null)
   }, [activeId])
 
+  const [activitiesAnchor, setActivitiesAnchor] = useState<HTMLElement | null>(null)
+  const [buddyActivities, setBuddyActivities] = useState<HTMLElement | null>(null)
   const [mediaPicker, setMediaPicker] =
     useState<MediaPickerState | null>(null)
 
@@ -309,6 +323,10 @@ function App({
   // Elsewhere friends chat in the native chat window, which reaches the account through main.
   const cloudPerson = nativeMain ? null : elsewherePersonId(activeId)
   const cloudChat = useElsewhereChat(cloudPerson)
+  const cloudGroup = nativeMain ? null : elsewhereGroupId(activeId)
+  const groupChat = useElsewhereGroupChat(cloudGroup)
+  const groupList = useCloudGroupList()
+  const [inviteOpen, setInviteOpen] = useState(false)
   const discordPhoto = useDiscordProfilePhoto()
   const headerService = socialService === 'all' ? 'elsewhere' : socialService
   const chatService = igThreadId ? 'instagram' : discordId ? 'discord' : 'elsewhere'
@@ -318,6 +336,7 @@ function App({
   const [discordReply,setDiscordReply]=useState<{id:string;summary:string}|null>(null)
   useEffect(()=>setDiscordReply(null),[discordId])
   const messages = useCoreHistory(coreOwner)
+  const live = useElsewhereLive()
 
   const contacts = [
     ...contactDirectory(messages, coreOwner).map(contact => ({
@@ -325,8 +344,8 @@ function App({
     })),
     ...(buddies || []).map(profile => ({
       id: ELSEWHERE_BUDDY_PREFIX + profile.id, name: '@' + profile.handle,
-      group: 'Buddies' as const, status: 'offline' as const, avatar: 'red-sunset-palm',
-      avatarUrl: undefined, note: '', online: false,
+      group: 'Buddies' as const, status: live.status[profile.id] || 'offline', avatar: 'red-sunset-palm',
+      avatarUrl: undefined, note: '', online: (live.status[profile.id] || 'offline') !== 'offline',
     })),
     ...sortInstagramThreads(ig.threads, appearance).map(thread => ({
       id: instagramContactId(thread.id),
@@ -345,6 +364,14 @@ function App({
       status: 'offline' as const, avatar: 'red-sunset-palm', avatarUrl: undefined as string|undefined,
       note: ` · ${channel.guildName}`, online: false,
     })),
+    ...groupList.groups.map(group => {
+      const online = group.members.some(id => id !== groupList.me && (live.status[id] || 'offline') !== 'offline')
+      return {
+        id: ELSEWHERE_GROUP_PREFIX + group.id, name: groupList.titles[group.id] || 'Group chat',
+        group: 'Buddies' as const, status: (online ? 'online' : 'offline') as 'online' | 'offline', avatar: 'red-sunset-palm',
+        avatarUrl: undefined as string | undefined, note: ` · group of ${group.members.length}`, online,
+      }
+    }),
   ]
 
   const visibleContacts = contacts.filter(contact => matchesSocialService(contact.id, socialService))
@@ -354,7 +381,23 @@ function App({
   ) ?? (cloudPerson && cloudChat.profile ? {
     id: activeId!, name: '@' + cloudChat.profile.handle, group: 'Buddies' as const,
     status: 'offline' as const, avatar: 'red-sunset-palm', avatarUrl: undefined, note: '', online: false,
+  } : cloudGroup && groupChat.group ? {
+    id: activeId!, name: groupChatTitle(groupChat), group: 'Buddies' as const,
+    status: 'offline' as const, avatar: 'red-sunset-palm', avatarUrl: undefined, note: '', online: false,
   } : undefined)
+
+  // Conversations open at the newest message (and follow new ones), like every messenger.
+  const historyRef = useRef<HTMLDivElement>(null)
+  const historyCount = (ig.messages?.length || 0) + (cloudChat.messages?.length || 0) + (discordChat.messages?.length || 0)
+  useEffect(() => {
+    const box = historyRef.current
+    if (!box) return
+    const toEnd = () => { box.scrollTop = box.scrollHeight }
+    toEnd()
+    const frame = requestAnimationFrame(toEnd)
+    const late = window.setTimeout(toEnd, 250) // after pictures and GIFs size themselves
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(late) }
+  }, [activeId, historyCount])
 
   const activeMessages =
     activeId ? (messages[activeId] ?? []) : []
@@ -373,6 +416,8 @@ function App({
     messages,
     activeSkin && !nativeMain && !nativeLogin,
   )
+  useReportChatFocus(activeId, activeSkin && !nativeMain && !nativeLogin)
+  const socialUnread = useSocialUnread()
 
   const leavingSession = useRef(false)
 
@@ -930,15 +975,17 @@ function App({
     if (!activeSkin || nativeChat || nativeLogin) return
     const open = (event: Event) => {
       const contact = (event as CustomEvent<string>).detail
-      if (contact.startsWith('instagram:') || contact.startsWith('discord:') || contact.startsWith(ELSEWHERE_BUDDY_PREFIX)) openContact(contact)
+      if (contact.startsWith('instagram:') || contact.startsWith('discord:') || contact.startsWith(ELSEWHERE_BUDDY_PREFIX) || contact.startsWith(ELSEWHERE_GROUP_PREFIX)) openContact(contact)
     }
     window.addEventListener(OPEN_TOOLBAR_CONTACT, open)
     return () => window.removeEventListener(OPEN_TOOLBAR_CONTACT, open)
   }, [activeSkin, nativeChat, nativeLogin, nativeMain])
 
-  const externalBuddy = (socialService === 'instagram' || socialService === 'discord') ||
-    (socialService === 'all' && chatService !== 'elsewhere')
   function nudgeSelected() {
+    if (cloudGroup) {
+      void groupChat.send('Nudge', 'nudge').then(() => playNotificationSound('outgoing', preferences)).catch(reportNativeError)
+      return
+    }
     if (cloudPerson) {
       void cloudChat.nudge().then(() => playNotificationSound('outgoing', preferences)).catch(reportNativeError)
       return
@@ -983,8 +1030,31 @@ function insertEmoticon(code: string) {
 
     const text = media ? mediaLabel(media) : draft.trim()
     if (!text) return
+    if (cloudGroup) {
+      if (media) {
+        sendingRef.current = true
+        try { await groupChat.sendMedia(media); playNotificationSound('outgoing', preferences) }
+        catch (error) { reportNativeError(error) }
+        finally { sendingRef.current = false }
+        return
+      }
+      sendingRef.current = true
+      setDraft(previous => previous === draft ? '' : previous)
+      try {
+        await groupChat.send(text)
+        playNotificationSound('outgoing', preferences)
+      } catch (error) { setDraft(previous => previous || draft); reportNativeError(error) }
+      finally { sendingRef.current = false }
+      return
+    }
     if (cloudPerson) {
-      if (media) { reportNativeError(new Error('Photos and files can’t be sent to Elsewhere friends yet.')); return }
+      if (media) {
+        sendingRef.current = true
+        try { await cloudChat.sendMedia(media); playNotificationSound('outgoing', preferences) }
+        catch (error) { reportNativeError(error) }
+        finally { sendingRef.current = false }
+        return
+      }
       sendingRef.current = true
       setDraft(previous => previous === draft ? '' : previous)
       try {
@@ -1306,7 +1376,7 @@ function insertEmoticon(code: string) {
 
             <div className="em-profile-info">
               <div className="em-profile-heading">
-                <strong>{name || 'you'}</strong>
+                <strong>{headerService === 'instagram' && ig.accountName ? '@' + ig.accountName : name || 'you'}</strong>
                 <ClassicPresenceSelect
                   label="Your status"
                   value={status}
@@ -1331,13 +1401,14 @@ function insertEmoticon(code: string) {
     { id: 'invite', label: 'Add contact', action: () => toolbarAction({ kind: 'add-contact' }) },
     { id: 'mail', label: 'Mail', action: () => toolbarAction({ kind: 'mail' }) },
     { id: 'call', label: 'Call', action: () => toolbarAction({ kind: 'call' }) },
-    { id: 'webcam', label: 'Webcam', action: () => { void openCamera().catch(() => window.alert('Couldn’t open the Windows Camera app. Check that a camera is connected.')) } },
-    { id: 'nudge', label: 'Nudge', action: nudgeSelected, blocked: externalBuddy || !activeContact },
+    { id: 'webcam', label: 'Webcam', action: () => openPhotoBooth({ contactId: null }) },
     { id: 'gift', label: 'Web Treasures', action: () => window.dispatchEvent(new Event('elsewhere:web-treasures:open')) },
+    { id: 'activities', label: 'Activities', action: (anchor?: HTMLElement) => setBuddyActivities(previous => previous ? null : anchor || null) },
   ].map(tool => (
-    <button key={tool.id} type="button" aria-disabled={tool.blocked}
-      onClick={tool.blocked ? undefined : tool.action}
-      title={tool.id === 'nudge' && externalBuddy ? NUDGE_LOCAL_ONLY : tool.label} aria-label={tool.label}>
+    <button key={tool.id} type="button"
+      aria-expanded={tool.id === 'activities' ? Boolean(buddyActivities) : undefined}
+      onClick={event => tool.action(event.currentTarget)}
+      title={tool.label} aria-label={tool.label}>
       {tool.id === 'gift' ? <span className="em-buddy-tool-icon ew-treasure-shortcut" aria-hidden="true" /> :
         <img src={tool.id === 'nudge' ? '/approved/dead-signal/icons/toolbar-lightning.png' : `/approved/classic-icons/toolbar-${tool.id}.png`}
           alt="" className="em-buddy-tool-icon" draggable={false} />}
@@ -1345,6 +1416,7 @@ function insertEmoticon(code: string) {
   ))}
 </div>
 
+          <ActivitiesMenu anchor={buddyActivities} skin="classic" onClose={() => setBuddyActivities(null)} />
           <SocialServiceFilter value={socialService} onChange={setSocialService} instagramConnected={ig.connected} />
           <div className="em-groups">
             {(['Buddies', 'Other Contacts', 'Instagram Chats'] as ContactGroup[]).map((group) => {
@@ -1380,8 +1452,10 @@ function insertEmoticon(code: string) {
                             (activeId === contact.id ? ' em-contact-selected' : '')
                           }
                           onClick={() => openContact(contact.id)}
+                          onContextMenu={instagramThreadId(contact.id) ? event => { event.preventDefault(); openInstagramContactSettings(instagramThreadId(contact.id)!) } : contact.id.startsWith(ELSEWHERE_BUDDY_PREFIX) && contact.name.startsWith('@') ? event => { event.preventDefault(); toolbarAction({ kind: 'profile', handle: contact.name.slice(1) }) } : undefined}
+                          title={instagramThreadId(contact.id) ? 'Right-click to change this contact\'s color' : contact.id.startsWith(ELSEWHERE_BUDDY_PREFIX) ? 'Right-click to view their profile' : undefined}
                         >
-                          {instagramThreadId(contact.id) ? <span className="ew-ig-contact-indicator" style={{backgroundColor:contactAppearance(appearance,instagramThreadId(contact.id)!).color}} title="Instagram contact · live presence unavailable" aria-label="Instagram contact, live presence unavailable" /> : <span
+                          {instagramThreadId(contact.id) ? <span className="ew-ig-contact-indicator" style={{backgroundColor:contactAppearance(appearance,instagramThreadId(contact.id)!).color}} title="Instagram contact · right-click to change its color" aria-label="Instagram contact, live presence unavailable" /> : <span
                             className={
                               'em-presence ' +
                               (contact.online ? 'em-online' : 'em-offline')
@@ -1393,9 +1467,9 @@ function insertEmoticon(code: string) {
                             {contact.name}
                             {contact.note && <span> {contact.note}</span>}
                             {'preview' in contact && typeof contact.preview === 'string' && contact.preview && <span className="ew-contact-preview" title={contact.preview}>{contact.preview}</span>}
-                            {unreadCount(messages[contact.id]) > 0 && (
+                            {unreadCount(messages[contact.id]) + (socialUnread[contact.id] || 0) > 0 && (
                               <span className="ew-unread">
-                                {unreadCount(messages[contact.id])}
+                                {unreadCount(messages[contact.id]) + (socialUnread[contact.id] || 0)}
                               </span>
                             )}
                           </span>
@@ -1484,14 +1558,15 @@ function insertEmoticon(code: string) {
     { id: 'webcam', label: 'Webcam', menu: false },
     { id: 'audio', label: 'Audio', menu: false },
     { id: 'nudge', label: 'Nudge', menu: false },
-    { id: 'activities', label: 'Activities', menu: true },
     { id: 'emoticons', label: 'Emoticons', menu: true },
-    { id: 'winks', label: 'Winks', menu: true },
+    { id: 'activities', label: 'Activities', menu: true },
+    { id: 'gift', label: 'Web Treasures', menu: false },
   ].map((tool) => (
     <button
       type="button"
       key={tool.id}
-      disabled={!['emoticons', 'send-files', 'webcam', 'audio', 'nudge'].includes(tool.id)}
+      disabled={!['emoticons', 'send-files', 'webcam', 'audio', 'nudge', 'gift', 'activities'].includes(tool.id) && !(tool.id === 'invite' && (cloudPerson || cloudGroup))}
+      aria-expanded={tool.id === 'activities' ? Boolean(activitiesAnchor) : undefined}
       aria-disabled={tool.id === 'nudge' && chatService !== 'elsewhere'}
       data-emoticon-trigger={tool.id === 'emoticons'}
       data-media-trigger={tool.id === 'send-files'}
@@ -1499,7 +1574,14 @@ function insertEmoticon(code: string) {
         if (tool.id === 'send-files') {
           openMedia(event.currentTarget, 'local')
         } else if (tool.id === 'webcam') {
-          void openCamera().catch(() => window.alert('Couldn’t open the Windows Camera app. Check that a camera is connected.'))
+          openPhotoBooth({ contactId: activeId, contactName: activeContact?.name, useUnavailable: cloudPerson || cloudGroup ? undefined : 'Sending Booth photos works in chats with Elsewhere friends for now. You can still save the photo.' })
+        } else if (tool.id === 'gift') {
+          openWebTreasures()
+        } else if (tool.id === 'invite') {
+          setInviteOpen(true)
+        } else if (tool.id === 'activities') {
+          const target = event.currentTarget
+          setActivitiesAnchor(previous => previous ? null : target)
         } else if (tool.id === 'audio') {
           toolbarAction({ kind: 'call' })
         } else if (tool.id === 'nudge') {
@@ -1511,11 +1593,14 @@ function insertEmoticon(code: string) {
       }}
       title={tool.id === 'nudge' && chatService !== 'elsewhere' ? NUDGE_LOCAL_ONLY : tool.label}
     >
-      <img
-        src={tool.id === 'nudge' ? '/approved/dead-signal/icons/toolbar-lightning.png' : `/approved/classic-icons/toolbar-${tool.id}.png`}
-        alt=""
-        className="em-tool-icon"
-      />
+      {tool.id === 'gift'
+        // Same glossy globe as the buddy window's Web Treasures button.
+        ? <span className="em-tool-icon ew-treasure-shortcut" aria-hidden="true" />
+        : <img
+            src={tool.id === 'nudge' ? '/approved/dead-signal/icons/toolbar-lightning.png' : `/approved/classic-icons/toolbar-${tool.id}.png`}
+            alt=""
+            className="em-tool-icon"
+          />}
       <small>
         {tool.label}
         {tool.menu && <span> ▾</span>}
@@ -1523,6 +1608,7 @@ function insertEmoticon(code: string) {
     </button>
   ))}
 
+<ActivitiesMenu anchor={activitiesAnchor} skin="classic" onClose={() => setActivitiesAnchor(null)} />
 <MediaPicker
     picker={mediaPicker}
     skin="classic"
@@ -1542,10 +1628,14 @@ function insertEmoticon(code: string) {
               <div className="em-message-column">
                 <div className="em-recipient">
                   To: <strong>{activeContact.name}</strong>
+                  {cloudGroup && <GroupHeaderTools chat={groupChat} onInvite={() => setInviteOpen(true)} />}
                 </div>
+                {inviteOpen && (cloudPerson || cloudGroup) && <InviteDialog skin="classic" onClose={() => setInviteOpen(false)}
+                  withPerson={cloudPerson ? { id: cloudPerson, name: activeContact.name } : undefined}
+                  group={cloudGroup && groupChat.group ? { id: cloudGroup, members: groupChat.group.members, add: groupChat.add } : undefined} />}
 
-                <div className="em-history" role="log" aria-live="polite">
-                  {cloudPerson ? <>
+                <div className="em-history" role="log" aria-live="polite" ref={historyRef}>
+                  {cloudGroup ? <GroupTranscript chat={groupChat} skin="classic" renderText={renderClassicText} /> : cloudPerson ? <>
                     {cloudChat.error && <p role="alert">{cloudChat.error}</p>}
                     {!cloudChat.messages.length && !cloudChat.error && <p className="em-empty">Start a conversation.</p>}
                     {cloudChat.messages.map(message => message.kind === 'nudge' ? (
@@ -1556,9 +1646,12 @@ function insertEmoticon(code: string) {
                           <strong>{message.sender_id === cloudChat.userId ? name || 'you' : activeContact.name}</strong>
                           <span> says ({new Date(message.created_at).toLocaleString()}):</span>
                         </div>
-                        <div className="ew-core-message-text">{renderClassicText(message.text_body)}</div>
+                        {message.kind === 'image' || message.kind === 'gif'
+                          ? <ElsewhereMediaMessage message={message} mediaUrl={cloudChat.mediaUrl} />
+                          : <div className="ew-core-message-text">{renderClassicText(message.text_body)}</div>}
                       </div>
                     ))}
+                    {live.typing[cloudPerson] && <p className="ew-typing" role="status">{activeContact.name} is typing…</p>}
                   </> : discordId ? <>
                     {discordChat.error && <p role="alert">{discordChat.error}</p>}
                     {!discordChat.messages.length && <p className="em-empty">No Discord messages available. Check the bot's channel permissions and Message Content intent.</p>}
@@ -1751,12 +1844,13 @@ function insertEmoticon(code: string) {
                   {discordId && discordReply && <div className="ew-ig-compose-reply"><span>↩ Reply to Discord: {discordReply.summary}</span><button type="button" onClick={()=>setDiscordReply(null)}>✕</button></div>}
                   {igThreadId && instagramReplyWindowClosed(ig.messages, ig.account) && <div className="ew-ig-window-notice" role="note">{INSTAGRAM_WINDOW_NOTICE}</div>}
                   {igThreadId && igReply && <div className="ew-ig-compose-reply"><span>↩ Replying to: {igReply.summary}</span><button type="button" onClick={()=>setIgReply(null)} aria-label="Cancel reply">✕</button></div>}
+                  <StagedPhotoBar contactId={activeId} onSend={media => sendMessage(null, media)} />
                   <form className="em-compose" onSubmit={sendMessage}>
                     <textarea
                       ref={composerRef}
                       aria-label="Write a message"
                       value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
+                      onChange={(event) => { setDraft(event.target.value); if (cloudPerson && event.target.value.trim()) sendElsewhereTyping(cloudPerson) }}
                       style={formatStyle(formatting)}
                       onKeyDown={(event) => {
                         if (
@@ -1880,6 +1974,8 @@ export default function ClassicSkin({
   onChangeSkin,
   buddies,
 }: ClassicSkinProps) {
+  // A saved SkinMapper skin, worn on top of Classic (only while Classic is the active skin).
+  useWearCustomSkin(active)
   return (
     <>
       {active && <style>{classicStyles}</style>}

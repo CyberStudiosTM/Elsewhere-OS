@@ -1,0 +1,42 @@
+.ew-activities-menu {
+  position: fixed;
+  z-index: 2147482000;
+  min-width: 190px;
+  display: grid;
+  padding: 3px;
+  font: 12px "Segoe UI", Tahoma, sans-serif;
+  box-shadow: 2px 3px 10px rgba(0, 0, 0, .25);
+}
+.ew-activities-menu button {
+  text-align: left;
+  padding: 5px 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+.ew-activities-menu button span { opacity: .7; }
+.ew-activities-menu button:disabled { cursor: default; opacity: .6; }
+.ew-activities-classic { background: #fff; border: 1px solid #8fb2d6; color: #1d2f45; }
+.ew-activities-classic button { color: inherit; }
+.ew-activities-classic button:hover:not(:disabled), .ew-activities-classic button:focus-visible { background: #dcebfb; outline: none; }
+.ew-activities-dead-signal { background: #120f1a; border: 1px solid #5a4b78; color: #e6def5; }
+.ew-activities-dead-signal button { color: inherit; }
+.ew-activities-dead-signal button:hover:not(:disabled), .ew-activities-dead-signal button:focus-visible { background: #2c2240; outline: none; }
+
+/* SkinMapper lives under Creative Studio. */
+.ew-activities .ew-activities-sub, [role="menu"] .ew-activities-sub { padding-left: 22px; }
+
+/* The menu opens inside the chat toolbar, whose big-icon button styles would otherwise leak in
+   (column layout, 24px labels). Doubled class = higher specificity than `.em-chat-tools button`. */
+.ew-activities-menu.ew-activities-menu button {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  white-space: nowrap;
+  font: 12px "Segoe UI", Tahoma, sans-serif;
+  line-height: 1.35;
+  text-align: left;
+}
+.ew-activities-menu.ew-activities-menu button > span { font-size: 11px; line-height: inherit; }
+.ew-activities-menu.ew-activities-menu .ew-activities-sub { padding-left: 22px; }

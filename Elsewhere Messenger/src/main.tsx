@@ -10,11 +10,21 @@ import Classic from './App.tsx'
 import { isNativeClassicChat, isNativeClassicLogin } from './services/nativeWindows'
 import ToastPopup from './components/ToastPopup'
 import { isToastWindow } from './services/toastWindow'
+import PhotoBoothHost from './components/PhotoBooth'
+import StudioApp from './studio/StudioApp'
+import { isStudioWindow } from './services/studioWindow'
+import SkinMapperApp from './skinmapper/SkinMapperApp'
+import { isSkinMapperWindow } from './services/skinMapperWindow'
+import PixelDollApp from './pixeldoll/PixelDollApp'
+import ProfileApp from './profiles/ProfileApp'
+import { isProfileWindow } from './services/profiles'
+import { isPixelDollWindow } from './services/pixelDollWindow'
 
 if (isTauri() && !isToastWindow()) void invoke('apply_elsewhere_window_icon').catch(console.error)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {isToastWindow() ? <ToastPopup /> : new URLSearchParams(window.location.search).has('instagram-inbox') ? <InstagramInbox /> : isNativeClassicChat() || isNativeClassicLogin() ? <Classic /> : (isDeadSignalChild() ? <DeadSignal /> : <SkinHost />)}
+    {!isToastWindow() && !isStudioWindow() && !isSkinMapperWindow() && !isPixelDollWindow() && !isProfileWindow() && <PhotoBoothHost />}
+    {isProfileWindow() ? <ProfileApp /> : isPixelDollWindow() ? <PixelDollApp /> : isSkinMapperWindow() ? <SkinMapperApp /> : isStudioWindow() ? <StudioApp /> : isToastWindow() ? <ToastPopup /> : new URLSearchParams(window.location.search).has('instagram-inbox') ? <InstagramInbox /> : isNativeClassicChat() || isNativeClassicLogin() ? <Classic /> : (isDeadSignalChild() ? <DeadSignal /> : <SkinHost />)}
   </StrictMode>,
 )

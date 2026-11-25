@@ -17,3 +17,21 @@
 /* Beta label next to the app name in window titles. */
 .ew-beta-badge{display:inline;margin-left:6px;font-size:10px;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;color:inherit;background:none;border:0;padding:0}
 .ew-beta-inline{margin:0 2px 0 0;font-style:normal}
+
+.ew-typing { font-style: italic; opacity: .75; margin: 6px 0 0; font-size: .9em; }
+.ew-dm-media { display: inline-grid; gap: 2px; margin: 4px 0; max-width: min(320px, 100%); text-decoration: none; }
+.ew-dm-media img { max-width: 100%; max-height: 260px; border-radius: 6px; border: 1px solid rgba(0,0,0,.15); background: rgba(255,255,255,.4); }
+.ew-dm-media-credit { font-size: .75em; opacity: .7; }
+.ew-dm-media-missing { font-style: italic; opacity: .7; margin: 4px 0; }
+.ew-staged-photo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 6px; margin: 2px 0 4px; border: 1px dashed rgba(47, 134, 207, .6); border-radius: 6px; background: rgba(232, 244, 253, .6); font-size: .9em; }
+.ew-staged-photo img { width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.ew-staged-photo span { margin-right: auto; }
+.ew-tester-request { display: grid; gap: 6px; }
+.ew-tester-form { display: grid; gap: 6px; }
+.ew-tester-form label { display: grid; gap: 2px; }
+.ew-link-button { border: 0; background: none; padding: 0; color: #1a5fb4; text-decoration: underline; cursor: pointer; font: inherit; }
+.ew-group-event { font-style: italic; opacity: .7; margin: 4px 0; font-size: .9em; }
+.ew-group-tools { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-left: 8px; font-size: .85em; }
+.ew-group-tools button { border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; opacity: .85; }
+.ew-group-members { opacity: .75; }
+.ew-tester-agree { display: flex; gap: 6px; align-items: flex-start; font-size: .9em; }

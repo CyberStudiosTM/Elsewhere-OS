@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { accountKey } from '../services/messagingCore'
+import { readLocalImage } from '../services/messengerMedia'
 import { prepareProfilePhoto, saveProfilePhoto } from '../services/profilePhoto'
 import { ToolbarDialog, type ToolbarSkin } from './ToolbarDialogs'
 
@@ -13,7 +14,7 @@ const looks = {
 const frames = { None: null, Lilac: '#bea1eb', Aqua: '#8ae7df', Pink: '#f6afd6' }
 const imageTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
 
-export default function PhotoStudio({ skin, onClose, owner }: { skin: ToolbarSkin; onClose: () => void; owner?: string }) {
+export default function PhotoStudio({ skin, onClose, owner, initialMediaId }: { skin: ToolbarSkin; onClose: () => void; owner?: string; initialMediaId?: string }) {
   const video = useRef<HTMLVideoElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const stream = useRef<MediaStream | null>(null)
@@ -55,13 +56,14 @@ export default function PhotoStudio({ skin, onClose, owner }: { skin: ToolbarSki
     }
   }, [])
   useEffect(() => {
-    const starting = window.setTimeout(() => void enableCamera(), 0)
+    // A photo from the Camera Booth opens straight into editing; otherwise start the camera.
+    const starting = initialMediaId ? undefined : window.setTimeout(() => void enableCamera(), 0)
     return () => {
       window.clearTimeout(starting)
       request.current++
       stream.current?.getTracks().forEach(track => track.stop())
     }
-  }, [enableCamera])
+  }, [enableCamera, initialMediaId])
 
   function stopCamera() {
     request.current++
@@ -96,6 +98,18 @@ export default function PhotoStudio({ skin, onClose, owner }: { skin: ToolbarSki
       finally { image.close() }
     } catch { if (id === request.current) setNotice('This photo could not be opened.') }
   }
+
+  useEffect(() => {
+    if (!initialMediaId) return
+    let alive = true
+    void readLocalImage(initialMediaId).then(blob => {
+      if (alive && blob) void openPhoto(new File([blob], 'booth-photo', { type: blob.type }))
+      else if (alive) setNotice('That photo couldn’t be found. Take or open another one.')
+    }).catch(() => { if (alive) setNotice('That photo couldn’t be opened.') })
+    return () => { alive = false }
+    // openPhoto is stable enough for a one-time load of this photo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMediaId])
 
   useEffect(() => {
     if (!photo || !canvas.current) return
@@ -148,7 +162,7 @@ export default function PhotoStudio({ skin, onClose, owner }: { skin: ToolbarSki
     } catch { setNotice('Could not save your profile picture.') }
   }
 
-  return <ToolbarDialog title="Photo Studio" skin={skin} onClose={onClose}>
+  return <ToolbarDialog title="Studio" skin={skin} onClose={onClose}>
     <div className="ew-studio-stage">
       <video hidden={camera !== 'on'} ref={video} autoPlay playsInline muted onLoadedData={() => setCameraReady(true)} />
       {photo && camera === 'off' && <canvas ref={canvas} aria-label="Edited photo" />}

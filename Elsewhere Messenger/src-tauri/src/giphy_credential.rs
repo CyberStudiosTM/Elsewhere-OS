@@ -5,10 +5,10 @@ fn require_media_window(window: &tauri::WebviewWindow) -> Result<(), String> {
     }
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 static CREDENTIAL_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 fn credential() -> Result<keyring::Entry, String> {
     keyring::Entry::new("com.cyberstudiostm.elsewhere", "giphy")
         .map_err(|_| "Could not open Windows Credential Manager for GIPHY.".into())
@@ -20,7 +20,7 @@ pub fn load_giphy_key(
     legacy_key: Option<String>,
 ) -> Result<Option<String>, String> {
     require_media_window(&window)?;
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         let _guard = CREDENTIAL_LOCK.lock().map_err(|_| "GIPHY credential store is unavailable.")?;
         let entry = credential()?;
@@ -37,7 +37,7 @@ pub fn load_giphy_key(
             Err(_) => Err("Could not read the saved GIPHY key from Windows Credential Manager.".into()),
         }
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     Ok(legacy_key)
 }
 
@@ -48,21 +48,21 @@ pub fn save_giphy_key(window: tauri::WebviewWindow, key: String) -> Result<bool,
     if key.is_empty() || key.len() > 512 {
         return Err("Enter a valid GIPHY Web SDK key.".into());
     }
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         let _guard = CREDENTIAL_LOCK.lock().map_err(|_| "GIPHY credential store is unavailable.")?;
         credential()?.set_password(key)
             .map_err(|_| "Could not save the GIPHY key to Windows Credential Manager.")?;
         Ok(true)
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     Ok(false)
 }
 
 #[tauri::command]
 pub fn remove_giphy_key(window: tauri::WebviewWindow) -> Result<(), String> {
     require_media_window(&window)?;
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         let _guard = CREDENTIAL_LOCK.lock().map_err(|_| "GIPHY credential store is unavailable.")?;
         match credential()?.delete_credential() {
@@ -70,6 +70,6 @@ pub fn remove_giphy_key(window: tauri::WebviewWindow) -> Result<(), String> {
             Err(_) => Err("Could not remove the saved GIPHY key.".into()),
         }
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     Ok(())
 }

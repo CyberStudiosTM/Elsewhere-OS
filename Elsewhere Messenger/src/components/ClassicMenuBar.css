@@ -27,3 +27,7 @@
 /* Narrow windows: keep each menu name on one line and let extra menus wrap to a second row. */
 .em-functional-menu{flex-wrap:wrap;row-gap:0}
 .em-functional-menu .em-menu-top{white-space:nowrap}
+
+/* Built-in skin collections fold up, so the Skins menu stays short. */
+.em-menu-popup details details.ew-skin-collection > summary { padding-left: 19px; }
+.em-menu-popup details details.ew-skin-collection > .em-menu-indented { padding-left: 32px; }

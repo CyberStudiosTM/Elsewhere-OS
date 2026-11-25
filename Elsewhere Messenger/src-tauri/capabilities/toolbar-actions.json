@@ -7,6 +7,7 @@
     "identifier": "opener:allow-open-url",
     "allow": [
       { "url": "mailto:" },
+      { "url": "mailto:elsewhere.os.info@gmail.com*" },
       { "url": "tel:*" },
       { "url": "microsoft.windows.camera:" },
       { "url": "https://discord.com/channels/@me" },
