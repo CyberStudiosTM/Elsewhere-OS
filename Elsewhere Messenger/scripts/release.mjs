@@ -14,6 +14,8 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 const root = join(import.meta.dirname, '..')
+// Keep the (large, rebuildable) Rust build cache out of OneDrive so it never syncs.
+const targetDir = process.env.CARGO_TARGET_DIR || join(process.env.LOCALAPPDATA || homedir(), 'ElsewhereMessenger', 'cargo-target')
 const config = JSON.parse(readFileSync(join(root, 'src-tauri', 'tauri.conf.json'), 'utf8'))
 const version = config.version
 const endpoint = config.plugins?.updater?.endpoints?.[0] || ''
@@ -28,10 +30,10 @@ const notes = process.argv.slice(2).join(' ').trim() || `Elsewhere Messenger ${v
 execSync('npx tauri build', {
   cwd: root,
   stdio: 'inherit',
-  env: { ...process.env, TAURI_SIGNING_PRIVATE_KEY: readFileSync(keyPath, 'utf8'), TAURI_SIGNING_PRIVATE_KEY_PASSWORD: '' },
+  env: { ...process.env, CARGO_TARGET_DIR: targetDir, TAURI_SIGNING_PRIVATE_KEY: readFileSync(keyPath, 'utf8'), TAURI_SIGNING_PRIVATE_KEY_PASSWORD: '' },
 })
 
-const bundle = join(root, 'src-tauri', 'target', 'release', 'bundle', 'nsis')
+const bundle = join(targetDir, 'release', 'bundle', 'nsis')
 const built = join(bundle, `Elsewhere Messenger_${version}_x64-setup.exe`)
 const signature = readFileSync(built + '.sig', 'utf8').trim()
 // GitHub turns spaces in asset names into dots, so publish a name without spaces.

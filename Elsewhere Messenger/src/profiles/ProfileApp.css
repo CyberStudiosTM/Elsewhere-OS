@@ -50,3 +50,4 @@
 
 /* The Elsewhere desktop wallpaper for the Elsewhaero profile background. */
 .pa-app { --ep-scene-image: url("/elsewhere-desktop.webp"); }
+.pa-body.pa-designer { display: block; min-height: 0; overflow: hidden; }

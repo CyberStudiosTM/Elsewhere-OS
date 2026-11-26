@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blankDoc, normalizeDoc, safeImage, safeUrl } from '../profiles/profileRender'
+import { blankDoc, normalizeDesign, normalizeDoc, safeImage, safeUrl } from '../profiles/profileRender'
 
 describe('Elsewhere Profiles renderer safety', () => {
   it('only allows https links', () => {
@@ -34,5 +34,35 @@ describe('Elsewhere Profiles renderer safety', () => {
       expect(Object.values(doc.sections).every(Boolean)).toBe(true)
       expect(doc.layout).toBe(layout)
     }
+  })
+  it('only keeps safe Visual Designer elements', () => {
+    const d = normalizeDesign({ on: true, height: 99999999, elements: [
+      { id: 'a', kind: 'button', x: 10, y: 20, w: 100, h: 40, z: 1, text: '<img src=x onerror=alert(1)>', href: 'javascript:alert(1)', style: { bg: 'red;position:fixed', color: '#ff00aa', size: 9999, font: 'Evil', anim: 'explode' } },
+      { id: 'b', kind: 'image', x: 0, y: 0, w: 50, h: 50, z: 0, src: 'data:image/svg+xml;base64,AAAA', style: {} },
+      { id: 'c', kind: 'script', x: 0, y: 0, w: 1, h: 1 },
+      { id: 'd', kind: 'module', module: 'passwords', x: 0, y: 0, w: 1, h: 1 },
+      { id: 'e', kind: 'module', module: 'friends', x: -99999, y: 5, w: 300, h: 200, z: 2, style: { shadow: 2 } },
+    ] })
+    expect(d.height).toBe(12000)
+    expect(d.elements.map(e => e.id)).toEqual(['a', 'b', 'e'])
+    const [button, image, friends] = d.elements
+    expect(button.href).toBeUndefined()
+    expect(button.style.bg).toBeUndefined()
+    expect(button.style.color).toBe('#ff00aa')
+    expect(button.style.size).toBe(160)
+    expect(button.style.font).toBeUndefined()
+    expect(button.style.anim).toBeUndefined()
+    expect(image.src).toBeUndefined()
+    expect(friends.x).toBe(-400)
+  })
+  it('keeps old profiles working with an empty, switched-off design', () => {
+    const doc = normalizeDoc({ layout: 'classic' })
+    expect(doc.design).toEqual({ on: false, height: 900, elements: [] })
+  })
+  it('keeps code blocks as plain text with size limits', () => {
+    const big = 'x'.repeat(70000)
+    const d = normalizeDesign({ elements: [{ id: 'c', kind: 'code', x: 0, y: 0, w: 300, h: 200, z: 0, code: { html: '<b>hi</b>', css: big, js: 42 }, href: 'https://a.example' }] })
+    expect(d.elements[0].code).toEqual({ html: '<b>hi</b>', css: 'x'.repeat(60000), js: '' })
+    expect(d.elements[0].href).toBeUndefined()
   })
 })

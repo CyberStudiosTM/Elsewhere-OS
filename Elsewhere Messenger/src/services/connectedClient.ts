@@ -13,6 +13,10 @@ const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() || 
 const project = /^https:\/\/([a-z0-9]{20})\.supabase\.co\/?$/.exec(url)?.[1] || ''
 export const cloudReady = Boolean(project && publishableKey)
 export const canRememberAccount = () => isTauri() && /Windows/.test(navigator.userAgent)
+/** A client for helper windows that signs requests with a token borrowed from the main window. */
+export function borrowingClient(token: () => Promise<string | null>): SupabaseClient | null {
+  return cloudReady ? createClient(url, publishableKey, { accessToken: async () => (await token()) || publishableKey }) : null
+}
 export const cloud: SupabaseClient | null = cloudReady ? createClient(url, publishableKey, {
   auth: { storageKey: 'elsewhere-active-account', persistSession: false, autoRefreshToken: true, detectSessionInUrl: false },
 }) : null

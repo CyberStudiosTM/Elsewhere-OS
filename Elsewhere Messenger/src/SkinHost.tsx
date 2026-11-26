@@ -39,6 +39,7 @@ import { OPEN_TOOLBAR_CONTACT } from './components/ToolbarDialogs'
 import { discordContactId } from './services/discordBot'
 import { ELSEWHERE_BUDDY_PREFIX } from './services/connectedClient'
 import { getSocialAccount, hasOldSocialConnections, moveOldSocialConnections, restoreMainAccount, watchSocialAccount } from './services/mainAccount'
+import { lendSessionToWindows } from './services/sessionBridge'
 import Classic from "./App"
 import DeadSignal from "./skins/dead-signal/DeadSignal"
 import "./SkinHost.css"
@@ -68,7 +69,8 @@ export default function SkinHost() {
   useEffect(() => {
     const stop = watchSocialAccount(() => setSocialAccount(getSocialAccount()))
     void restoreMainAccount().catch(console.error).finally(() => setAuthReady(true))
-    return stop
+    const stopLending = lendSessionToWindows()
+    return () => { stop(); stopLending() }
   }, [])
   useEffect(() => {
     const adopt = () => void (async () => {

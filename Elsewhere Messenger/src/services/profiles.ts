@@ -1,7 +1,9 @@
 import { isTauri } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
-import { cloud } from './connectedClient'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { borrowingClient, cloud } from './connectedClient'
+import { borrowedAccessToken } from './sessionBridge'
 import type { ProfileData, ProfileDoc } from '../profiles/profileRender'
 
 // Elsewhere Profiles: talks to the server functions in supabase/11_profiles.sql. The server decides what
@@ -14,8 +16,11 @@ export type MyProfile = {
   friends: { id: string; handle: string; display_name: string }[]
 }
 
+let borrowed: SupabaseClient | null = null
 function client() {
   if (!cloud) throw new Error('Profiles need Elsewhere Accounts, which aren’t set up in this build.')
+  // The Profile window has no sign-in of its own: it borrows the main window's.
+  if (isProfileWindow()) return (borrowed ??= borrowingClient(borrowedAccessToken)) || cloud
   return cloud
 }
 async function call<T>(name: string, args?: Record<string, unknown>): Promise<T> {
@@ -36,6 +41,10 @@ export const signGuestbook = (handle: string, body: string) => call<string>('sig
 export const removeGuestbookEntry = (id: string) => call<void>('remove_elsewhere_guestbook_entry', { entry: id })
 export const postBulletin = (body: string) => call<string>('post_elsewhere_bulletin', { body })
 export const deleteBulletin = (id: string) => call<void>('delete_elsewhere_bulletin', { entry: id })
+export type ProfileVersion = { id: string; created_at: string; size: number }
+/** Published versions, newest first (needs supabase/12_profile_versions.sql). */
+export const listProfileVersions = () => call<ProfileVersion[]>('list_my_elsewhere_profile_versions')
+export const getProfileVersion = (id: string) => call<Partial<ProfileDoc>>('get_my_elsewhere_profile_version', { version_id: id })
 
 /** The public web address of a profile (works in any browser, no install needed). */
 export const PROFILE_WEB_BASE = 'https://cyberthreed.github.io/CyberStudios/elsewhere/profile.html'

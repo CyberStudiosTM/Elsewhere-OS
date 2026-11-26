@@ -22,7 +22,9 @@ import { isPixelDollWindow } from './services/pixelDollWindow'
 
 if (isTauri() && !isToastWindow()) void invoke('apply_elsewhere_window_icon').catch(console.error)
 
-createRoot(document.getElementById('root')!).render(
+if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('designer-harness')) {
+  void import('./profiles/DesignerHarness').then(({ default: Harness }) => createRoot(document.getElementById('root')!).render(<Harness />))
+} else createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {!isToastWindow() && !isStudioWindow() && !isSkinMapperWindow() && !isPixelDollWindow() && !isProfileWindow() && <PhotoBoothHost />}
     {isProfileWindow() ? <ProfileApp /> : isPixelDollWindow() ? <PixelDollApp /> : isSkinMapperWindow() ? <SkinMapperApp /> : isStudioWindow() ? <StudioApp /> : isToastWindow() ? <ToastPopup /> : new URLSearchParams(window.location.search).has('instagram-inbox') ? <InstagramInbox /> : isNativeClassicChat() || isNativeClassicLogin() ? <Classic /> : (isDeadSignalChild() ? <DeadSignal /> : <SkinHost />)}

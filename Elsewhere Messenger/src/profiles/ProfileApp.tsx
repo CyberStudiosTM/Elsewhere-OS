@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { isTauri } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { FONTS, INTEREST_LABELS, LAYOUT_DEFAULTS, PATTERNS, blankDoc, normalizeDoc, renderProfile, type ProfileData, type ProfileDoc } from './profileRender'
-import { deleteBulletin, getMyProfile, getProfile, postBulletin, profileWebUrl, removeGuestbookEntry, saveProfile, signGuestbook, unpublishProfile, type MyProfile } from '../services/profiles'
+import { deleteBulletin, getMyProfile, getProfile, getProfileVersion, listProfileVersions, type ProfileVersion, postBulletin, profileWebUrl, removeGuestbookEntry, saveProfile, signGuestbook, unpublishProfile, type MyProfile } from '../services/profiles'
 import { toolbarAction } from '../services/toolbarActions'
 import { ELSEWHERE_BUDDY_PREFIX } from '../services/connectedClient'
+import Designer from './Designer'
 import './profileRender.css'
 import './ProfileApp.css'
 
@@ -65,6 +66,9 @@ export default function ProfileApp() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [choosing, setChoosing] = useState(false)
+  const [viewAs, setViewAs] = useState<'me' | 'friend' | 'public'>('me')
+  const [versions, setVersions] = useState<ProfileVersion[] | string | null>(null)
+  const [mode, setMode] = useState<'quick' | 'designer'>(() => params().get('mode') === 'designer' ? 'designer' : 'quick')
 
   const load = useCallback(async () => {
     setError('')
@@ -99,11 +103,19 @@ export default function ProfileApp() {
 
   // While editing, preview the draft exactly as visitors will see it once published.
   const previewData = useMemo<ProfileData | null>(() => {
+    if (data && isMine && !editing && viewAs !== 'me') {
+      // Preview as someone else: what a friend or the public would get (the server enforces the real thing).
+      const blocked = visibility === 'private' || (viewAs === 'public' && visibility === 'friends')
+      if (!data.published) return { status: 'locked', handle: data.handle, display_name: data.display_name, card: { message: 'Not published yet: visitors see “Profile not found” until you publish.' }, signed_in: true }
+      if (blocked) return { status: 'locked', handle: data.handle, display_name: data.display_name, card: { message: doc.privateCard.message }, signed_in: viewAs === 'friend' }
+      return { ...data, access: viewAs === 'friend' ? 'friend' : 'visitor', published: true, signed_in: viewAs === 'friend',
+        can_sign: viewAs === 'friend' && guestbook !== 'off', guestbook: (data.guestbook || []).map(entry => ({ ...entry, mine: false })) }
+    }
     if (!data || !editing || !isMine || !mine) return data
     const byId = new Map(mine.friends.map(f => [f.id, f]))
     return { ...data, doc, access: 'owner', published: data.published, guestbook_mode: guestbook,
       top_friends: doc.topFriends.map(id => byId.get(id)).filter((f): f is NonNullable<typeof f> => !!f) }
-  }, [data, editing, isMine, mine, doc, guestbook])
+  }, [data, editing, isMine, mine, doc, guestbook, viewAs, visibility])
 
   async function save(publish: boolean) {
     setError('')
@@ -126,12 +138,14 @@ export default function ProfileApp() {
     if (isMine) {
       if (!editing) list.push({ label: '✎ Edit profile', onClick: () => setEditing(true), primary: true })
       list.push({ label: '🔗 Copy link', onClick: () => { void navigator.clipboard?.writeText(profileWebUrl(data.handle!)).then(() => setNotice('Profile link copied.')) } })
+      if (!editing) list.push({ label: viewAs === 'me' ? '👁 View as: me' : viewAs === 'friend' ? '👁 View as: a friend' : '👁 View as: the public',
+        onClick: () => setViewAs(v => v === 'me' ? 'friend' : v === 'friend' ? 'public' : 'me') })
     } else {
       if (data.id && data.access === 'friend') list.push({ label: '💬 Message', primary: true, onClick: () => toolbarAction({ kind: 'open-contact', personId: ELSEWHERE_BUDDY_PREFIX + data.id }) })
       if (mine) list.push({ label: 'My profile', onClick: () => open(mine.handle) })
     }
     return list
-  }, [data, isMine, editing, mine, open])
+  }, [data, isMine, editing, mine, open, viewAs])
 
   const pickTopFriend = (id: string, on: boolean) => change({ topFriends: on ? [...doc.topFriends, id].slice(0, 12) : doc.topFriends.filter(f => f !== id) })
   const moveTopFriend = (id: string, step: -1 | 1) => {
@@ -147,7 +161,7 @@ export default function ProfileApp() {
 
   return <div className="pa-app">
     <div className="pa-titlebar" data-tauri-drag-region>
-      <span data-tauri-drag-region>🦋 {editing ? 'Profile Workshop · Quick Customize' : 'Elsewhere Profile'}{dirty ? ' •' : ''}</span>
+      <span data-tauri-drag-region>🦋 {editing ? `Profile Workshop · ${mode === 'designer' ? 'Visual Designer' : 'Quick Customize'}` : 'Elsewhere Profile'}{dirty ? ' •' : ''}</span>
       {isTauri() && <>
         <button type="button" aria-label="Minimize" onClick={() => void getCurrentWindow().minimize()}>_</button>
         <button type="button" aria-label="Maximize" onClick={() => void getCurrentWindow().toggleMaximize()}>□</button>
@@ -168,13 +182,18 @@ export default function ProfileApp() {
       </div>
       <button type="button" className="pa-skip" onClick={() => { setDoc(blankDoc('original')); setChoosing(false) }}>Skip for now</button>
     </section></div>}
-    <div className={editing && isMine ? 'pa-body is-editing' : 'pa-body'}>
+    {editing && isMine && mode === 'designer' && previewData ? <div className="pa-body pa-designer">
+      <Designer doc={doc} data={previewData} dirty={dirty} onDoc={next => { setDoc(next); setDirty(true) }} onSave={publish => void save(publish)}
+        onLeave={() => setMode('quick')} pickImage={file => shrinkImage(file, 800, 800)} onError={setError} />
+    </div> : <div className={editing && isMine ? 'pa-body is-editing' : 'pa-body'}>
       {editing && isMine && <aside className="pa-editor" aria-label="Quick Customize">
         <div className="pa-editor-actions">
           <button type="button" onClick={() => void save(false)} disabled={!dirty}>💾 Save draft</button>
           <button type="button" className="is-primary" onClick={() => void save(true)}>✦ Publish</button>
           <button type="button" onClick={() => { if (!dirty || window.confirm('Leave the editor? Your draft is kept.')) setEditing(false) }}>👁 View</button>
+          <button type="button" onClick={() => setMode('designer')}>✦ Visual Designer</button>
         </div>
+        {doc.design.on && doc.design.elements.length > 0 && <small>Your profile uses your Visual Designer page. Text, pictures and friends you set here still show in its pieces.</small>}
         {data?.published && <button type="button" className="pa-link" onClick={() => { if (window.confirm('Unpublish your profile? Visitors will see “Profile not found” until you publish again.')) void unpublishProfile().then(load) }}>Unpublish</button>}
 
         <details open><summary>Layout & colors</summary>
@@ -228,6 +247,16 @@ export default function ProfileApp() {
         <details><summary>Sections</summary>
           {(Object.keys(doc.sections) as (keyof ProfileDoc['sections'])[]).map(key => <label key={key} className="pa-check"><input type="checkbox" checked={doc.sections[key]} onChange={e => change({ sections: { ...doc.sections, [key]: e.target.checked } })} /> {key === 'friends' ? 'Top Friends' : key[0].toUpperCase() + key.slice(1)}</label>)}
         </details>
+        <details onToggle={e => { if ((e.target as HTMLDetailsElement).open && versions === null) void listProfileVersions().then(setVersions, () => setVersions('Version history isn’t switched on yet (run supabase/12_profile_versions.sql).')) }}><summary>Version history</summary>
+          {versions === null && <small>Loading…</small>}
+          {typeof versions === 'string' && <small>{versions}</small>}
+          {Array.isArray(versions) && !versions.length && <small>Every time you publish, a copy is kept here (your last 30).</small>}
+          {Array.isArray(versions) && versions.map((v, i) => <div key={v.id} className="pa-row pa-top">
+            <span>{new Date(v.created_at).toLocaleString()}{i === 0 ? ' · live now' : ''}</span>
+            <button type="button" onClick={() => { if (dirty && !window.confirm('Replace your current draft with this version? Your live profile won’t change until you publish.')) return
+              void getProfileVersion(v.id).then(found => { setDoc(normalizeDoc(found)); setDirty(true); setNotice('Version loaded into your draft. Publish to make it live.') }, cause => setError(cause instanceof Error ? cause.message : String(cause))) }}>Load into draft</button>
+          </div>)}
+        </details>
         <details open><summary>Privacy</summary>
           <label>Who can see my profile<select value={visibility} onChange={e => { setVisibility(e.target.value as MyProfile['visibility']); setDirty(true) }}>
             <option value="public">Everyone, including the web</option><option value="friends">Friends only</option><option value="private">Only me</option></select></label>
@@ -238,6 +267,6 @@ export default function ProfileApp() {
         </details>
       </aside>}
       <main className="pa-view">{previewData ? <Preview data={previewData} onOpen={open} buttons={buttons} onChanged={() => void load()} /> : !error && <p className="pa-loading">Loading…</p>}</main>
-    </div>
+    </div>}
   </div>
 }

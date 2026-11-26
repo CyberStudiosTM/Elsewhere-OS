@@ -297,6 +297,11 @@ export default function ClassicMenuBar(
                 </button>
               )}
 
+              <hr />
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile' }))}>My Profile...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile', edit: true }))}>Edit My Profile...</button>
+              <button type="button" onClick={() => run(() => { const handle = window.prompt('Whose profile? Type their @handle')?.trim().replace(/^@/, ''); if (handle) toolbarAction({ kind: 'profile', handle }) })}>View a Profile...</button>
+
               {props.onClose && (
                 <button
                   type="button"
@@ -362,9 +367,6 @@ export default function ClassicMenuBar(
           {open === 'Contacts' && (
             <>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'add-contact' }))}>Add Contact...</button>
-              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile' }))}>My Profile...</button>
-              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile', edit: true }))}>Edit My Profile...</button>
-              <button type="button" onClick={() => run(() => { const handle = window.prompt('Whose profile? Type their @handle')?.trim().replace(/^@/, ''); if (handle) toolbarAction({ kind: 'profile', handle }) })}>View a Profile...</button>
               <hr />
               <button
                 type="button"
@@ -415,15 +417,6 @@ export default function ClassicMenuBar(
                 )}
               </details>
 
-              <hr />
-
-              <button
-                type="button"
-                disabled
-                title="Account connections are not implemented."
-              >
-                Add a Contact...
-              </button>
             </>
           )}
 

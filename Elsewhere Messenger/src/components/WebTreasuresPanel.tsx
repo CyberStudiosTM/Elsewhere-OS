@@ -86,8 +86,8 @@ export default function WebTreasuresPanel({ skin, onClose }: { skin: 'classic' |
     if (!files) return
     let added = 0
     for (const file of Array.from(files)) {
-      if (!TYPES.includes(file.type)) { setNotice(`${file.name} isn’t a PNG, JPEG, GIF or WebP, so it was skipped.`); continue }
-      if (findDuplicateTreasure(file.name, file.size) && !window.confirm(`“${file.name}” is already in My Treasures. Keep both?`)) continue
+      if (!TYPES.includes(file.type)) { setNotice(`One file isn’t a PNG, JPEG, GIF or WebP, so it was skipped.`); continue }
+      if (findDuplicateTreasure(file.name, file.size) && !window.confirm('This one is already in My Treasures. Keep both?')) continue
       try {
         const media = await saveLocalImage(file)
         if (media.kind !== 'local') continue
@@ -95,7 +95,7 @@ export default function WebTreasuresPanel({ skin, onClose }: { skin: 'classic' |
         addMyTreasure({ id: media.id, name: file.name.replace(/\.[^.]+$/, '').slice(0, 60), width: bitmap.width, height: bitmap.height, size: file.size, addedAt: new Date().toISOString() })
         bitmap.close()
         added++
-      } catch (cause) { setNotice(`${file.name}: ${cause instanceof Error ? cause.message : 'couldn’t be saved.'}`) }
+      } catch (cause) { setNotice(`A file couldn’t be added: ${cause instanceof Error ? cause.message : 'couldn’t be saved.'}`) }
     }
     if (added) setNotice(`Added ${added} treasure${added === 1 ? '' : 's'} ♡`)
   }
@@ -142,22 +142,20 @@ export default function WebTreasuresPanel({ skin, onClose }: { skin: 'classic' |
                       <button type="button" className="ew-treasures-upload" onClick={() => upload.current?.click()}>+ Add treasures</button></>)}
               </div>
                 : shown.map(item => <button key={item.key} type="button" className={'ew-treasures-tile' + (selected?.key === item.key ? ' is-selected' : '')}
-                  onClick={() => setSelected(item)} title={item.name + (item.creator ? ` · by ${item.creator}` : '')}>
+                  onClick={() => setSelected(item)} title={item.creator ? `by ${item.creator}` : undefined} aria-label="Treasure">
                   <span className="ew-treasures-thumb"><img src={item.url} alt="" loading="lazy" draggable={false}
                     style={{ imageRendering: (item.width || 999) <= 160 ? 'pixelated' : undefined }} /></span>
-                  <span className="ew-treasures-name">{item.name}</span>
                 </button>)}
           </div>
         </div>
 
         {selected && <aside className="ew-treasures-detail" aria-label="Treasure details">
-          <span className="ew-treasures-detail-img"><img src={selected.url} alt={selected.name} style={{ imageRendering: (selected.width || 999) <= 160 ? 'pixelated' : undefined }} /></span>
-          <strong>{selected.name}</strong>
+          <span className="ew-treasures-detail-img"><img src={selected.url} alt="" style={{ imageRendering: (selected.width || 999) <= 160 ? 'pixelated' : undefined }} /></span>
           {selected.width && <small>{selected.width}×{selected.height}</small>}
           {selected.mine ? <>
             <small>Added {new Date(selected.mine.addedAt).toLocaleDateString()} · on this PC</small>
             <button type="button" onClick={() => {
-              if (!selected.mine || !window.confirm(`Remove “${selected.name}” from My Treasures? Photos that already use it keep it.`)) return
+              if (!selected.mine || !window.confirm('Remove this from My Treasures? Photos that already use it keep it.')) return
               removeMyTreasure(selected.mine.id); setSelected(null)
             }}>Remove from My Treasures</button>
           </> : <>
