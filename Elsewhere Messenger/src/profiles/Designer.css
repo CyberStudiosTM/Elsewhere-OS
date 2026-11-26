@@ -89,3 +89,12 @@
 .ce-preview p { margin: 0; padding: 4px 8px; color: #06418d; font-weight: bold; background: #f5f9ff; border-bottom: 1px solid #b9d3f1; }
 .ce-frame, .ce-frame iframe { width: 100%; height: 100%; border: 0; }
 .ce-note { margin: 0; padding: 6px 10px; color: #2b5677; font-size: 12px; border-top: 1px solid #b9d3f1; }
+.dz-start-choices { grid-template-columns: repeat(3, 1fr); max-width: 780px; }
+.dz-gen { display: grid; gap: 8px; width: min(460px, 92vw); padding: 18px; border: 1px solid #0850b4; border-radius: 12px; color: #101a31; background: #fff; box-shadow: 0 16px 50px #0008; }
+.dz-gen h2 { margin: 0; color: #06418d; }
+.dz-gen p { margin: 0; }
+.dz-gen label { display: grid; gap: 2px; }
+.dz-gen select { padding: 5px; border: 1px solid #8aafd9; border-radius: 6px; }
+.dz-gen fieldset { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; border: 1px solid #b9d3f1; border-radius: 8px; }
+.dz-gen button { padding: 6px 12px; border: 1px solid #8aafd9; border-radius: 6px; color: #06418d; cursor: pointer; background: linear-gradient(#fff, #dcecff); }
+.dz-gen button.is-primary { color: #fff; font-weight: bold; border-color: #08419c; background: linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%); }

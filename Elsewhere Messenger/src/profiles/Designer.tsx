@@ -4,6 +4,7 @@ import {
   type Design, type DesignElement, type DesignStyle, type ElementKind, type ModuleName, type ProfileData, type ProfileDoc,
 } from './profileRender'
 import CodeEditor from './CodeEditor'
+import { VIBES, generateLayout, type Decoration, type GeneratorOptions, type Structure, type Vibe } from './layoutGenerator'
 import './Designer.css'
 
 // Profile Workshop · Visual Designer: a Wix-style free-form editor. It edits doc.design; the shared renderer
@@ -66,12 +67,9 @@ function NumberField({ label: text, value, min, max, step = 1, onChange }: { lab
 
 export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pickImage, onError, sandboxUrl }: Props) {
   const [coding, setCoding] = useState(false)
-  const design = doc.design
   const [selected, setSelected] = useState<string[]>([])
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
-  const [guides, setGuides] = useState<Guide[]>([])
-  const [scale, setScale] = useState(1)
-  const [zoomPick, setZoomPick] = useState<'fit' | number>('fit')
+  const [generating, setGenerating] = useState(false)
+  const [gen, setGen] = useState<GeneratorOptions>({ vibe: 'frutiger-aero', structure: 'modular', decoration: 'decorated', seed: 1, modules: ['identity', 'about', 'music', 'friends', 'interests', 'links', 'bulletins', 'guestbook'] })
   const past = useRef<Design[]>([])
   const future = useRef<Design[]>([])
   const lastKey = useRef<{ key: string; at: number }>({ key: '', at: 0 })
@@ -98,6 +96,38 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   const undo = useCallback(() => { const prev = past.current.pop(); if (!prev) return; future.current.push(docRef.current.design); setDesign(prev); syncHistory() }, [setDesign])
   const redo = useCallback(() => { const next = future.current.pop(); if (!next) return; past.current.push(docRef.current.design); setDesign(next); syncHistory() }, [setDesign])
 
+  function runGenerator(next: GeneratorOptions) {
+    setGen(next)
+    const made = generateLayout(next)
+    past.current.push(docRef.current.design); future.current = []; syncHistory()
+    onDoc({ ...docRef.current, theme: made.theme, design: made.design })
+    setSelected([])
+  }
+  const generatorDialog = generating && <div className="ce-backdrop" onPointerDown={e => e.stopPropagation()}>
+    <section className="dz-gen" role="dialog" aria-label="Layout Generator">
+      <h2>✦ Layout Generator</h2>
+      <p>Pick a vibe and a structure. Every result is a normal page you can keep editing.</p>
+      <label>Vibe<select value={gen.vibe} onChange={e => setGen({ ...gen, vibe: e.target.value as Vibe })}>
+        {Object.entries(VIBES).map(([key, v]) => <option key={key} value={key}>{v.label}</option>)}<option value="surprise">Surprise me</option></select></label>
+      <label>Structure<select value={gen.structure} onChange={e => setGen({ ...gen, structure: e.target.value as Structure })}>
+        <option value="two-column">Classic two columns</option><option value="modular">Modular homepage</option><option value="collage">Freeform collage</option><option value="surprise">Surprise me</option></select></label>
+      <label>Decoration<select value={gen.decoration} onChange={e => setGen({ ...gen, decoration: e.target.value as Decoration })}>
+        <option value="minimal">Minimal</option><option value="decorated">Decorated</option><option value="maximalist">Maximalist</option></select></label>
+      <fieldset><legend>Pieces to include</legend>{MODULES.map(m => <label key={m} className="dz-check"><input type="checkbox" checked={gen.modules.includes(m)}
+        onChange={e => setGen({ ...gen, modules: e.target.checked ? [...gen.modules, m] : gen.modules.filter(x => x !== m) })} /> {MODULE_LABELS[m]}</label>)}</fieldset>
+      <p className="dz-tip">Generating replaces this page and its colors (Undo brings the page back). No AI is used: it's built from hand-made styles and patterns.</p>
+      <div className="dz-row">
+        <button type="button" onClick={() => setGenerating(false)}>Close</button>
+        <button type="button" onClick={() => runGenerator({ ...gen, seed: gen.seed + 1 })}>🎲 Try another</button>
+        <button type="button" className="is-primary" onClick={() => { runGenerator(gen); setGenerating(false) }}>✦ Generate</button>
+      </div>
+    </section>
+  </div>
+  const design = doc.design
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
+  const [guides, setGuides] = useState<Guide[]>([])
+  const [scale, setScale] = useState(1)
+  const [zoomPick, setZoomPick] = useState<'fit' | number>('fit')
   const byId = useMemo(() => new Map(design.elements.map(e => [e.id, e])), [design.elements])
   const sel = selected.map(id => byId.get(id)).filter((e): e is DesignElement => !!e)
   const one = sel.length === 1 ? sel[0] : null
@@ -262,7 +292,9 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
     <div className="dz-start-choices">
       <button type="button" onClick={() => commit(fromLayout(doc))}><strong>Start from my profile</strong><small>Turns your current page into pieces you can move around.</small></button>
       <button type="button" onClick={() => commit({ ...design, on: true, elements: [{ id: newId(), z: 1, ...starter('heading', undefined, 40, doc.theme) }] })}><strong>Blank canvas</strong><small>Start with just a heading and build from scratch.</small></button>
+      <button type="button" onClick={() => setGenerating(true)}><strong>✦ Layout Generator</strong><small>Pick a vibe and get a decorated page to make your own.</small></button>
     </div>
+    {generatorDialog}
     <button type="button" className="dz-link" onClick={onLeave}>← Back to Quick Customize</button>
   </div>
 
@@ -281,6 +313,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
       <label className="dz-check"><input type="checkbox" checked={design.on} onChange={e => commit({ ...design, on: e.target.checked })} /> Use this design on my profile</label>
       <span className="dz-grow" />
       {size > 600000 && <span className="dz-warn" title="Profiles can hold about 700 KB">Almost full: use fewer or smaller pictures</span>}
+      <button type="button" onClick={() => setGenerating(true)}>✦ Generate</button>
       <button type="button" onClick={onLeave}>Quick Customize</button>
       <button type="button" onClick={() => onSave(false)} disabled={!dirty}>💾 Save draft</button>
       <button type="button" className="is-primary" onClick={() => onSave(true)}>✦ Publish</button>
@@ -412,6 +445,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
         </>}
       </aside>
     </div>
+    {generatorDialog}
     {coding && one?.kind === 'code' && <CodeEditor code={one.code || { html: '', css: '', js: '' }} sandboxUrl={sandboxUrl}
       onChange={next => update([one.id], x => ({ ...x, code: next }))} onClose={() => setCoding(false)} />}
   </div>
