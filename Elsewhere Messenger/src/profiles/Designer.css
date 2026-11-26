@@ -98,3 +98,4 @@
 .dz-gen fieldset { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; border: 1px solid #b9d3f1; border-radius: 8px; }
 .dz-gen button { padding: 6px 12px; border: 1px solid #8aafd9; border-radius: 6px; color: #06418d; cursor: pointer; background: linear-gradient(#fff, #dcecff); }
 .dz-gen button.is-primary { color: #fff; font-weight: bold; border-color: #08419c; background: linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%); }
+.dz-credit { margin: 0; padding: 8px 10px; border: 1px dashed #ff9fd0; border-radius: 8px; color: #8a2a63; font-size: 12px; font-style: italic; background: #fff4fa; }

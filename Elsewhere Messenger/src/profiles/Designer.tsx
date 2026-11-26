@@ -115,7 +115,8 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
         <option value="minimal">Minimal</option><option value="decorated">Decorated</option><option value="maximalist">Maximalist</option></select></label>
       <fieldset><legend>Pieces to include</legend>{MODULES.map(m => <label key={m} className="dz-check"><input type="checkbox" checked={gen.modules.includes(m)}
         onChange={e => setGen({ ...gen, modules: e.target.checked ? [...gen.modules, m] : gen.modules.filter(x => x !== m) })} /> {MODULE_LABELS[m]}</label>)}</fieldset>
-      <p className="dz-tip">Generating replaces this page and its colors (Undo brings the page back). No AI is used: it's built from hand-made styles and patterns.</p>
+      <p className="dz-tip">Generating replaces this page and its colors (Undo brings the page back).</p>
+      <p className="dz-credit">the elsewhere profile generator runs on a rule-based algorithm designed by Cyber. no data sets, no AI generation, no generative slop. it runs right on your computer: just code, functions, and vibes ♡</p>
       <div className="dz-row">
         <button type="button" onClick={() => setGenerating(false)}>Close</button>
         <button type="button" onClick={() => runGenerator({ ...gen, seed: gen.seed + 1 })}>🎲 Try another</button>
