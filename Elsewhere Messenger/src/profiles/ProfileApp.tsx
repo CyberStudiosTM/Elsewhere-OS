@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { isTauri } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { FONTS, INTEREST_LABELS, LAYOUT_DEFAULTS, PATTERNS, blankDoc, normalizeDoc, renderProfile, type ProfileData, type ProfileDoc } from './profileRender'
-import { deleteBulletin, getMyProfile, getProfile, getProfileVersion, listProfileVersions, type ProfileVersion, postBulletin, profileWebUrl, removeGuestbookEntry, saveProfile, signGuestbook, unpublishProfile, type MyProfile } from '../services/profiles'
+import { FONTS, INTEREST_LABELS, LAYOUT_DEFAULTS, PATTERNS, blankDoc, normalizeAssets, normalizeDesign, normalizeDoc, renderProfile, type ProfileData, type ProfileDoc } from './profileRender'
+import { ownDomainKit, profileShortUrl, countProfileView, createPoll, getPoll, votePoll, myWebrings, setProfileSaved, webringNav, deleteBulletin, getMyProfile, getProfile, getProfileVersion, listProfileVersions, type ProfileVersion, postBulletin, profileWebUrl, removeGuestbookEntry, saveProfile, signGuestbook, unpublishProfile, type MyProfile } from '../services/profiles'
 import { toolbarAction } from '../services/toolbarActions'
 import { ELSEWHERE_BUDDY_PREFIX } from '../services/connectedClient'
 import Designer from './Designer'
+import HomeApp from './HomeApp'
+import ExchangeApp from './ExchangeApp'
 import './profileRender.css'
 import './ProfileApp.css'
 
@@ -39,9 +41,12 @@ function shrinkImage(file: File, maxW: number, maxH: number): Promise<string> {
 
 function Preview({ data, onOpen, buttons, onChanged }: { data: ProfileData; onOpen: (handle: string) => void; buttons: { label: string; onClick: () => void; primary?: boolean }[]; onChanged: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
+  const [page, setPage] = useState('home')
   useEffect(() => {
     if (!ref.current) return
     renderProfile(ref.current, data, {
+      page, onOpenPage: setPage, pageHref: slug => '?page=' + encodeURIComponent(slug),
+      getPoll, votePoll, webringNav: id => webringNav(id, data.handle || ''), countView: data.handle && data.access !== 'owner' ? () => countProfileView(data.handle!) : undefined,
       profileHref: handle => '?profile=' + encodeURIComponent(handle),
       onOpenProfile: onOpen,
       railButtons: buttons,
@@ -50,7 +55,7 @@ function Preview({ data, onOpen, buttons, onChanged }: { data: ProfileData; onOp
       onPostBulletin: async body => { await postBulletin(body); onChanged() },
       onDeleteBulletin: async id => { if (window.confirm('Delete this bulletin?')) { await deleteBulletin(id); onChanged() } },
     })
-  }, [data, onOpen, buttons, onChanged])
+  }, [data, onOpen, buttons, onChanged, page])
   return <div ref={ref} className="pa-preview" />
 }
 
@@ -75,6 +80,8 @@ export default function ProfileApp() {
     try {
       const me = await getMyProfile().catch(() => null)
       setMine(me)
+      if (handle === '~home') { if (!me) setError('Sign in to Elsewhere to see your Home.'); return }
+      if (handle === '~exchange') { if (!me) setError('Sign in to Elsewhere to use the Creative Exchange.'); else setDoc(normalizeDoc(me.draft)); return }
       const target = handle === 'me' ? me?.handle : handle
       if (!target) { setError('Sign in to Elsewhere to see profiles.'); return }
       setData(await getProfile(target))
@@ -138,11 +145,14 @@ export default function ProfileApp() {
     if (isMine) {
       if (!editing) list.push({ label: '✎ Edit profile', onClick: () => setEditing(true), primary: true })
       list.push({ label: '🔗 Copy link', onClick: () => { void navigator.clipboard?.writeText(profileWebUrl(data.handle!)).then(() => setNotice('Profile link copied.')) } })
+      list.push({ label: '🏠 Home', onClick: () => open('~home') })
+      list.push({ label: '✦ Exchange', onClick: () => open('~exchange') })
       if (!editing) list.push({ label: viewAs === 'me' ? '👁 View as: me' : viewAs === 'friend' ? '👁 View as: a friend' : '👁 View as: the public',
         onClick: () => setViewAs(v => v === 'me' ? 'friend' : v === 'friend' ? 'public' : 'me') })
     } else {
       if (data.id && data.access === 'friend') list.push({ label: '💬 Message', primary: true, onClick: () => toolbarAction({ kind: 'open-contact', personId: ELSEWHERE_BUDDY_PREFIX + data.id }) })
       if (mine) list.push({ label: 'My profile', onClick: () => open(mine.handle) })
+      if (mine && data.handle) list.push({ label: '☆ Save', onClick: () => { void setProfileSaved(data.handle!, true).then(() => setNotice('Saved to your Home ♡'), cause => setError(cause instanceof Error ? cause.message : String(cause))) } })
     }
     return list
   }, [data, isMine, editing, mine, open, viewAs])
@@ -161,7 +171,7 @@ export default function ProfileApp() {
 
   return <div className="pa-app">
     <div className="pa-titlebar" data-tauri-drag-region>
-      <span data-tauri-drag-region>🦋 {editing ? `Profile Workshop · ${mode === 'designer' ? 'Visual Designer' : 'Quick Customize'}` : 'Elsewhere Profile'}{dirty ? ' •' : ''}</span>
+      <span data-tauri-drag-region>🦋 {handle === '~home' ? 'Elsewhere Home' : handle === '~exchange' ? 'Elsewhere Creative Exchange' : editing ? `Profile Workshop · ${mode === 'designer' ? 'Visual Designer' : 'Quick Customize'}` : 'Elsewhere Profile'}{dirty ? ' •' : ''}</span>
       {isTauri() && <>
         <button type="button" aria-label="Minimize" onClick={() => void getCurrentWindow().minimize()}>_</button>
         <button type="button" aria-label="Maximize" onClick={() => void getCurrentWindow().toggleMaximize()}>□</button>
@@ -182,9 +192,23 @@ export default function ProfileApp() {
       </div>
       <button type="button" className="pa-skip" onClick={() => { setDoc(blankDoc('original')); setChoosing(false) }}>Skip for now</button>
     </section></div>}
-    {editing && isMine && mode === 'designer' && previewData ? <div className="pa-body pa-designer">
+    {handle === '~exchange' ? <div className="pa-body pa-home">{mine && <ExchangeApp me={mine.handle} draft={doc} onOpenProfile={open} onNotice={setNotice} onError={setError}
+      onApply={(kind, pkg) => {
+        // Build the new draft, keep it in the recovery slot (so nothing is lost), then open it in the Visual Designer.
+        const base = normalizeDoc(doc)
+        const theme = { ...base.theme, ...(pkg.theme && typeof pkg.theme === 'object' ? pkg.theme : {}) }
+        const z = base.design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
+        const next = kind === 'layout'
+          ? normalizeDoc({ ...base, theme, assets: [...base.assets, ...normalizeAssets(pkg.assets).filter(a => !base.assets.some(b => b.id === a.id))], design: { ...normalizeDesign(pkg.design), on: true } })
+          : kind === 'style' ? normalizeDoc({ ...base, theme })
+          : normalizeDoc({ ...base, design: { ...base.design, on: true, elements: [...base.design.elements, { id: Math.random().toString(36).slice(2, 10), kind: 'code', x: 40, y: 40, w: 480, h: 280, z, code: { html: pkg.html, css: pkg.css, js: pkg.js }, style: {} }] } })
+        try { localStorage.setItem(RECOVERY, JSON.stringify({ handle: mine.handle, doc: next })) } catch { /* full */ }
+        setMode(kind === 'style' ? 'quick' : 'designer'); setEditing(true); setHandle(mine.handle); setData(null)
+      }} />}</div>
+    : handle === '~home' ? <div className="pa-body pa-home">{mine && <HomeApp onOpen={h => open(h === 'me' ? mine.handle : h)} onError={m => { if (/^(Joined|Request sent)/.test(m)) setNotice(m); else setError(m) }} />}</div>
+    : editing && isMine && mode === 'designer' && previewData ? <div className="pa-body pa-designer">
       <Designer doc={doc} data={previewData} dirty={dirty} onDoc={next => { setDoc(next); setDirty(true) }} onSave={publish => void save(publish)}
-        onLeave={() => setMode('quick')} pickImage={file => shrinkImage(file, 800, 800)} onError={setError} />
+        onLeave={() => setMode('quick')} pickImage={file => shrinkImage(file, 800, 800)} onError={setError} createPoll={createPoll} listWebrings={myWebrings} />
     </div> : <div className={editing && isMine ? 'pa-body is-editing' : 'pa-body'}>
       {editing && isMine && <aside className="pa-editor" aria-label="Quick Customize">
         <div className="pa-editor-actions">
@@ -247,6 +271,14 @@ export default function ProfileApp() {
         <details><summary>Sections</summary>
           {(Object.keys(doc.sections) as (keyof ProfileDoc['sections'])[]).map(key => <label key={key} className="pa-check"><input type="checkbox" checked={doc.sections[key]} onChange={e => change({ sections: { ...doc.sections, [key]: e.target.checked } })} /> {key === 'friends' ? 'Top Friends' : key[0].toUpperCase() + key.slice(1)}</label>)}
         </details>
+        {mine && <details><summary>Your web address</summary>
+          <label>Your free link<input readOnly value={profileShortUrl(mine.handle)} onFocus={e => e.target.select()} /></label>
+          <button type="button" onClick={() => { void navigator.clipboard?.writeText(profileShortUrl(mine.handle)).then(() => setNotice('Link copied.')) }}>Copy link</button>
+          <small>Pages get their own links too: add /page-name after your @handle.</small>
+          <strong>Use your own domain</strong>
+          <small>Own a domain? Download this little page, put it on a free host (GitHub Pages, Neocities or Cloudflare Pages) and connect your domain there. It always shows your latest published profile.</small>
+          <button type="button" onClick={() => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ownDomainKit(mine.handle, mine.display_name)], { type: 'text/html' })); a.download = 'index.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000) }}>⬇ Download my website kit</button>
+        </details>}
         <details onToggle={e => { if ((e.target as HTMLDetailsElement).open && versions === null) void listProfileVersions().then(setVersions, () => setVersions('Version history isn’t switched on yet (run supabase/12_profile_versions.sql).')) }}><summary>Version history</summary>
           {versions === null && <small>Loading…</small>}
           {typeof versions === 'string' && <small>{versions}</small>}

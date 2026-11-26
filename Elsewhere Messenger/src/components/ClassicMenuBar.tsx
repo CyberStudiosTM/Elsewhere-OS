@@ -298,6 +298,8 @@ export default function ClassicMenuBar(
               )}
 
               <hr />
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile', handle: '~home' }))}>Elsewhere Home...</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile', handle: '~exchange' }))}>Creative Exchange...</button>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile' }))}>My Profile...</button>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'profile', edit: true }))}>Edit My Profile...</button>
               <button type="button" onClick={() => run(() => { const handle = window.prompt('Whose profile? Type their @handle')?.trim().replace(/^@/, ''); if (handle) toolbarAction({ kind: 'profile', handle }) })}>View a Profile...</button>

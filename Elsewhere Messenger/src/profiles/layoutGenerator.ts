@@ -48,7 +48,7 @@ export function generateLayout(opts: GeneratorOptions): { theme: ProfileDoc['the
   const title = `${pick(vibe.glyphs as readonly string[])} welcome to my page ${pick(vibe.glyphs as readonly string[])}`
   add({ kind: 'heading', x: 40, y: 24, w: DESIGN_WIDTH - 80, h: 64, text: title, style: { size: 38, bold: true, align: 'center', color: palette.heading, font } })
   let top = 110
-  const heights: Record<ModuleName, number> = { identity: 200, about: 240, interests: 220, music: 130, links: 170, friends: 230, bulletins: 260, guestbook: 320 }
+  const heights: Record<ModuleName, number> = { identity: 200, about: 240, interests: 220, music: 130, links: 170, friends: 230, bulletins: 260, guestbook: 320, counter: 120, poll: 220, webring: 140 }
 
   if (structure === 'two-column') {
     const left = modules.filter(m => ['identity', 'music', 'interests', 'links'].includes(m))
@@ -92,5 +92,5 @@ export function generateLayout(opts: GeneratorOptions): { theme: ProfileDoc['the
   // Decorations sit behind the profile pieces so nothing gets covered.
   const decorations = elements.filter(e => e.kind !== 'module' && e !== elements[0])
   decorations.forEach((e, i) => { e.z = -100 + i })
-  return { theme, design: { on: true, height: Math.max(900, top + 60), elements } }
+  return { theme, design: { on: true, height: Math.max(900, top + 60), elements, pages: [], homeName: 'Home', adapt: 'reflow' } }
 }

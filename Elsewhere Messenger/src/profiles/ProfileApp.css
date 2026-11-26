@@ -51,3 +51,90 @@
 /* The Elsewhere desktop wallpaper for the Elsewhaero profile background. */
 .pa-app { --ep-scene-image: url("/elsewhere-desktop.webp"); }
 .pa-body.pa-designer { display: block; min-height: 0; overflow: hidden; }
+/* The profile page always fills the window, so the wallpaper reaches the bottom. */
+.pa-preview.ep-host { display: flex; flex-direction: column; min-height: 100%; }
+.pa-preview.ep-host > .ep-page { flex: 1 0 auto; }
+
+/* Elsewhere Home */
+.pa-body.pa-home { display: block; overflow-y: auto; background: #2f8fe0 url("/elsewhere-desktop.webp") center / cover fixed; }
+.hm { max-width: 1100px; margin: 0 auto; padding: 14px; }
+.hm-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.hm-head h1 { margin: 0; padding: 4px 16px; border-radius: 999px; color: #fff; font-size: 20px; text-shadow: 0 1px 2px #06306e; background: linear-gradient(180deg, #8fd3ff 0%, #2d8ff0 46%, #0b5fd0 54%, #2f86e6 100%); box-shadow: inset 0 1px 0 #ffffffaa; }
+.hm-grow { flex: 1; }
+.hm button { padding: 5px 12px; border: 1px solid #8aafd9; border-radius: 999px; color: #06418d; cursor: pointer; background: linear-gradient(#fff, #dcecff); }
+.hm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+.hm-card { padding: 10px 14px 14px; border: 1px solid #ffffffe6; border-radius: 18px; color: #0b2a4a; background: #ffffffd0; box-shadow: 0 12px 30px #0b2a4a33, inset 0 1px 0 #fff; }
+@supports (backdrop-filter: blur(1px)) { .hm-card { background: #ffffffb8; backdrop-filter: blur(12px) saturate(1.25); } }
+.hm-card h2 { display: flex; align-items: center; margin: 0 0 8px; color: #0a6fbd; font-size: 15px; }
+.hm-tools { margin-left: auto; display: flex; gap: 2px; }
+.hm-tools button { padding: 1px 7px; }
+.hm-feed, .hm-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.hm-feed li { padding: 8px 10px; border-radius: 12px; background: #f4fbffcc; }
+.hm-feed p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.hm-feed time { float: right; color: #4f6585; font-size: 11px; }
+.hm-list li { display: flex; align-items: center; gap: 6px; }
+.hm-person { padding: 0 !important; border: 0 !important; color: #0b5fd0 !important; font-weight: bold; background: none !important; }
+.hm-person small { color: #4f6585; font-weight: normal; }
+.hm-x { margin-left: auto; padding: 0 8px !important; }
+.hm-empty, .hm-end { margin: 4px 0; color: #4f6585; }
+.hm-end { text-align: center; font-weight: bold; color: #0a6fbd; }
+.hm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.hm-stats b { display: block; font-size: 24px; color: #0b5fd0; }
+.hm-stats span { font-size: 12px; color: #4f6585; }
+.hm-stats button { grid-column: 1 / -1; justify-self: center; }
+.hm-discover form { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.hm-discover input { padding: 5px 8px; border: 1px solid #8aafd9; border-radius: 8px; }
+.hm-discover fieldset { display: grid; gap: 6px; margin-top: 8px; border: 1px solid #b9d3f1; border-radius: 10px; }
+.hm-discover label { display: grid; gap: 2px; }
+.hm-rings { display: grid; gap: 8px; }
+.hm-ring { padding: 8px 10px; border-radius: 12px; background: #f4fbffcc; }
+.hm-ring p { margin: 4px 0; }
+.hm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.hm-hidden { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: #fff; }
+
+/* Creative Exchange */
+.ex { max-width: 1200px; margin: 0 auto; padding: 12px; color: #0b2a4a; }
+.ex button, .ex input, .ex select, .ex textarea { font: inherit; }
+.ex-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ex-tabs button, .ex-depts button, .ex .dz-row button, .ex-search button, .ex-desk button, .ex-preview-wrap > button { padding: 5px 12px; border: 1px solid #8aafd9; border-radius: 999px; color: #06418d; cursor: pointer; background: linear-gradient(#fff, #dcecff); }
+.ex-tabs button.is-on, .ex-depts button.is-on { color: #fff; text-shadow: 0 1px 2px #06306e; border-color: #0a4ea8; background: linear-gradient(180deg, #8fd3ff 0%, #2d8ff0 46%, #0b5fd0 54%, #2f86e6 100%); }
+.ex button.is-primary { color: #fff; font-weight: bold; text-shadow: 0 1px 1px #24620c; border-color: #3f9a1f; background: linear-gradient(180deg, #d8ffb8 0%, #8fe060 45%, #4fb028 55%, #7cd650 100%); }
+.ex-body { display: grid; gap: 10px; padding: 12px; border: 1px solid #ffffffe6; border-radius: 18px; background: #ffffffc8; box-shadow: 0 12px 30px #0b2a4a33; }
+@supports (backdrop-filter: blur(1px)) { .ex-body { background: #ffffffb0; backdrop-filter: blur(12px) saturate(1.25); } }
+.ex-body h3 { margin: 6px 0 0; color: #0a6fbd; }
+.ex-depts, .ex-search { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ex-search input, .ex-search select, .ex-desk input:not([type=checkbox]), .ex-desk select, .ex-desk textarea, .ex form input { padding: 5px 8px; border: 1px solid #8aafd9; border-radius: 8px; background: #fff; }
+.ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.ex-card { display: grid; gap: 4px; padding: 8px; border: 1px solid #c7dcf3; border-radius: 14px; color: #0b2a4a; text-align: left; cursor: pointer; background: #fff; }
+.ex-card:hover { border-color: #2d84e6; }
+.ex-thumb { display: grid; place-items: center; height: 120px; border-radius: 10px; overflow: hidden; font-size: 34px; background: repeating-conic-gradient(#eef4fb 0 25%, #fff 0 50%) 0 0 / 14px 14px; }
+.ex-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.ex-card small { color: #4f6585; }
+.ex-labels { display: flex; flex-wrap: wrap; gap: 4px; }
+.ex-labels i { padding: 1px 7px; border-radius: 999px; font-size: 11px; font-style: normal; color: #06418d; background: #e3f0fd; }
+.ex-labels i:empty { display: none; }
+.ex-labels .ex-warn { color: #7a1f1f; background: #fff0f0; }
+.ex-gallery { columns: 4 200px; column-gap: 10px; }
+.ex-tile { display: block; width: 100%; margin: 0 0 10px; padding: 0; overflow: hidden; border: 1px solid #c7dcf3; border-radius: 14px; text-align: left; cursor: pointer; background: #fff; break-inside: avoid; }
+.ex-tile img { display: block; width: 100%; height: auto; }
+.ex-tile span { display: block; padding: 6px 8px; color: #0b2a4a; font-weight: bold; }
+.ex-tile small { display: block; color: #4f6585; font-weight: normal; }
+.ex-desk { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
+.ex-desk section { display: grid; gap: 6px; padding: 10px; border-radius: 14px; background: #f4fbffcc; }
+.ex-desk label { display: grid; gap: 2px; }
+.ex-detail { display: grid; grid-template-rows: auto 1fr; width: min(1100px, 96vw); height: min(760px, 94vh); border: 1px solid #0850b4; border-radius: 12px; overflow: hidden; background: #f5f9ff; color: #0b2a4a; box-shadow: 0 16px 50px #0008; }
+.ex-detail .ce-head button { padding: 4px 10px; border: 1px solid #c9e6ff; border-radius: 6px; color: #06418d; background: linear-gradient(#fff, #dcecff); cursor: pointer; }
+.ex-detail-body { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; min-height: 0; padding: 12px; overflow: auto; }
+.ex-detail > .ex-body { overflow-y: auto; border-radius: 0; }
+.ex-preview-wrap { display: grid; gap: 6px; align-content: start; min-height: 0; }
+.ex-preview { min-height: 320px; max-height: 620px; overflow: auto; border: 1px solid #b9d3f1; border-radius: 10px; background: #fff; }
+.ex-preview iframe { width: 100%; height: 320px; border: 0; }
+.ex-preview-img { max-width: 100%; max-height: 360px; object-fit: contain; border-radius: 10px; background: repeating-conic-gradient(#eef4fb 0 25%, #fff 0 50%) 0 0 / 14px 14px; }
+.ex-post-img { display: grid; place-items: center; min-height: 0; }
+.ex-post-img img { max-width: 100%; max-height: 640px; object-fit: contain; border-radius: 10px; }
+.ex-info { display: grid; gap: 6px; align-content: start; }
+.ex-info p { margin: 0; }
+.ex-tag { display: inline-block; margin: 0 4px 4px 0; padding: 1px 8px; border-radius: 999px; font-size: 12px; color: #8a2a63; background: #fff0f8; }
+.ex-comments, .ex-reports { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.ex-comments li, .ex-case { padding: 6px 8px; border-radius: 10px; background: #f4fbff; }
+.ex-case p { margin: 4px 0; }

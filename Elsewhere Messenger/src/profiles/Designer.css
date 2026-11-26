@@ -124,3 +124,58 @@
 .ai-preview iframe { width: 100%; height: 100%; border: 0; }
 .ai-tabs { display: flex; gap: 2px; align-items: center; }
 .ai-code { margin: 0; min-height: 0; overflow: auto; padding: 10px; border-radius: 8px; color: #e6f0ff; font: 12px/1.45 Consolas, "Courier New", monospace; white-space: pre-wrap; background: #0f1b2e; }
+.dz-pages { margin: 0 0 4px; padding: 0; list-style: none; display: grid; gap: 2px; } .dz-pages li { display: grid; grid-template-columns: 1fr auto auto; gap: 2px; align-items: center; border-radius: 6px; } .dz-pages li.is-selected { background: #cfe5ff; } .dz-pages button { padding: 2px 5px !important; border-color: transparent !important; background: none !important; }
+
+/* Widgets Studio */
+.ws { display: grid; grid-template-rows: auto auto 1fr; width: min(1200px, 96vw); height: min(780px, 94vh); border: 1px solid #0850b4; border-radius: 10px; overflow: hidden; background: #f5f9ff; color: #101a31; font: 13px "Segoe UI", Tahoma, sans-serif; box-shadow: 0 16px 50px #0008; }
+.ws button { font: inherit; }
+.ws-note { margin: 0; padding: 6px 12px; color: #1d5a22; background: #e9fbe2; border-bottom: 1px solid #b6e3a6; }
+.ws-body { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 0; }
+.ws-list, .ws-create { overflow-y: auto; padding: 10px; border-right: 1px solid #b9d3f1; display: flex; flex-direction: column; gap: 6px; }
+.ws-list h3, .ws-create h3 { margin: 8px 0 2px; color: #06418d; font-size: 12px; text-transform: uppercase; }
+.ws-card { display: grid; gap: 2px; width: 100%; padding: 8px 10px; border: 1px solid #c7dcf3; border-radius: 10px; color: #101a31; text-align: left; cursor: pointer; background: #fff; }
+.ws-card small { color: #4f6585; }
+.ws-card.is-on { border-color: #2d84e6; box-shadow: 0 0 0 2px #2d84e644; }
+.ws-detail { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; padding: 12px; }
+.ws-detail h2 { margin: 0; color: #06418d; font-size: 18px; }
+.ws-detail h2 small { color: #4f6585; font-size: 12px; font-weight: normal; }
+.ws-preview { border: 1px solid #b9d3f1; border-radius: 10px; overflow: hidden; background: repeating-conic-gradient(#eef4fb 0 25%, #ffffff 0 50%) 0 0 / 20px 20px; }
+.ws-preview iframe { width: 100%; height: 100%; min-height: inherit; border: 0; }
+.ws-form { display: grid; gap: 6px; }
+.ws-form fieldset { display: grid; gap: 4px; border: 1px solid #b9d3f1; border-radius: 8px; background: #fff; }
+.ws-form legend { color: #06418d; font-weight: bold; }
+.ws-form label { display: grid; gap: 2px; }
+.ws-form input:not([type=checkbox]):not([type=color]), .ws-form select, .ws-create input:not([type=checkbox]), .ws-create select { box-sizing: border-box; width: 100%; padding: 4px; border: 1px solid #8aafd9; border-radius: 5px; }
+.ws-form small { color: #4f6585; }
+.ws-create label { display: grid; gap: 2px; }
+.ws-prop { display: grid; grid-template-columns: 1fr 1.3fr 0.9fr 1fr auto; gap: 3px; }
+.ws-prop input, .ws-prop select { min-width: 0; }
+.ws .dz-row button, .ws-create > button, .ws-prop button { padding: 5px 10px; border: 1px solid #8aafd9; border-radius: 6px; color: #06418d; cursor: pointer; background: linear-gradient(#fff, #dcecff); }
+.ws button.is-primary { color: #fff; font-weight: bold; border-color: #08419c; background: linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%); }
+.ws .ce-head button { padding: 4px 10px; }
+
+/* Asset Manager */
+.am { display: grid; grid-template-rows: auto auto 1fr; width: min(1200px, 96vw); height: min(780px, 94vh); border: 1px solid #0850b4; border-radius: 10px; overflow: hidden; background: #f5f9ff; color: #101a31; font: 13px "Segoe UI", Tahoma, sans-serif; box-shadow: 0 16px 50px #0008; }
+.am button { font: inherit; }
+.am-body { display: grid; grid-template-columns: 190px minmax(0, 1fr) 280px; min-height: 0; }
+.am-shelves { display: flex; flex-direction: column; gap: 3px; padding: 10px; overflow-y: auto; border-right: 1px solid #b9d3f1; }
+.am-shelves h3 { margin: 8px 0 2px; color: #06418d; font-size: 12px; text-transform: uppercase; }
+.am-shelves button { padding: 5px 8px; border: 1px solid transparent; border-radius: 6px; color: #06418d; text-align: left; cursor: pointer; background: none; }
+.am-shelves button.is-on { color: #fff; background: linear-gradient(#7fc4ff, #2d84e6 45%, #0b56c4 55%, #3c8ff0); }
+.am-grid-wrap { display: grid; grid-template-rows: auto 1fr; min-height: 0; padding: 10px; gap: 8px; }
+.am-search { padding: 6px 8px; border: 1px solid #8aafd9; border-radius: 8px; }
+.am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; align-content: start; overflow-y: auto; }
+.am-tile { position: relative; display: grid; place-items: center; aspect-ratio: 1; padding: 4px; border: 1px solid #c7dcf3; border-radius: 8px; cursor: pointer; background: repeating-conic-gradient(#eef4fb 0 25%, #fff 0 50%) 0 0 / 14px 14px; }
+.am-tile img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.am-tile.is-on { border-color: #2d84e6; box-shadow: 0 0 0 2px #2d84e655; }
+.am-fav { position: absolute; top: 3px; right: 5px; color: #ff5fa2; }
+.am-detail { display: flex; flex-direction: column; gap: 6px; padding: 10px; overflow-y: auto; border-left: 1px solid #b9d3f1; }
+.am-detail label { display: grid; gap: 2px; }
+.am-detail input:not([type=checkbox]), .am-detail select { box-sizing: border-box; width: 100%; padding: 4px; border: 1px solid #8aafd9; border-radius: 5px; }
+.am-big { display: grid; place-items: center; min-height: 140px; max-height: 220px; padding: 6px; border-radius: 8px; background: repeating-conic-gradient(#eef4fb 0 25%, #fff 0 50%) 0 0 / 14px 14px; }
+.am-big img { max-width: 100%; max-height: 200px; object-fit: contain; }
+.am .dz-row button, .am-panel button { padding: 5px 10px; border: 1px solid #8aafd9; border-radius: 6px; color: #06418d; cursor: pointer; background: linear-gradient(#fff, #dcecff); }
+.am button.is-primary { color: #fff; font-weight: bold; border-color: #08419c; background: linear-gradient(#acdfff 0%, #3e95f0 35%, #1260ca 65%, #0846ae 100%); }
+.am .ce-head button { padding: 4px 10px; }
+.am-panel { display: grid; gap: 6px; padding: 8px; border: 1px solid #b9d3f1; border-radius: 8px; background: #fff; }
+.am-sprite { width: 120px; justify-self: center; background-repeat: no-repeat; image-rendering: pixelated; border: 1px dashed #b9d3f1; }

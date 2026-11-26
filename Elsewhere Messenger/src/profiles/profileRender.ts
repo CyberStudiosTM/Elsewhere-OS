@@ -22,13 +22,16 @@ export type ProfileDoc = {
   privateCard: { message: string }
   /** Visual Designer page. When `on` and it has elements, it replaces the starter layout. */
   design: Design
+  /** Project assets: pictures stored once and used anywhere by `asset:<id>`. */
+  assets: ProfileAsset[]
 }
+export type ProfileAsset = { id: string; name: string; src: string; w: number; h: number; folder: string; tags: string[]; fav: boolean; origin: string }
 
 // ---------- Visual Designer model ----------
 export const DESIGN_WIDTH = 960
-export const MODULES = ['identity', 'about', 'interests', 'music', 'links', 'friends', 'bulletins', 'guestbook'] as const
+export const MODULES = ['identity', 'about', 'interests', 'music', 'links', 'friends', 'bulletins', 'guestbook', 'counter', 'poll', 'webring'] as const
 export type ModuleName = typeof MODULES[number]
-export const ELEMENT_KINDS = ['heading', 'text', 'image', 'button', 'divider', 'shape', 'module', 'code'] as const
+export const ELEMENT_KINDS = ['heading', 'text', 'image', 'button', 'divider', 'shape', 'module', 'code', 'nav', 'widget'] as const
 /** Custom HTML/CSS/JS runs only here: a page on a separate origin, loaded in an opaque-origin sandbox. */
 export const CODE_SANDBOX_URL = 'https://cyberthreed.github.io/CyberStudios/elsewhere/sandbox.html'
 export const CODE_LIMIT = 60000
@@ -45,10 +48,42 @@ export type DesignElement = {
   hidden?: boolean; locked?: boolean; hideMobile?: boolean; group?: string
   text?: string; src?: string; href?: string
   code?: { html: string; css: string; js: string }
+  /** Shown on every page (navigation, music player, floating decorations...). Lives on the home page. */
+  global?: boolean
+  /** Starts hidden; an interaction shows it (popups, reveals). Hidden is visual only, never access control. */
+  startHidden?: boolean
+  /** No-code interaction: trigger -> action on a target element or page. */
+  on?: Interaction
+  /** An installed widget: its pinned package plus this instance's own settings. */
+  widget?: WidgetInstance
+  /** Native poll piece: which of the owner's polls it shows. */
+  pollId?: string
+  /** Webring piece: which ring's Previous / Random / Next to show. */
+  ringId?: string
+  /** Animated sprite sheet on a picture: grid size, frame count and speed. */
+  sprite?: { cols: number; rows: number; frames: number; fps: number }
   style: DesignStyle
 }
-export type Design = { on: boolean; height: number; elements: DesignElement[] }
-export const blankDesign = (): Design => ({ on: false, height: 900, elements: [] })
+// ---------- Widgets ----------
+export const PROP_TYPES = ['text', 'number', 'color', 'boolean', 'select'] as const
+export type WidgetProp = { key: string; label: string; type: typeof PROP_TYPES[number]; default: string | number | boolean; min?: number; max?: number; options?: string[]; group?: string; help?: string }
+export type WidgetPackage = { id: string; name: string; version: string; author: string; description: string; category: string; props: WidgetProp[]; code: { html: string; css: string; js: string }; remix: boolean; minW: number; minH: number }
+export type WidgetInstance = { pkg: WidgetPackage; values: Record<string, string | number | boolean> }
+export const TRIGGERS = ['click', 'hover'] as const
+export const ACTIONS = ['show', 'hide', 'toggle', 'page'] as const
+export type Interaction = { trigger: typeof TRIGGERS[number]; action: typeof ACTIONS[number]; target: string }
+export type DesignPage = { id: string; name: string; slug: string; hidden: boolean; height: number; elements: DesignElement[] }
+export const ADAPT_MODES = ['reflow', 'scale', 'scroll'] as const
+export type Design = {
+  on: boolean; height: number; elements: DesignElement[]
+  /** Extra pages besides the home page (whose content is `elements`). */
+  pages: DesignPage[]
+  homeName: string
+  /** Narrow screens: reflow into one column, scale the whole composition, or scroll the scene. */
+  adapt: typeof ADAPT_MODES[number]
+}
+export const blankDesign = (): Design => ({ on: false, height: 900, elements: [], pages: [], homeName: 'Home', adapt: 'reflow' })
+export const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'page'
 export type ProfileData = {
   status: 'ok' | 'locked' | 'missing'
   access?: 'owner' | 'friend' | 'visitor'
@@ -79,7 +114,18 @@ export type ProfileActions = {
   quiet?: boolean
   /** Where code blocks run (defaults to the public Elsewhere sandbox). */
   sandboxUrl?: string
+  /** Visual Designer pages: which page to show, and how page links work. */
+  page?: string
+  pageHref?: (slug: string) => string
+  onOpenPage?: (slug: string) => void
+  /** Native widgets (server-backed). Missing ones show a friendly placeholder (e.g. in the editor). */
+  getPoll?: (id: string) => Promise<PollData>
+  votePoll?: (id: string, choice: number) => Promise<PollData>
+  countView?: () => Promise<number | null>
+  webringNav?: (ringId: string) => Promise<WebringNav>
 }
+export type WebringNav = { status: 'ok' | 'missing'; name?: string; members?: number; prev?: string; next?: string; random?: string }
+export type PollData = { status: 'ok' | 'missing'; question?: string; options?: string[]; counts?: Record<string, number>; mine?: number | null; can_vote?: boolean }
 
 export const FONTS = ['Tahoma', 'Verdana', 'Trebuchet MS', 'Georgia', 'Courier New', 'Comic Sans MS', 'Segoe UI', 'Lucida Console', 'Arial']
 export const PATTERNS = ['elsewhaero', 'none', 'stars', 'hearts', 'grid', 'dots', 'checker', 'stripes', 'sparkles']
@@ -96,7 +142,7 @@ export function blankDoc(layout: ProfileDoc['layout'] = 'original'): ProfileDoc 
     interests: INTEREST_LABELS.slice(0, 4).map(label => ({ label, value: '' })),
     music: { title: '', artist: '', url: '' }, links: [], topFriends: [], avatar: '', banner: '',
     sections: { about: true, interests: true, music: true, bulletins: true, friends: true, guestbook: true, links: true },
-    privateCard: { message: '' }, design: blankDesign(),
+    privateCard: { message: '' }, design: blankDesign(), assets: [],
   }
 }
 
@@ -139,7 +185,26 @@ export function normalizeDoc(raw: unknown): ProfileDoc {
     sections: Object.fromEntries(Object.keys(base.sections).map(key => [key, s[key] !== false])) as ProfileDoc['sections'],
     privateCard: { message: str(card.message, 300) },
     design: normalizeDesign(d.design),
+    assets: normalizeAssets(d.assets),
   }
+}
+const ASSET_ID = /^[a-z0-9]{4,16}$/
+export function normalizeAssets(raw: unknown): ProfileAsset[] {
+  const out: ProfileAsset[] = []
+  for (const item of (Array.isArray(raw) ? raw.slice(0, 80) : [])) {
+    const a = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
+    const id = str(a.id, 16), src = safeImage(a.src)
+    if (!ASSET_ID.test(id) || !src || out.some(x => x.id === id)) continue
+    out.push({ id, name: str(a.name, 60) || 'picture', src, w: num(a.w, 1, 8000, 0), h: num(a.h, 1, 8000, 0), folder: str(a.folder, 30),
+      tags: (Array.isArray(a.tags) ? a.tags : []).filter((t): t is string => typeof t === 'string').slice(0, 8).map(t => t.slice(0, 20)), fav: a.fav === true, origin: str(a.origin, 80) })
+  }
+  return out
+}
+/** Picture sources may point at a project asset (`asset:<id>`); this turns them into the real image. */
+export function resolveSrc(src: string | undefined, doc: ProfileDoc): string {
+  if (!src) return ''
+  if (src.startsWith('asset:')) return doc.assets.find(a => a.id === src.slice(6))?.src || ''
+  return src
 }
 
 const num = (value: unknown, min: number, max: number, fallback: number) => typeof value === 'number' && isFinite(value) ? Math.min(max, Math.max(min, Math.round(value * 100) / 100)) : fallback
@@ -167,7 +232,77 @@ function normalizeStyle(raw: unknown): DesignStyle {
 /** Reads any stored design into a safe one (unknown kinds dropped, numbers clamped, links/images checked). */
 export function normalizeDesign(raw: unknown): Design {
   const d = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
-  const list = Array.isArray(d.elements) ? d.elements.slice(0, 120) : []
+  const elements = normalizeElements(d.elements)
+  const pages: DesignPage[] = []
+  const slugs = new Set<string>(['home'])
+  for (const item of (Array.isArray(d.pages) ? d.pages.slice(0, 12) : [])) {
+    const pg = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
+    const name = str(pg.name, 40).trim() || 'Page'
+    let slug = slugify(str(pg.slug, 30) || name)
+    while (slugs.has(slug)) slug = slug.slice(0, 26) + '-' + (slugs.size + 1)
+    slugs.add(slug)
+    pages.push({ id: str(pg.id, 24) || slug, name, slug, hidden: pg.hidden === true, height: num(pg.height, 200, 12000, 900), elements: normalizeElements(pg.elements).map(e => ({ ...e, global: undefined })) })
+  }
+  return { on: d.on === true, height: num(d.height, 200, 12000, 900), elements, pages, homeName: str(d.homeName, 40).trim() || 'Home',
+    adapt: ADAPT_MODES.includes(d.adapt as typeof ADAPT_MODES[number]) ? d.adapt as typeof ADAPT_MODES[number] : 'reflow' }
+}
+const KEY = /^[a-z][a-z0-9_]{0,23}$/i
+/** Reads a widget package safely (unknown fields dropped, sizes limited). */
+export function normalizeWidgetPackage(raw: unknown): WidgetPackage | null {
+  const w = (raw && typeof raw === 'object' ? raw : null) as Record<string, unknown> | null
+  if (!w) return null
+  const c = (w.code && typeof w.code === 'object' ? w.code : {}) as Record<string, unknown>
+  const props: WidgetProp[] = []
+  for (const item of (Array.isArray(w.props) ? w.props.slice(0, 24) : [])) {
+    const pr = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
+    const key = str(pr.key, 24)
+    if (!KEY.test(key) || props.some(x => x.key === key) || !PROP_TYPES.includes(pr.type as typeof PROP_TYPES[number])) continue
+    const type = pr.type as typeof PROP_TYPES[number]
+    const prop: WidgetProp = { key, label: str(pr.label, 40) || key, type, default: '' }
+    if (type === 'number') { prop.min = num(pr.min, -1e6, 1e6, 0); prop.max = num(pr.max, -1e6, 1e6, 100); prop.default = num(pr.default, prop.min, prop.max, prop.min) }
+    else if (type === 'boolean') prop.default = pr.default === true
+    else if (type === 'color') prop.default = color(pr.default, '#ff5fa2')
+    else if (type === 'select') { prop.options = (Array.isArray(pr.options) ? pr.options : []).filter((o): o is string => typeof o === 'string').slice(0, 20).map(o => o.slice(0, 40)); prop.default = prop.options.includes(pr.default as string) ? pr.default as string : prop.options[0] || '' }
+    else prop.default = str(pr.default, 400)
+    if (typeof pr.group === 'string') prop.group = str(pr.group, 24)
+    if (typeof pr.help === 'string') prop.help = str(pr.help, 120)
+    props.push(prop)
+  }
+  return {
+    id: str(w.id, 40) || 'widget', name: str(w.name, 40) || 'Widget', version: str(w.version, 12) || '1.0.0', author: str(w.author, 40), description: str(w.description, 200),
+    category: str(w.category, 24) || 'Other', props, code: { html: str(c.html, CODE_LIMIT), css: str(c.css, CODE_LIMIT), js: str(c.js, CODE_LIMIT) },
+    remix: w.remix !== false, minW: num(w.minW, 40, 960, 120), minH: num(w.minH, 30, 2000, 80),
+  }
+}
+/** Each instance's settings, checked against the package's declared properties. */
+export function widgetValues(pkg: WidgetPackage, raw: unknown): Record<string, string | number | boolean> {
+  const v = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  const out: Record<string, string | number | boolean> = {}
+  for (const pr of pkg.props) {
+    const x = v[pr.key]
+    if (pr.type === 'number') out[pr.key] = num(x, pr.min ?? -1e6, pr.max ?? 1e6, pr.default as number)
+    else if (pr.type === 'boolean') out[pr.key] = typeof x === 'boolean' ? x : pr.default as boolean
+    else if (pr.type === 'color') out[pr.key] = color(x, pr.default as string)
+    else if (pr.type === 'select') out[pr.key] = pr.options?.includes(x as string) ? x as string : pr.default as string
+    else out[pr.key] = typeof x === 'string' ? x.slice(0, 400) : pr.default as string
+  }
+  return out
+}
+const escHtml = (t: string) => t.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
+/** Fills a widget's {{key}} placeholders: escaped in HTML, plain values in CSS, and a `props` object for JS. */
+export function compileWidget(inst: WidgetInstance): { html: string; css: string; js: string } {
+  const values = widgetValues(inst.pkg, inst.values)
+  const fill = (text: string, encode: (v: string) => string) => text.replace(/\{\{\s*([a-z][a-z0-9_]*)\s*\}\}/gi, (m, key: string) => key in values ? encode(String(values[key])) : m)
+  const cssSafe = (v: string) => v.replace(/[;{}<>\\"']/g, '')
+  return {
+    html: fill(inst.pkg.code.html, escHtml),
+    css: fill(inst.pkg.code.css, cssSafe),
+    js: `const props = Object.freeze(${JSON.stringify(values).replace(/</g, '\\u003c')});\n` + inst.pkg.code.js,
+  }
+}
+
+function normalizeElements(raw: unknown): DesignElement[] {
+  const list = Array.isArray(raw) ? raw.slice(0, 120) : []
   const elements: DesignElement[] = []
   for (const item of list) {
     const e = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
@@ -179,17 +314,38 @@ export function normalizeDesign(raw: unknown): Design {
       z: Math.round(num(e.z, -1000, 1000, 0)), style: normalizeStyle(e.style),
     }
     if (e.kind === 'module') el.module = e.module as ModuleName
+    if (e.kind === 'module' && e.module === 'poll' && typeof e.pollId === 'string' && /^[0-9a-f-]{36}$/i.test(e.pollId)) el.pollId = e.pollId
+    if (e.kind === 'module' && e.module === 'webring' && typeof e.ringId === 'string' && /^[0-9a-f-]{36}$/i.test(e.ringId)) el.ringId = e.ringId
     if (e.hidden === true) el.hidden = true
     if (e.locked === true) el.locked = true
     if (e.hideMobile === true) el.hideMobile = true
     if (typeof e.group === 'string' && e.group) el.group = str(e.group, 24)
     if (typeof e.text === 'string') el.text = str(e.text, 4000)
-    if (e.kind === 'image' || e.kind === 'shape') { const src = safeImage(e.src); if (src) el.src = src }
+    if (e.kind === 'image' || e.kind === 'shape') {
+      const src = typeof e.src === 'string' && /^asset:[a-z0-9]{4,16}$/.test(e.src) ? e.src : safeImage(e.src)
+      if (src) el.src = src
+    }
+    if (e.kind === 'image' && e.sprite && typeof e.sprite === 'object') {
+      const sp = e.sprite as Record<string, unknown>
+      const cols = Math.round(num(sp.cols, 1, 32, 1)), rows = Math.round(num(sp.rows, 1, 32, 1))
+      el.sprite = { cols, rows, frames: Math.round(num(sp.frames, 1, cols * rows, cols * rows)), fps: num(sp.fps, 1, 30, 8) }
+    }
     if (e.kind === 'button' || e.kind === 'image' || e.kind === 'text' || e.kind === 'heading') { const href = safeUrl(e.href); if (href) el.href = href }
     if (e.kind === 'code') { const c = (e.code && typeof e.code === 'object' ? e.code : {}) as Record<string, unknown>; el.code = { html: str(c.html, CODE_LIMIT), css: str(c.css, CODE_LIMIT), js: str(c.js, CODE_LIMIT) } }
+    if (e.kind === 'widget') {
+      const wi = (e.widget && typeof e.widget === 'object' ? e.widget : {}) as Record<string, unknown>
+      const pkg = normalizeWidgetPackage(wi.pkg)
+      if (!pkg) continue
+      el.widget = { pkg, values: widgetValues(pkg, wi.values) }
+    }
+    if (e.global === true) el.global = true
+    if (e.startHidden === true) el.startHidden = true
+    const on = (e.on && typeof e.on === 'object' ? e.on : null) as Record<string, unknown> | null
+    if (on && TRIGGERS.includes(on.trigger as typeof TRIGGERS[number]) && ACTIONS.includes(on.action as typeof ACTIONS[number]) && typeof on.target === 'string' && on.target)
+      el.on = { trigger: on.trigger as typeof TRIGGERS[number], action: on.action as typeof ACTIONS[number], target: str(on.target, 30) }
     elements.push(el)
   }
-  return { on: d.on === true, height: num(d.height, 200, 12000, 900), elements }
+  return elements
 }
 
 // ---------- DOM helpers (text only, never innerHTML) ----------
@@ -334,7 +490,63 @@ function moduleBox(module: ModuleName, doc: ProfileDoc, data: ProfileData, actio
     case 'friends': return friendsBox(data, actions)
     case 'bulletins': return bulletinsBox(data, actions)
     case 'guestbook': return data.guestbook_mode === 'off' ? box('Guestbook', 'ep-guestbook-box', h('p', { class: 'ep-empty' }, 'The guestbook is closed.')) : guestbookBox(data, actions)
+    case 'counter': return counterBox(actions)
+    case 'poll': return pollBox(undefined, actions)
+    case 'webring': return webringBox(undefined, actions)
   }
+}
+/** Old-web webring: Previous / Random / Next through the ring's approved, discoverable members. */
+function webringBox(ringId: string | undefined, actions: ProfileActions) {
+  const body = h('div', { class: 'ep-webring' }, h('p', { class: 'ep-empty' }, ringId ? 'Loading webring…' : 'Pick one of your webrings in the Visual Designer.'))
+  const el = box('Webring', 'ep-webring-box', body)
+  const link = (label: string, handle?: string) => {
+    if (!handle) return h('span', { class: 'ep-webring-off' }, label)
+    const a = h('a', { href: actions.profileHref(handle) }, label)
+    if (actions.onOpenProfile) a.addEventListener('click', event => { event.preventDefault(); actions.onOpenProfile!(handle) })
+    return a
+  }
+  const draw = (nav: WebringNav) => {
+    body.replaceChildren()
+    if (nav.status !== 'ok') { body.append(h('p', { class: 'ep-empty' }, 'This webring isn’t available.')); return }
+    el.querySelector('.ep-box-title')!.textContent = `✦ ${nav.name} ✦`
+    body.append(h('nav', { class: 'ep-webring-nav', 'aria-label': 'Webring' }, link('◀ previous', nav.prev), link('✦ random', nav.random), link('next ▶', nav.next)),
+      h('p', { class: 'ep-note' }, `${nav.members || 0} member${nav.members === 1 ? '' : 's'}`))
+  }
+  if (ringId && actions.webringNav) void actions.webringNav(ringId).then(draw, () => draw({ status: 'missing' }))
+  else if (ringId) draw({ status: 'ok', name: 'your webring', members: 3 })
+  return el
+}
+/** Old-web visitor counter. Counting happens on the server (once a day per signed-in visitor). */
+function counterBox(actions: ProfileActions) {
+  const digits = h('span', { class: 'ep-counter-digits', 'aria-live': 'polite' }, '······')
+  const el = box('Visitors', 'ep-counter-box', h('p', { class: 'ep-counter' }, h('span', {}, 'you are visitor no.'), digits))
+  if (actions.countView) void actions.countView().then(n => { digits.textContent = n == null ? '—' : String(n).padStart(6, '0') }, () => { digits.textContent = '—' })
+  else digits.textContent = '000123'
+  return el
+}
+/** A poll with live results. Only signed-in visitors who can see the profile may vote (checked by the server). */
+function pollBox(pollId: string | undefined, actions: ProfileActions) {
+  const body = h('div', { class: 'ep-poll' }, h('p', { class: 'ep-empty' }, pollId ? 'Loading poll…' : 'Pick or make a poll in the Visual Designer.'))
+  const el = box('Poll', 'ep-poll-box', body)
+  const draw = (poll: PollData) => {
+    body.replaceChildren()
+    if (poll.status !== 'ok' || !poll.options) { body.append(h('p', { class: 'ep-empty' }, 'This poll isn’t available.')); return }
+    el.querySelector('.ep-box-title')!.textContent = poll.question || 'Poll'
+    const total = Object.values(poll.counts || {}).reduce((a, b) => a + b, 0)
+    poll.options.forEach((option, i) => {
+      const n = poll.counts?.[String(i)] || 0
+      const pct = total ? Math.round(n / total * 100) : 0
+      const row = h('button', { type: 'button', class: 'ep-poll-row' + (poll.mine === i ? ' is-mine' : ''), 'aria-pressed': String(poll.mine === i) },
+        h('span', { class: 'ep-poll-fill', style: `width:${pct}%` }), h('span', { class: 'ep-poll-label' }, option), h('span', { class: 'ep-poll-pct' }, `${pct}%`))
+      if (poll.can_vote && actions.votePoll) row.addEventListener('click', () => { void actions.votePoll!(pollId!, i).then(draw, () => {}) })
+      else row.setAttribute('disabled', '')
+      body.append(row)
+    })
+    body.append(h('p', { class: 'ep-note' }, `${total} vote${total === 1 ? '' : 's'}` + (poll.can_vote && actions.votePoll ? '' : ' · sign in to Elsewhere to vote')))
+  }
+  if (pollId && actions.getPoll) void actions.getPoll(pollId).then(draw, () => draw({ status: 'missing' }))
+  else if (pollId) draw({ status: 'ok', question: 'Your poll', options: ['answer one', 'answer two'], counts: { 0: 3, 1: 1 }, mine: null, can_vote: false })
+  return el
 }
 const SHADOWS = ['none', '0 2px 6px #0b2a4a33', '0 8px 20px #0b2a4a40', '0 16px 40px #0b2a4a59']
 /** Applies a validated design style to an element (values were already checked by normalizeStyle). */
@@ -363,12 +575,53 @@ function elementBody(e: DesignElement, doc: ProfileDoc, data: ProfileData, actio
     case 'heading': return link(h('h2', { class: 'ep-el-heading' }, e.text || ''))
     case 'text': return link(paragraphs(e.text || ''))
     case 'button': return h('a', { class: 'ep-el-button', href: e.href || undefined, target: e.href ? '_blank' : undefined, rel: 'noopener noreferrer ugc', role: e.href ? undefined : 'presentation' }, e.text || 'Button')
-    case 'image': return link(e.src ? h('img', { class: 'ep-el-img', src: e.src, alt: e.text || '', loading: 'lazy', draggable: 'false', style: `object-fit:${e.style.fit || 'cover'}` }) : h('div', { class: 'ep-el-img ep-el-empty' }, 'Picture'))
+    case 'image': {
+      const src = resolveSrc(e.src, doc)
+      if (src && e.sprite) return link(spriteEl(src, e.sprite, e.text || ''))
+      return link(src ? h('img', { class: 'ep-el-img', src, alt: e.text || '', loading: 'lazy', draggable: 'false', style: `object-fit:${e.style.fit || 'cover'}` }) : h('div', { class: 'ep-el-img ep-el-empty' }, 'Picture'))
+    }
     case 'divider': return h('hr', { class: 'ep-el-divider' })
     case 'shape': return h('div', { class: 'ep-el-shape' })
-    case 'module': return moduleBox(e.module!, doc, data, actions)
+    case 'module': return e.module === 'poll' ? pollBox(e.pollId, actions) : e.module === 'webring' ? webringBox(e.ringId, actions) : moduleBox(e.module!, doc, data, actions)
     case 'code': return codeFrame(e.code || { html: '', css: '', js: '' }, actions.sandboxUrl || CODE_SANDBOX_URL)
+    case 'widget': return codeFrame(e.widget ? compileWidget(e.widget) : { html: '', css: '', js: '' }, actions.sandboxUrl || CODE_SANDBOX_URL)
+    case 'nav': {
+      const nav = h('nav', { class: 'ep-el-nav', 'aria-label': 'Pages' })
+      const list = [{ slug: 'home', name: doc.design.homeName }, ...doc.design.pages.filter(pg => !pg.hidden)]
+      for (const pg of list) {
+        const current = (actions.page || 'home') === pg.slug
+        const a = h('a', { href: actions.pageHref ? actions.pageHref(pg.slug) : '#', 'aria-current': current ? 'page' : undefined }, pg.name)
+        if (actions.onOpenPage) a.addEventListener('click', event => { event.preventDefault(); actions.onOpenPage!(pg.slug) })
+        nav.append(a)
+      }
+      return nav
+    }
   }
+}
+/** A sprite sheet played frame by frame (paused for reduced motion; stops itself when removed from the page). */
+function spriteEl(src: string, sp: NonNullable<DesignElement['sprite']>, alt: string) {
+  const el = h('div', { class: 'ep-el-img ep-sprite', role: 'img', 'aria-label': alt || 'animated picture' })
+  el.style.backgroundImage = `url("${src.replace(/"/g, '%22')}")`
+  el.style.backgroundSize = `${sp.cols * 100}% ${sp.rows * 100}%`
+  const show = (i: number) => {
+    const c = i % sp.cols, r = Math.floor(i / sp.cols)
+    el.style.backgroundPosition = `${sp.cols > 1 ? c / (sp.cols - 1) * 100 : 0}% ${sp.rows > 1 ? r / (sp.rows - 1) * 100 : 0}%`
+  }
+  show(0)
+  if (typeof window !== 'undefined' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches && sp.frames > 1) {
+    let frame = 0, started = false
+    const timer = window.setInterval(() => {
+      if (!el.isConnected) { if (started) window.clearInterval(timer); return }
+      started = true; frame = (frame + 1) % sp.frames; show(frame)
+    }, 1000 / sp.fps)
+  }
+  return el
+}
+/** Elements shown on a page: that page's own, plus the home page's global ones. */
+export function pageElements(design: Design, slug = 'home'): DesignElement[] {
+  const page = design.pages.find(pg => pg.slug === slug && !pg.hidden)
+  if (!page) return design.elements
+  return [...design.elements.filter(e => e.global), ...page.elements]
 }
 /** A creator's code block: an opaque-origin sandboxed frame on a separate site. It can't reach the profile page,
  *  sign-ins, storage, the app, the network, pop-ups or top-level navigation. */
@@ -379,15 +632,21 @@ export function codeFrame(code: { html: string; css: string; js: string }, sandb
 }
 /** The free-form Visual Designer page. Desktop: exact positions on a 960px canvas. Narrow screens: a
  *  readable single column in top-to-bottom order, so a desktop design never makes mobile unusable. */
-export function designCanvas(doc: ProfileDoc, data: ProfileData, actions: ProfileActions, editing = false) {
+export function designCanvas(doc: ProfileDoc, data: ProfileData, actions: ProfileActions, editing = false, elementsOverride?: DesignElement[], heightOverride?: number) {
   const design = doc.design
-  const bottom = design.elements.reduce((max, e) => e.hidden ? max : Math.max(max, e.y + e.h), 0)
-  const canvas = h('div', { class: 'ep-canvas' + (editing ? ' is-editing' : '') })
-  canvas.style.height = Math.max(design.height, bottom + 40) + 'px'
-  const order = [...design.elements].sort((a, b) => a.y - b.y || a.x - b.x)
-  for (const e of design.elements) {
+  const slug = actions.page || 'home'
+  const page = design.pages.find(pg => pg.slug === slug && !pg.hidden)
+  const elements = elementsOverride || pageElements(design, slug)
+  const bottom = elements.reduce((max, e) => e.hidden ? max : Math.max(max, e.y + e.h), 0)
+  const canvas = h('div', { class: `ep-canvas ep-adapt-${design.adapt}` + (editing ? ' is-editing' : '') })
+  const height = Math.max(heightOverride ?? (page ? page.height : design.height), bottom + 40)
+  canvas.style.height = height + 'px'
+  const order = [...elements].sort((a, b) => a.y - b.y || a.x - b.x)
+  const byId = new Map<string, HTMLElement>()
+  for (const e of elements) {
     if (e.hidden && !editing) continue
-    const wrap = h('div', { class: `ep-el ep-el-${e.kind}` + (e.hideMobile ? ' ep-hide-mobile' : '') + (e.hidden ? ' is-hidden' : '') + (e.style.anim && e.style.anim !== 'none' ? ` ep-anim-${e.style.anim}` : ''), 'data-el': e.id })
+    const wrap = h('div', { class: `ep-el ep-el-${e.kind}` + (e.hideMobile ? ' ep-hide-mobile' : '') + (e.hidden ? ' is-hidden' : '') + (e.startHidden && !editing ? ' ep-start-hidden' : '') + (e.style.anim && e.style.anim !== 'none' ? ` ep-anim-${e.style.anim}` : ''), 'data-el': e.id })
+    byId.set(e.id, wrap)
     const st = wrap.style
     st.left = e.x + 'px'; st.top = e.y + 'px'; st.width = e.w + 'px'; st.height = e.h + 'px'; st.zIndex = String(500 + e.z)
     st.order = String(order.indexOf(e))
@@ -395,10 +654,44 @@ export function designCanvas(doc: ProfileDoc, data: ProfileData, actions: Profil
     if (e.kind === 'divider') { wrap.style.setProperty('--ep-line', e.style.color || doc.theme.accent) }
     const body = elementBody(e, doc, data, actions)
     body.classList.add('ep-el-body')
-    if (e.kind === 'shape' && e.src) body.style.backgroundImage = `url("${e.src.replace(/"/g, '%22')}")`
+    if (e.kind === 'shape' && e.src) body.style.backgroundImage = `url("${resolveSrc(e.src, doc).replace(/"/g, '%22')}")`
     applyStyle(e.kind === 'module' ? wrap : body, e.style)
     wrap.append(body)
     canvas.append(wrap)
+  }
+  // Interaction Builder runtime: only shows/hides elements on this page or opens another page. No custom code.
+  if (!editing) for (const e of elements) {
+    if (!e.on) continue
+    const source = byId.get(e.id)
+    if (!source) continue
+    const { trigger, action, target } = e.on
+    const run = () => {
+      if (action === 'page') { if (actions.onOpenPage) actions.onOpenPage(target); else if (actions.pageHref) window.location.href = actions.pageHref(target); return }
+      const el = byId.get(target)
+      if (!el) return
+      const shown = !el.classList.contains('ep-start-hidden') && !el.hidden
+      const next = action === 'show' ? true : action === 'hide' ? false : !shown
+      el.classList.remove('ep-start-hidden'); el.hidden = !next
+    }
+    source.classList.add('ep-interactive')
+    if (trigger === 'click') {
+      source.setAttribute('role', 'button'); source.tabIndex = 0
+      source.addEventListener('click', run)
+      source.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); run() } })
+    } else {
+      // Hover, with keyboard focus as the alternative.
+      source.tabIndex = 0
+      source.addEventListener('pointerenter', run); source.addEventListener('focus', run)
+      if (action === 'show') { const undo = () => { const el = byId.get(target); if (el) el.hidden = true }; source.addEventListener('pointerleave', undo); source.addEventListener('blur', undo) }
+    }
+  }
+  if (design.adapt === 'scale' && !editing && typeof ResizeObserver !== 'undefined') {
+    // Proportional scaling: the whole composition shrinks to fit narrow screens.
+    const frame = h('div', { class: 'ep-scale-frame' })
+    frame.append(canvas)
+    const fit = () => { const w = frame.clientWidth || DESIGN_WIDTH; const k = Math.min(1, w / DESIGN_WIDTH); canvas.style.transform = `scale(${k})`; frame.style.height = height * k + 'px' }
+    new ResizeObserver(fit).observe(frame); requestAnimationFrame(fit)
+    return frame
   }
   return canvas
 }

@@ -57,12 +57,29 @@ describe('Elsewhere Profiles renderer safety', () => {
   })
   it('keeps old profiles working with an empty, switched-off design', () => {
     const doc = normalizeDoc({ layout: 'classic' })
-    expect(doc.design).toEqual({ on: false, height: 900, elements: [] })
+    expect(doc.design).toEqual({ on: false, height: 900, elements: [], pages: [], homeName: 'Home', adapt: 'reflow' })
   })
   it('keeps code blocks as plain text with size limits', () => {
     const big = 'x'.repeat(70000)
     const d = normalizeDesign({ elements: [{ id: 'c', kind: 'code', x: 0, y: 0, w: 300, h: 200, z: 0, code: { html: '<b>hi</b>', css: big, js: 42 }, href: 'https://a.example' }] })
     expect(d.elements[0].code).toEqual({ html: '<b>hi</b>', css: 'x'.repeat(60000), js: '' })
     expect(d.elements[0].href).toBeUndefined()
+  })
+  it('keeps pages tidy: unique links, page limits, safe interactions', () => {
+    const d = normalizeDesign({ pages: [
+      { name: 'Music!!', elements: [{ id: 'x', kind: 'text', x: 0, y: 0, w: 10, h: 10, global: true, on: { trigger: 'click', action: 'page', target: 'home' } }] },
+      { name: 'music' }, { name: 'Home' },
+      ...Array.from({ length: 20 }, (_, i) => ({ name: 'p' + i })),
+    ], elements: [{ id: 'n', kind: 'nav', x: 0, y: 0, w: 300, h: 50, global: true, on: { trigger: 'explode', action: 'show', target: 'n' } }] })
+    expect(d.pages.length).toBe(12)
+    const slugs = d.pages.map(p => p.slug)
+    expect(new Set(slugs).size).toBe(slugs.length)
+    expect(slugs[0]).toBe('music')
+    expect(slugs).not.toContain('home')
+    expect(d.pages[0].elements[0].global).toBeUndefined()
+    expect(d.pages[0].elements[0].on).toEqual({ trigger: 'click', action: 'page', target: 'home' })
+    expect(d.elements[0].global).toBe(true)
+    expect(d.elements[0].on).toBeUndefined()
+    expect(d.adapt).toBe('reflow')
   })
 })

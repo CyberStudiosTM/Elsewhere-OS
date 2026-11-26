@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import {
-  ANIMATIONS, DESIGN_WIDTH, FONTS, MODULES, renderDesignPage,
-  type Design, type DesignElement, type DesignStyle, type ElementKind, type ModuleName, type ProfileData, type ProfileDoc,
+  ACTIONS, ADAPT_MODES, ANIMATIONS, DESIGN_WIDTH, FONTS, MODULES, TRIGGERS, renderDesignPage, slugify,
+  type Design, type DesignElement, type DesignPage, type DesignStyle, type ElementKind, type ModuleName, type ProfileData, type ProfileDoc,
 } from './profileRender'
 import CodeEditor from './CodeEditor'
 import AlgoPanel from './AlgoPanel'
+import WidgetsStudio, { WidgetPropsForm } from './WidgetsStudio'
+import AssetManager from './AssetManager'
 import { VIBES, generateLayout, type Decoration, type GeneratorOptions, type Structure, type Vibe } from './layoutGenerator'
 import './Designer.css'
 
@@ -22,13 +24,17 @@ type Props = {
   onError: (message: string) => void
   /** Where code blocks run (dev harness overrides it). */
   sandboxUrl?: string
+  /** Creates a server poll for the Poll piece (returns its id). */
+  createPoll?: (question: string, options: string[]) => Promise<string>
+  /** Lists my webrings for the Webring piece. */
+  listWebrings?: () => Promise<{ id: string; name: string }[]>
 }
 type Box = { x: number; y: number; w: number; h: number }
-type Drag = { kind: 'move' | 'resize'; dir: string; startX: number; startY: number; start: Map<string, Box>; before: Design; moved: boolean }
+type Drag = { kind: 'move' | 'resize'; dir: string; startX: number; startY: number; start: Map<string, Box>; before: Design; rootBefore: Design; moved: boolean }
 type Guide = { axis: 'x' | 'y'; at: number }
 
-const MODULE_LABELS: Record<ModuleName, string> = { identity: 'Name card', about: 'About me', interests: 'Interests', music: 'Profile song', links: 'Links', friends: 'Top Friends', bulletins: 'Bulletins', guestbook: 'Guestbook' }
-const KIND_LABELS: Record<ElementKind, string> = { heading: 'Heading', text: 'Text', image: 'Picture', button: 'Button', divider: 'Divider', shape: 'Shape', module: 'Module', code: 'Code block' }
+const MODULE_LABELS: Record<ModuleName, string> = { identity: 'Name card', about: 'About me', interests: 'Interests', music: 'Profile song', links: 'Links', friends: 'Top Friends', bulletins: 'Bulletins', guestbook: 'Guestbook', counter: 'Visitor counter', poll: 'Poll', webring: 'Webring' }
+const KIND_LABELS: Record<ElementKind, string> = { heading: 'Heading', text: 'Text', image: 'Picture', button: 'Button', divider: 'Divider', shape: 'Shape', module: 'Module', code: 'Code block', nav: 'Page menu', widget: 'Widget' }
 const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
 const SNAP = 6
 const newId = () => Math.random().toString(36).slice(2, 10)
@@ -44,6 +50,8 @@ function starter(kind: ElementKind, module: ModuleName | undefined, y: number, t
     case 'divider': return { ...base, kind, w: 600, h: 6, style: { color: theme.accent } }
     case 'shape': return { ...base, kind, w: 240, h: 160, style: { bg: theme.panel, radius: 18, shadow: 1, opacity: 0.9 } }
     case 'module': return { ...base, kind, module, w: module === 'guestbook' || module === 'bulletins' ? 560 : 440, h: module === 'identity' ? 190 : 260, style: {} }
+    case 'nav': return { ...base, kind, w: 600, h: 56, style: {} }
+    case 'widget': return { ...base, kind, w: 300, h: 240, style: {} }
     case 'code': return { ...base, kind, w: 420, h: 240, code: {
       html: '<div class="sparkle">click me ✦</div>',
       css: '.sparkle { display: grid; place-items: center; height: 100vh; font: bold 28px Tahoma, sans-serif; color: #ff5fa2; cursor: pointer; }',
@@ -58,7 +66,18 @@ function fromLayout(doc: ProfileDoc): Design {
     ['friends', 480, 300, 460, 220], ['links', 20, 640, 440, 160], ['bulletins', 480, 540, 460, 260], ['guestbook', 20, 820, 920, 320],
   ]
   const shown = (m: ModuleName) => m === 'identity' || doc.sections[m as keyof ProfileDoc['sections']] !== false
-  return { on: true, height: 1180, elements: place.filter(([m]) => shown(m)).map(([module, x, y, w, h], i) => ({ id: newId(), kind: 'module', module, x, y, w, h, z: i, style: {} })) }
+  return { on: true, height: 1180, pages: doc.design.pages, homeName: doc.design.homeName, adapt: doc.design.adapt, elements: place.filter(([m]) => shown(m)).map(([module, x, y, w, h], i) => ({ id: newId(), kind: 'module', module, x, y, w, h, z: i, style: {} })) }
+}
+
+/** The Designer edits one page at a time: a view of the design with that page's elements and height. */
+function viewOf(root: Design, page: string): Design {
+  if (page === 'home') return root
+  const pg = root.pages.find(x => x.slug === page)
+  return pg ? { ...root, elements: pg.elements, height: pg.height } : root
+}
+function mergeView(root: Design, view: Design, page: string): Design {
+  if (page === 'home') return { ...root, on: view.on, adapt: view.adapt, height: view.height, elements: view.elements }
+  return { ...root, on: view.on, adapt: view.adapt, pages: root.pages.map(pg => pg.slug === page ? { ...pg, elements: view.elements.map(e => ({ ...e, global: undefined })), height: view.height } : pg) }
 }
 
 function NumberField({ label: text, value, min, max, step = 1, onChange }: { label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }) {
@@ -66,11 +85,13 @@ function NumberField({ label: text, value, min, max, step = 1, onChange }: { lab
     onChange={e => { const v = Number(e.target.value); if (isFinite(v)) onChange(Math.min(max, Math.max(min, v))) }} /></label>
 }
 
-export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pickImage, onError, sandboxUrl }: Props) {
+export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pickImage, onError, sandboxUrl, createPoll, listWebrings }: Props) {
   const [coding, setCoding] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
   const [generating, setGenerating] = useState(false)
   const [algo, setAlgo] = useState(false)
+  const [widgets, setWidgets] = useState(false)
+  const [assets, setAssets] = useState<null | { mode: 'browse' } | { mode: 'pick'; target: string }>(null)
   const [gen, setGen] = useState<GeneratorOptions>({ vibe: 'frutiger-aero', structure: 'modular', decoration: 'decorated', seed: 1, modules: ['identity', 'about', 'music', 'friends', 'interests', 'links', 'bulletins', 'guestbook'] })
   const past = useRef<Design[]>([])
   const future = useRef<Design[]>([])
@@ -85,24 +106,34 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   const [history, setHistory] = useState({ undo: 0, redo: 0 })
   const syncHistory = () => setHistory({ undo: past.current.length, redo: future.current.length })
 
-  const setDesign = useCallback((next: Design) => onDoc({ ...docRef.current, design: next }), [onDoc])
+  const [page, setPageState] = useState('home')
+  const pageRef = useRef('home')
+  /** Switches the page being edited (the ref keeps callbacks in step without an effect). */
+  const setPage = (slug: string) => { pageRef.current = slug; setPageState(slug) }
+  const setDesign = useCallback((next: Design) => {
+    docRef.current = { ...docRef.current, design: mergeView(docRef.current.design, next, pageRef.current) }
+    onDoc(docRef.current)
+  }, [onDoc])
+  const setRoot = useCallback((next: Design) => { docRef.current = { ...docRef.current, design: next }; onDoc(docRef.current) }, [onDoc])
   /** Records an undo step (typing into one field within a moment counts as one step). */
   const commit = useCallback((next: Design, key = '') => {
     const now = Date.now()
     if (!key || key !== lastKey.current.key || now - lastKey.current.at > 900) { past.current.push(docRef.current.design); if (past.current.length > 200) past.current.shift() }
     lastKey.current = { key, at: now }
     future.current = []
-    docRef.current = { ...docRef.current, design: next }
     setDesign(next); syncHistory()
   }, [setDesign])
-  const undo = useCallback(() => { const prev = past.current.pop(); if (!prev) return; future.current.push(docRef.current.design); setDesign(prev); syncHistory() }, [setDesign])
-  const redo = useCallback(() => { const next = future.current.pop(); if (!next) return; past.current.push(docRef.current.design); setDesign(next); syncHistory() }, [setDesign])
+  /** A change to the whole design (pages list, page names…), recorded as one undo step. */
+  const commitRoot = useCallback((next: Design) => { past.current.push(docRef.current.design); future.current = []; setRoot(next); syncHistory() }, [setRoot])
+  const undo = useCallback(() => { const prev = past.current.pop(); if (!prev) return; future.current.push(docRef.current.design); setRoot(prev); syncHistory() }, [setRoot])
+  const redo = useCallback(() => { const next = future.current.pop(); if (!next) return; past.current.push(docRef.current.design); setRoot(next); syncHistory() }, [setRoot])
 
   function runGenerator(next: GeneratorOptions) {
     setGen(next)
     const made = generateLayout(next)
     past.current.push(docRef.current.design); future.current = []; syncHistory()
-    onDoc({ ...docRef.current, theme: made.theme, design: made.design })
+    docRef.current = { ...docRef.current, theme: made.theme, design: mergeView(docRef.current.design, { ...docRef.current.design, on: true, elements: made.design.elements, height: made.design.height }, pageRef.current) }
+    onDoc(docRef.current)
     setSelected([])
   }
   const generatorDialog = generating && <div className="ce-backdrop" onPointerDown={e => e.stopPropagation()}>
@@ -115,7 +146,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
         <option value="two-column">Classic two columns</option><option value="modular">Modular homepage</option><option value="collage">Freeform collage</option><option value="surprise">Surprise me</option></select></label>
       <label>Decoration<select value={gen.decoration} onChange={e => setGen({ ...gen, decoration: e.target.value as Decoration })}>
         <option value="minimal">Minimal</option><option value="decorated">Decorated</option><option value="maximalist">Maximalist</option></select></label>
-      <fieldset><legend>Pieces to include</legend>{MODULES.map(m => <label key={m} className="dz-check"><input type="checkbox" checked={gen.modules.includes(m)}
+      <fieldset><legend>Pieces to include</legend>{MODULES.filter(m => m !== 'poll' && m !== 'webring').map(m => <label key={m} className="dz-check"><input type="checkbox" checked={gen.modules.includes(m)}
         onChange={e => setGen({ ...gen, modules: e.target.checked ? [...gen.modules, m] : gen.modules.filter(x => x !== m) })} /> {MODULE_LABELS[m]}</label>)}</fieldset>
       <p className="dz-tip">Generating replaces this page and its colors (Undo brings the page back).</p>
       <p className="dz-credit">the elsewhere profile generator runs on a rule-based algorithm designed by Cyber. no data sets, no AI generation, no generative slop. it runs right on your computer: just code, functions, and vibes ♡</p>
@@ -126,7 +157,9 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
       </div>
     </section>
   </div>
-  const design = doc.design
+  const root = doc.design
+  const design = useMemo(() => viewOf(root, page), [root, page])
+  const currentPage: DesignPage | undefined = root.pages.find(x => x.slug === page)
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [guides, setGuides] = useState<Guide[]>([])
   const [scale, setScale] = useState(1)
@@ -149,8 +182,8 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   const pageData = useMemo<ProfileData>(() => ({ ...data, doc }), [data, doc])
   useEffect(() => {
     const target = device === 'desktop' ? host.current : mobileHost.current
-    if (target) renderDesignPage(target, pageData, { profileHref: () => '#', sandboxUrl })
-  }, [pageData, device, sandboxUrl])
+    if (target) renderDesignPage(target, pageData, { profileHref: () => '#', sandboxUrl, page })
+  }, [pageData, device, sandboxUrl, page])
 
   const height = Math.max(design.height, design.elements.reduce((m, e) => e.hidden ? m : Math.max(m, e.y + e.h), 0) + 40)
 
@@ -160,6 +193,27 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
     const el: DesignElement = { id: newId(), z, ...starter(kind, module, Math.round(top), doc.theme) }
     commit({ ...design, on: true, elements: [...design.elements, el] })
     setSelected([el.id])
+  }
+  async function addPoll() {
+    if (!createPoll) { onError('Polls need you to be signed in to Elsewhere.'); return }
+    const question = window.prompt('Poll question', 'what should i post next?')?.trim(); if (!question) return
+    const answers = window.prompt('Answers, separated by |', 'a song|a drawing|a photo')?.split('|').map(a => a.trim()).filter(Boolean) || []
+    if (answers.length < 2) { onError('A poll needs at least 2 answers.'); return }
+    try {
+      const pollId = await createPoll(question, answers.slice(0, 8))
+      const z = design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
+      const el: DesignElement = { id: newId(), z, ...starter('module', 'poll', 40, doc.theme), pollId }
+      commit({ ...design, on: true, elements: [...design.elements, el] }); setSelected([el.id])
+    } catch (cause) { onError(cause instanceof Error ? cause.message : String(cause)) }
+  }
+  async function addWebring() {
+    const rings = listWebrings ? await listWebrings().catch(() => []) : []
+    if (!rings.length) { onError('Start or join a webring in Elsewhere Home first.'); return }
+    const pick = rings.length === 1 ? 0 : Number(window.prompt('Which webring?\n' + rings.map((r, i) => `${i + 1}. ${r.name}`).join('\n'), '1')) - 1
+    const ring = rings[pick]; if (!ring) return
+    const z = design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
+    const el: DesignElement = { id: newId(), z, ...starter('module', 'webring', 40, doc.theme), h: 140, ringId: ring.id }
+    commit({ ...design, on: true, elements: [...design.elements, el] }); setSelected([el.id])
   }
   function remove(ids = selected) { if (!ids.length) return; commit({ ...design, elements: design.elements.filter(e => !ids.includes(e.id)) }); setSelected([]) }
   function duplicate(source = sel, offset = 16) {
@@ -210,7 +264,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
     if (!selected.includes(id)) { const grouped = e.group ? design.elements.filter(x => x.group === e.group).map(x => x.id) : [id]; ids = event.shiftKey ? [...selected, ...grouped] : grouped; setSelected(ids) }
     if (dir === '' && ids.some(x => byId.get(x)?.locked)) return
     if (dir && e.locked) return
-    drag.current = { kind: dir ? 'resize' : 'move', dir, startX: event.clientX, startY: event.clientY, before: design, moved: false,
+    drag.current = { kind: dir ? 'resize' : 'move', dir, startX: event.clientX, startY: event.clientY, before: design, rootBefore: docRef.current.design, moved: false,
       start: new Map(ids.map(x => { const el = byId.get(x)!; return [x, { x: el.x, y: el.y, w: el.w, h: el.h }] })) }
     ;(event.target as Element).setPointerCapture?.(event.pointerId)
   }
@@ -250,7 +304,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   }
   function onPointerUp() {
     const d = drag.current; drag.current = null; setGuides([])
-    if (d?.moved) { past.current.push(d.before); future.current = []; lastKey.current = { key: '', at: 0 }; syncHistory() }
+    if (d?.moved) { past.current.push(d.rootBefore); future.current = []; lastKey.current = { key: '', at: 0 }; syncHistory() }
   }
 
   // ---------- Keyboard ----------
@@ -289,7 +343,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   const size = useMemo(() => JSON.stringify(doc).length, [doc])
 
   // ---------- Empty state ----------
-  if (!design.elements.length) return <div className="dz-start">
+  if (page === 'home' && !design.elements.length && !root.pages.length) return <div className="dz-start">
     <h2>✦ Visual Designer</h2>
     <p>Build your page your way: drag things anywhere, resize them, layer them, and style every piece.</p>
     <div className="dz-start-choices">
@@ -302,6 +356,42 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   </div>
 
   const ordered = [...design.elements].sort((a, b) => b.z - a.z)
+  function addPage(copyOf?: DesignPage | 'home') {
+    const name = window.prompt('Name for the new page', copyOf ? 'Copy of ' + (copyOf === 'home' ? root.homeName : copyOf.name) : 'My page')?.trim().slice(0, 40)
+    if (!name) return
+    if (root.pages.length >= 12) { onError('Profiles can have up to 13 pages.'); return }
+    const taken = new Set(['home', ...root.pages.map(x => x.slug)])
+    let slug = slugify(name); while (taken.has(slug)) slug = slug.slice(0, 26) + '-' + Math.floor(Math.random() * 90 + 10)
+    const source = copyOf === 'home' ? root.elements.filter(e => !e.global) : copyOf?.elements || []
+    const pg: DesignPage = { id: newId(), name, slug, hidden: false, height: copyOf === 'home' ? root.height : copyOf?.height || 900,
+      elements: source.map(e => ({ ...e, id: newId(), global: undefined, on: undefined })) }
+    commitRoot({ ...root, on: true, pages: [...root.pages, pg] }); setPage(slug); setSelected([])
+  }
+  const movePage = (slug: string, step: -1 | 1) => {
+    const list = [...root.pages]; const i = list.findIndex(x => x.slug === slug); const j = i + step
+    if (i < 0 || j < 0 || j >= list.length) return
+    ;[list[i], list[j]] = [list[j], list[i]]; commitRoot({ ...root, pages: list })
+  }
+  const pagesPanel = <>
+    <h3>Pages</h3>
+    <ol className="dz-pages">
+      <li className={page === 'home' ? 'is-selected' : ''}>
+        <button type="button" className="dz-layer-name" onClick={() => { setPage('home'); setSelected([]) }}>🏠 {root.homeName}</button>
+        <button type="button" title="Rename" aria-label="Rename home page" onClick={() => { const n = window.prompt('Home page name', root.homeName)?.trim().slice(0, 40); if (n) commitRoot({ ...root, homeName: n }) }}>✎</button>
+      </li>
+      {root.pages.map(pg => <li key={pg.slug} className={page === pg.slug ? 'is-selected' : ''}>
+        <button type="button" className="dz-layer-name" onClick={() => { setPage(pg.slug); setSelected([]) }}>{pg.hidden ? '◌ ' : ''}{pg.name}</button>
+        <button type="button" title="Move up" aria-label="Move page up" onClick={() => movePage(pg.slug, -1)}>▲</button>
+        <button type="button" title="Move down" aria-label="Move page down" onClick={() => movePage(pg.slug, 1)}>▼</button>
+      </li>)}
+    </ol>
+    <div className="dz-row"><button type="button" onClick={() => addPage()}>+ Page</button><button type="button" onClick={() => addPage(page === 'home' ? 'home' : currentPage)}>⧉ Duplicate</button></div>
+    {currentPage && <div className="dz-row">
+      <button type="button" onClick={() => { const n = window.prompt('Page name', currentPage.name)?.trim().slice(0, 40); if (n) commitRoot({ ...root, pages: root.pages.map(x => x.slug === page ? { ...x, name: n } : x) }) }}>✎ Rename</button>
+      <button type="button" onClick={() => commitRoot({ ...root, pages: root.pages.map(x => x.slug === page ? { ...x, hidden: !x.hidden } : x) })}>{currentPage.hidden ? 'Show' : 'Hide'}</button>
+      <button type="button" onClick={() => { if (window.confirm(`Delete the page “${currentPage.name}”?`)) { commitRoot({ ...root, pages: root.pages.filter(x => x.slug !== page) }); setPage('home'); setSelected([]) } }}>🗑</button>
+    </div>}
+  </>
   return <div className="dz">
     <div className="dz-bar">
       <button type="button" onClick={undo} disabled={!history.undo} title="Undo (Ctrl+Z)">↶</button>
@@ -318,19 +408,22 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
       {size > 600000 && <span className="dz-warn" title="Profiles can hold about 700 KB">Almost full: use fewer or smaller pictures</span>}
       <button type="button" onClick={() => setGenerating(true)}>✦ Generate</button>
       <button type="button" onClick={() => setAlgo(true)}>🧠 Code generator</button>
+      <button type="button" onClick={() => setWidgets(true)}>🧩 Widgets</button>
+      <button type="button" onClick={() => setAssets({ mode: 'browse' })}>🖼 Assets</button>
       <button type="button" onClick={onLeave}>Quick Customize</button>
       <button type="button" onClick={() => onSave(false)} disabled={!dirty}>💾 Save draft</button>
       <button type="button" className="is-primary" onClick={() => onSave(true)}>✦ Publish</button>
     </div>
     <div className="dz-body">
       <aside className="dz-left">
+        {pagesPanel}
         <h3>Add</h3>
         <div className="dz-add">
-          {(['heading', 'text', 'image', 'button', 'divider', 'shape', 'code'] as const).map(k => <button key={k} type="button" onClick={() => add(k)}>{{ heading: '𝐇', text: '¶', image: '🖼', button: '⬭', divider: '―', shape: '◼', code: '</>' }[k]} {KIND_LABELS[k]}</button>)}
+          {(['heading', 'text', 'image', 'button', 'divider', 'shape', 'code', 'nav'] as const).map(k => <button key={k} type="button" onClick={() => add(k)}>{{ heading: '𝐇', text: '¶', image: '🖼', button: '⬭', divider: '―', shape: '◼', code: '</>', nav: '☰' }[k]} {KIND_LABELS[k]}</button>)}
         </div>
         <h3>Profile pieces</h3>
         <div className="dz-add">
-          {MODULES.map(m => <button key={m} type="button" onClick={() => add('module', m)}>{MODULE_LABELS[m]}</button>)}
+          {MODULES.map(m => <button key={m} type="button" onClick={() => m === 'poll' ? void addPoll() : m === 'webring' ? void addWebring() : add('module', m)}>{MODULE_LABELS[m]}</button>)}
         </div>
         <h3>Layers</h3>
         <ol className="dz-layers">
@@ -362,6 +455,10 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
         {!sel.length && <>
           <h3>Page</h3>
           <NumberField label="Page height" value={design.height} min={200} max={12000} step={20} onChange={v => commit({ ...design, height: v }, 'height')} />
+          {currentPage && <p className="dz-tip">Page link: …profile.html?u=you&amp;p={currentPage.slug}</p>}
+          <label>On phones<select value={design.adapt} onChange={e => commit({ ...design, adapt: e.target.value as Design['adapt'] })}>
+            {ADAPT_MODES.map(m => <option key={m} value={m}>{{ reflow: 'Reflow into one column', scale: 'Shrink the whole design', scroll: 'Scroll sideways (scene)' }[m]}</option>)}</select></label>
+          <p className="dz-tip">Add a ☰ Page menu so visitors can move between pages.</p>
           <p className="dz-tip">Click anything on the page to style it. Shift-click to pick several, then group them (Ctrl+G). Hold Alt while dragging to turn snapping off.</p>
           <p className="dz-tip">Colors, font and background pattern for the whole page are in Quick Customize.</p>
         </>}
@@ -395,14 +492,19 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
           </div>
           {(one.kind === 'heading' || one.kind === 'text' || one.kind === 'button') && <label>Text<textarea id="dz-text" rows={one.kind === 'text' ? 6 : 2} maxLength={4000} value={one.text || ''} onChange={e => update(selected, x => ({ ...x, text: e.target.value }), 'text')} /></label>}
           {(one.kind === 'image' || one.kind === 'shape') && <>
-            <label>{one.kind === 'image' ? 'Picture' : 'Fill picture (optional)'}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={e => void upload(e.target.files, src => update(selected, x => ({ ...x, src })))} /></label>
+            <button type="button" onClick={() => setAssets({ mode: 'pick', target: one.id })}>🖼 Choose from assets</button>
+            <label>{one.kind === 'image' ? 'Or upload a picture' : 'Or upload a fill picture (optional)'}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={e => void upload(e.target.files, src => update(selected, x => ({ ...x, src })))} /></label>
             {one.src && <button type="button" className="dz-link" onClick={() => update(selected, x => ({ ...x, src: undefined }))}>Remove picture</button>}
           </>}
           {one.kind === 'image' && <>
             <label>Description (for screen readers)<input value={one.text || ''} maxLength={200} onChange={e => update(selected, x => ({ ...x, text: e.target.value }), 'alt')} /></label>
             <label>Fit<select value={one.style.fit || 'cover'} onChange={e => style({ fit: e.target.value as 'cover' | 'contain' })}><option value="cover">Fill the box</option><option value="contain">Show the whole picture</option></select></label>
           </>}
-          {one.kind !== 'divider' && one.kind !== 'shape' && one.kind !== 'module' && one.kind !== 'code' && <label>Link (https, optional)<input value={one.href || ''} placeholder="https://…" onChange={e => update(selected, x => ({ ...x, href: e.target.value }), 'href')} /></label>}
+          {one.kind !== 'divider' && one.kind !== 'shape' && one.kind !== 'module' && one.kind !== 'code' && one.kind !== 'widget' && one.kind !== 'nav' && <label>Link (https, optional)<input value={one.href || ''} placeholder="https://…" onChange={e => update(selected, x => ({ ...x, href: e.target.value }), 'href')} /></label>}
+          {one.kind === 'widget' && one.widget && <>
+            <p className="dz-tip">{one.widget.pkg.name} v{one.widget.pkg.version}{one.widget.pkg.author ? ` · by ${one.widget.pkg.author}` : ''}. Each copy keeps its own settings.</p>
+            <WidgetPropsForm pkg={one.widget.pkg} values={one.widget.values} onChange={values => update([one.id], x => ({ ...x, widget: { ...x.widget!, values } }), 'widget')} />
+          </>}
           {one.kind === 'code' && <>
             <button type="button" className="dz-code-btn" onClick={() => setCoding(true)}>{'</>'} Edit HTML, CSS & JavaScript…</button>
             <p className="dz-tip">Code runs in a locked sandbox: no sign-ins, messages, internet or private data.</p>
@@ -445,11 +547,45 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
             <NumberField label="Rotate (°)" value={one.style.rot || 0} min={-180} max={180} onChange={v => style({ rot: v }, 'rot')} />
             <label>Animation<select value={one.style.anim || 'none'} onChange={e => style({ anim: e.target.value as DesignStyle['anim'] })}>{ANIMATIONS.map(a => <option key={a} value={a}>{a}</option>)}</select></label>
             <label className="dz-check"><input type="checkbox" checked={!!one.hideMobile} onChange={e => update(selected, x => ({ ...x, hideMobile: e.target.checked }))} /> Hide on phones</label>
+            {page === 'home' && root.pages.length > 0 && <label className="dz-check"><input type="checkbox" checked={!!one.global} onChange={e => update(selected, x => ({ ...x, global: e.target.checked || undefined }))} /> Show on every page</label>}
+            <label className="dz-check"><input type="checkbox" checked={!!one.startHidden} onChange={e => update(selected, x => ({ ...x, startHidden: e.target.checked || undefined }))} /> Starts hidden (a popup or reveal)</label>
+          </details>
+          <details open><summary>Interaction</summary>
+            <label>When visitors<select value={one.on?.trigger || ''} onChange={e => update(selected, x => ({ ...x, on: e.target.value ? { trigger: e.target.value as typeof TRIGGERS[number], action: x.on?.action || 'toggle', target: x.on?.target || '' } : undefined }))}>
+              <option value="">(nothing)</option>{TRIGGERS.map(t => <option key={t} value={t}>{t === 'click' ? 'click it' : 'hover over it'}</option>)}</select></label>
+            {one.on && <>
+              <label>Then<select value={one.on.action} onChange={e => update(selected, x => ({ ...x, on: { ...x.on!, action: e.target.value as typeof ACTIONS[number], target: '' } }))}>
+                {ACTIONS.map(a => <option key={a} value={a}>{{ show: 'show', hide: 'hide', toggle: 'show / hide', page: 'go to page' }[a]}</option>)}</select></label>
+              <label>{one.on.action === 'page' ? 'Page' : 'Which piece'}<select value={one.on.target} onChange={e => update(selected, x => ({ ...x, on: { ...x.on!, target: e.target.value } }))}>
+                <option value="">(choose)</option>
+                {one.on.action === 'page'
+                  ? [{ slug: 'home', name: root.homeName }, ...root.pages].map(pg => <option key={pg.slug} value={pg.slug}>{pg.name}</option>)
+                  : design.elements.filter(x => x.id !== one.id).map(x => <option key={x.id} value={x.id}>{label(x)}{x.startHidden ? ' (hidden)' : ''}</option>)}
+              </select></label>
+              <p className="dz-tip">Try it in “View as visitor” or after publishing. Hidden pieces are only hidden visually, so don't put secrets in them.</p>
+            </>}
           </details>
         </>}
       </aside>
     </div>
     {generatorDialog}
+    {assets && <AssetManager doc={doc} mode={assets.mode} onClose={() => setAssets(null)}
+      onDoc={next => { docRef.current = next; onDoc(next) }}
+      onUse={(asset, sprite) => {
+        if (assets.mode === 'pick') { update([assets.target], x => ({ ...x, src: 'asset:' + asset.id })); setAssets(null); return }
+        const fw = sprite ? asset.w / sprite.cols : asset.w, fh = sprite ? asset.h / sprite.rows : asset.h
+        const k = Math.min(1, 400 / (fw || 400), 400 / (fh || 400))
+        const top = viewport.current ? Math.round(viewport.current.scrollTop / scale + 40) : 40
+        const z = design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
+        const el: DesignElement = { id: newId(), kind: 'image', x: 40, y: top, w: Math.max(16, Math.round((fw || 200) * k)), h: Math.max(16, Math.round((fh || 200) * k)), z, src: 'asset:' + asset.id, text: '', sprite, style: { fit: 'contain' } }
+        commit({ ...design, on: true, elements: [...design.elements, el] }); setSelected([el.id]); setAssets(null)
+      }} />}
+    {widgets && <WidgetsStudio sandboxUrl={sandboxUrl} author={data.handle ? '@' + data.handle : ''} onClose={() => setWidgets(false)} onInsert={(pkg, values) => {
+      const top = viewport.current ? Math.round(viewport.current.scrollTop / scale + 40) : 40
+      const z = design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
+      const el: DesignElement = { id: newId(), kind: 'widget', x: 40, y: top, w: Math.max(pkg.minW, 300), h: Math.max(pkg.minH, 220), z, widget: { pkg, values }, style: {} }
+      commit({ ...design, on: true, elements: [...design.elements, el] }); setSelected([el.id])
+    }} />}
     {algo && <AlgoPanel sandboxUrl={sandboxUrl} onClose={() => setAlgo(false)} onInsert={code => {
       const top = viewport.current ? Math.round(viewport.current.scrollTop / scale + 40) : 40
       const z = design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
