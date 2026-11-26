@@ -14,7 +14,8 @@ const js = (value: unknown) => JSON.stringify(value)
 const dur = (base: number, p: Piece) => `${Math.round((base / p.speed) * 100) / 100}s`
 const still = (p: Piece) => p.no.has('animation')
 const c1 = (p: Piece, pal: Palette) => p.colors[0] || pal.accent
-const c2 = (p: Piece, pal: Palette) => p.colors[1] || pal.accent2
+/** Second color: the one asked for, or a lighter shade of the first so a single color stays one color. */
+const c2 = (p: Piece, pal: Palette) => p.colors[1] || (p.colors[0] ? `color-mix(in srgb, ${p.colors[0]} 55%, white)` : pal.accent2)
 const reduce = (id: string) => `@media (prefers-reduced-motion: reduce) { #${id}, #${id} * { animation: none !important; transition: none !important; } }`
 const glossBg = (a: string, b: string) => `linear-gradient(180deg, color-mix(in srgb, ${a} 35%, white) 0%, ${a} 48%, color-mix(in srgb, ${a} 80%, black) 52%, ${b} 100%)`
 const ANIM_CSS: Record<string, string> = {
@@ -30,6 +31,15 @@ function anims(id: string, p: Piece) {
   return { css: list.map(a => `@keyframes ${id}-${a}{${ANIM_CSS[a]}}`).join('\n'), value: list.map(a => `${id}-${a} ${dur(animDur[a], p)} ease-in-out infinite`).join(', ') }
 }
 
+/** Patterns that already apply the requested animation themselves. */
+export const ANIMATES_ITSELF = new Set(['heading', 'button', 'card', 'sparkle', 'rainbow', 'typewriter', 'marquee', 'glowtext'])
+const ING: Record<string, string> = { bounce: 'bouncing', spin: 'spinning', float: 'floating', shake: 'wiggling', pulse: 'pulsing', fade: 'fading', flicker: 'flickering', glow: 'glowing', wave: 'wavy' }
+/** Wraps any other pattern so a "bouncing clock" or "spinning sticker" moves too. */
+export function withAnimation(id: string, p: Piece, out: Code): Code {
+  const a = anims(id + '-m', p)
+  if (!a.value) return out
+  return { ...out, html: `<div id="${id}-m" style="display:flex;justify-content:center">${out.html}</div>`, css: `${out.css}\n${a.css}\n#${id}-m > * { animation: ${a.value}; }\n${reduce(id + '-m')}`, summary: `${ING[p.anims[0]] || p.anims[0]} ${out.summary}` }
+}
 export const PATTERNS: Record<string, (id: string, p: Piece, pal: Palette) => Code> = {
   heading(id, p, pal) {
     const text = p.text || 'welcome to my page ♡'
@@ -59,8 +69,9 @@ export const PATTERNS: Record<string, (id: string, p: Piece, pal: Palette) => Co
     }
     if (fx.has('marquee')) {
       html = `<div id="${id}" role="marquee" aria-label="${esc(text)}"><span>${esc(text)}</span></div>`
-      css = `#${id} { overflow: hidden; white-space: nowrap; font: bold ${size}px/1.4 ${pal.font}; color: ${c1(p, pal)}; }\n#${id} span { display: inline-block; padding-left: 100%;${still(p) ? '' : ` animation: ${id}-mq ${dur(10, p)} linear infinite;`} }\n@keyframes ${id}-mq { to { transform: translateX(-100%); } }`
-      summary = 'scrolling marquee text'
+      const rainbowText = fx.has('rainbow') ? ' background: linear-gradient(90deg, #ff4d6d, #ffb347, #ffe66d, #6ee36e, #4dc3ff, #9b6bff, #ff4d6d); -webkit-background-clip: text; background-clip: text; color: transparent;' : ''
+      css = `#${id} { overflow: hidden; white-space: nowrap; font: bold ${size}px/1.4 ${pal.font}; color: ${c1(p, pal)}; }\n#${id} span { display: inline-block;${still(p) ? '' : ' padding-left: 100%;'}${rainbowText}${still(p) ? '' : ` animation: ${id}-mq ${dur(10, p)} linear infinite;`} }\n@keyframes ${id}-mq { to { transform: translateX(-100%); } }`
+      summary = (fx.has('rainbow') ? 'rainbow ' : '') + 'scrolling marquee text'
     }
     if (fx.has('blinkie')) { css += `\n#${id} { animation: ${id}-bl ${dur(1, p)} steps(1) infinite; }\n@keyframes ${id}-bl { 50% { opacity: .2; } }`; summary = 'blinking text' }
     if (a.value) { css += `\n${a.css}\n#${id} { display: inline-block; animation: ${a.value}; }`; css = `#${id}-outer { text-align: center; }\n` + css; html = `<div id="${id}-outer">${html}</div>` }

@@ -4,6 +4,7 @@ import {
   type Design, type DesignElement, type DesignStyle, type ElementKind, type ModuleName, type ProfileData, type ProfileDoc,
 } from './profileRender'
 import CodeEditor from './CodeEditor'
+import AlgoPanel from './AlgoPanel'
 import { VIBES, generateLayout, type Decoration, type GeneratorOptions, type Structure, type Vibe } from './layoutGenerator'
 import './Designer.css'
 
@@ -69,6 +70,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
   const [coding, setCoding] = useState(false)
   const [selected, setSelected] = useState<string[]>([])
   const [generating, setGenerating] = useState(false)
+  const [algo, setAlgo] = useState(false)
   const [gen, setGen] = useState<GeneratorOptions>({ vibe: 'frutiger-aero', structure: 'modular', decoration: 'decorated', seed: 1, modules: ['identity', 'about', 'music', 'friends', 'interests', 'links', 'bulletins', 'guestbook'] })
   const past = useRef<Design[]>([])
   const future = useRef<Design[]>([])
@@ -315,6 +317,7 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
       <span className="dz-grow" />
       {size > 600000 && <span className="dz-warn" title="Profiles can hold about 700 KB">Almost full: use fewer or smaller pictures</span>}
       <button type="button" onClick={() => setGenerating(true)}>✦ Generate</button>
+      <button type="button" onClick={() => setAlgo(true)}>🧠 Code generator</button>
       <button type="button" onClick={onLeave}>Quick Customize</button>
       <button type="button" onClick={() => onSave(false)} disabled={!dirty}>💾 Save draft</button>
       <button type="button" className="is-primary" onClick={() => onSave(true)}>✦ Publish</button>
@@ -447,6 +450,12 @@ export default function Designer({ doc, data, onDoc, onSave, onLeave, dirty, pic
       </aside>
     </div>
     {generatorDialog}
+    {algo && <AlgoPanel sandboxUrl={sandboxUrl} onClose={() => setAlgo(false)} onInsert={code => {
+      const top = viewport.current ? Math.round(viewport.current.scrollTop / scale + 40) : 40
+      const z = design.elements.reduce((m, e) => Math.max(m, e.z), 0) + 1
+      const el: DesignElement = { id: newId(), kind: 'code', x: 40, y: top, w: 480, h: 280, z, code, style: {} }
+      commit({ ...design, on: true, elements: [...design.elements, el] }); setSelected([el.id])
+    }} />}
     {coding && one?.kind === 'code' && <CodeEditor code={one.code || { html: '', css: '', js: '' }} sandboxUrl={sandboxUrl}
       onChange={next => update([one.id], x => ({ ...x, code: next }))} onClose={() => setCoding(false)} />}
   </div>
