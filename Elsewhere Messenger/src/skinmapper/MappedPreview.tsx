@@ -1,5 +1,7 @@
 import type { MouseEvent } from 'react'
 import './mapped.css'
+import type { Decoration } from './schema'
+import { decorationStyle } from './decorations'
 
 // SkinMapper editor preview: the mapped skin drawn with simulated people and messages.
 // Nothing here can send, sign in or call anything; every control is inert. Clicking a part
@@ -22,13 +24,15 @@ function Slot({ id, picked, className, children, as = 'div', ...rest }: { id: st
   return <Tag data-sm-slot={id} className={(className || '') + (picked === id ? ' sm-is-picked' : '')} {...rest}>{children}</Tag>
 }
 
-export default function MappedPreview({ css, transcript, window: view, picked, onPick, state = {} }: {
+export default function MappedPreview({ css, transcript, window: view, picked, onPick, state = {}, decorations = [], urlFor }: {
   css: string
   transcript: 'classic' | 'bubble'
   window: PreviewWindow
   picked: string | null
   onPick: (slotId: string) => void
   state?: PreviewState
+  decorations?: Decoration[]
+  urlFor?: (path: string) => string | undefined
 }) {
   // One click handler for the whole preview: the closest slot under the pointer wins.
   const pick = (event: MouseEvent) => {
@@ -111,6 +115,8 @@ export default function MappedPreview({ css, transcript, window: view, picked, o
           </Slot>
         </div>
       </>}
+      {decorations.filter(item => item.window === view).map(item => urlFor?.(item.asset.path)
+        ? <img key={item.id} src={urlFor(item.asset.path)} alt="" draggable={false} className="sm-decoration" style={decorationStyle(item) as React.CSSProperties} /> : null)}
     </Slot>}
   </div>
 }

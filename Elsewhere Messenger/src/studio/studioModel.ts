@@ -48,7 +48,12 @@ type LayerBase = {
   /** Nearest-neighbor scaling for crisp pixel art. */
   pixelated: boolean
 }
-export type ImageLayer = LayerBase & { type: 'image'; mediaId: string; mediaKind: 'local' | 'treasure' | 'studio-sticker'; /** Fill the box and crop the overflow (collage photos). */ cover?: boolean }
+export type MediaKind = 'local' | 'treasure' | 'studio-sticker'
+export type ImageLayer = LayerBase & {
+  type: 'image'; mediaId: string; mediaKind: MediaKind; /** Fill the box and crop the overflow (collage photos). */ cover?: boolean
+  /** The picture before its background was removed, so it can be restored. */
+  originalMediaId?: string; originalKind?: MediaKind
+}
 /** An empty photo spot in a collage or strip, waiting for a picture. Not drawn in exports. */
 export type SlotLayer = LayerBase & { type: 'slot' }
 export type StickerLayer = LayerBase & { type: 'sticker'; glyph: string }
@@ -69,6 +74,8 @@ export type StudioDoc = {
   height: number
   /** Base photo in the local image library. Never modified. */
   photoId: string | null
+  /** Where the base photo sits after the canvas was resized (fills the whole canvas when missing). */
+  photoBox?: { x: number; y: number; w: number; h: number }
   background: string
   filter: FilterName
   filterStrength: number
@@ -106,6 +113,47 @@ export function collageDoc(layout: CollageLayout): StudioDoc {
     layers: layout.boxes.map(([x, y, w, h, rotation], index) => ({
       id: newId(), name: `Photo spot ${index + 1}`, x, y, w, h, rotation, opacity: 1, flipX: false, hidden: false, locked: false, pixelated: false, type: 'slot' as const,
     })),
+  }
+}
+
+/** Ready-made canvas sizes. */
+export const CANVAS_PRESETS: { id: string; label: string; width: number; height: number }[] = [
+  { id: 'ig-post', label: 'Instagram post (portrait 4:5)', width: 1080, height: 1350 },
+  { id: 'ig-square', label: 'Instagram post (square)', width: 1080, height: 1080 },
+  { id: 'ig-story', label: 'Instagram story / reel', width: 1080, height: 1920 },
+  { id: 'tiktok', label: 'TikTok', width: 1080, height: 1920 },
+  { id: 'pfp', label: 'Profile picture', width: 800, height: 800 },
+  { id: 'banner', label: 'Elsewhere profile banner', width: 960, height: 300 },
+  { id: 'yt-thumb', label: 'YouTube thumbnail', width: 1280, height: 720 },
+  { id: 'wallpaper', label: 'Desktop wallpaper (HD)', width: 1920, height: 1080 },
+  { id: 'phone', label: 'Phone wallpaper', width: 1170, height: 2532 },
+  { id: 'blinkie', label: 'Blinkie (old web)', width: 150, height: 20 },
+  { id: 'button', label: '88×31 button (old web)', width: 88, height: 31 },
+  { id: 'classic', label: 'Classic photo (4:3)', width: 1200, height: 900 },
+]
+export type ResizeMode = 'fit' | 'fill' | 'canvas'
+export const RESIZE_MODES: Record<ResizeMode, string> = {
+  fit: 'Scale everything to fit (nothing cut off)',
+  fill: 'Scale everything to fill (edges may be cut off)',
+  canvas: 'Keep sizes, just change the canvas (centered)',
+}
+
+/** A copy of the document at a new canvas size. Pictures keep their original files, so nothing loses quality. */
+export function resizeDoc(doc: StudioDoc, width: number, height: number, mode: ResizeMode): StudioDoc {
+  const scale = mode === 'canvas' ? 1 : mode === 'fit' ? Math.min(width / doc.width, height / doc.height) : Math.max(width / doc.width, height / doc.height)
+  const ox = (width - doc.width * scale) / 2
+  const oy = (height - doc.height * scale) / 2
+  const box = doc.photoBox || { x: 0, y: 0, w: doc.width, h: doc.height }
+  const round = (value: number) => Math.round(value * 100) / 100
+  const layers = doc.layers.map(layer => {
+    // Frames that covered the whole picture keep covering it.
+    if (layer.type === 'frame' && layer.x === 0 && layer.y === 0 && layer.w === doc.width && layer.h === doc.height) return { ...layer, w: width, h: height }
+    const moved = { ...layer, x: round(ox + layer.x * scale), y: round(oy + layer.y * scale), w: Math.max(1, round(layer.w * scale)), h: Math.max(1, round(layer.h * scale)) }
+    return layer.type === 'text' ? { ...moved, size: Math.max(4, round(layer.size * scale)) } as Layer : moved as Layer
+  })
+  return {
+    ...doc, width, height, layers,
+    photoBox: doc.photoId ? { x: round(ox + box.x * scale), y: round(oy + box.y * scale), w: round(box.w * scale), h: round(box.h * scale) } : undefined,
   }
 }
 

@@ -7,13 +7,14 @@ import MappedPreview, { type PreviewState, type PreviewWindow } from './MappedPr
 import { loadSkinPackage } from './packageLoader'
 import {
   SLOTS, SLOT_INDEX, resetProperty, resolve, validateManifest, validateTheme,
-  type AssetRef, type Finding, type ScaleMode, type SkinTheme, type SlotStyle, type StyleProperty, type VisualState,
+  type AssetRef, type Decoration, type Finding, type ScaleMode, type SkinTheme, type SlotStyle, type StyleProperty, type VisualState,
 } from './schema'
 import {
-  ASSET_FOLDERS, TEMPLATES, deleteSkinProject, exportPackage, importAsset, listSkinProjects, makePatternAsset, newProject, newStarterProject, projectFromPackage,
+  ASSET_FOLDERS, TEMPLATES, decorationAsset, deleteSkinProject, exportPackage, importAsset, listSkinProjects, makePatternAsset, newProject, newStarterProject, projectFromPackage,
   saveSkinProject, type AssetFolder, type ProjectAsset, type SkinProject,
 } from './skinProject'
 import SliceEditor from './SliceEditor'
+import DecorationsPanel from './DecorationsPanel'
 import { PATTERNS, type PatternKind } from './patterns'
 import { SKIN_FAMILIES, STARTER_SKINS } from './stationerySkins'
 import './SkinMapper.css'
@@ -33,6 +34,8 @@ const LABELS: Partial<Record<StyleProperty, string>> = {
   gap: 'Spacing between items', icon: 'Icon image',
 }
 type Mode = 'simple' | 'designer' | 'advanced'
+/** The Explorer entry for stickers and Web Treasures placed on the windows. */
+const DECOR = '__decorations'
 
 function download(bytes: Uint8Array, name: string) {
   const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: 'application/zip' }))
@@ -140,6 +143,20 @@ export default function SkinMapperApp() {
     }
     if (added.length) { setProject({ ...project, assets: [...project.assets, ...added] }); setDirty(true) }
   }
+  /** Copies a picture into the skin and places it on the window being previewed. */
+  async function addDecoration(blob: Blob, pixelated: boolean) {
+    if (!project || view === 'notification') return
+    try {
+      const asset = await decorationAsset(project, blob)
+      const width = Math.max(16, Math.min(asset.width, 96))
+      const decoration: Decoration = { id: crypto.randomUUID(), asset: { path: asset.path, ...(pixelated ? { pixelated: true } : {}) }, window: view, anchor: 'top-right', x: 12, y: 36, width }
+      setPast(list => [...list.slice(-99), project.theme]); setFuture([])
+      setProject({ ...project, assets: [...project.assets, asset], theme: { ...project.theme, decorations: [...(project.theme.decorations || []), decoration] } })
+      setDirty(true); setFindings(null)
+      setNotice('Decoration added ♡ Move and size it in Properties.')
+    } catch (cause) { setNotice(cause instanceof Error ? cause.message : 'That picture couldn’t be added.') }
+  }
+
   function closeWindow() {
     if (dirty && !window.confirm('Close SkinMapper? Changes that aren’t saved will be lost.')) return
     if (isTauri()) void getCurrentWindow().close()
@@ -181,6 +198,7 @@ export default function SkinMapperApp() {
     <div className="sm-app-body">
       <nav className="sm-explorer" aria-label="SkinMap Explorer">
         <strong>SkinMap Explorer</strong>
+        <button type="button" className={'sm-decor-entry' + (slotId === DECOR ? ' is-active' : '')} onClick={() => setSlotId(DECOR)}>✨ Decorations</button>
         {grouped.map(group => <details key={group.label} open={group.slots.some(item => item.id === slotId)}>
           <summary>{group.label}</summary>
           {group.slots.map(item => <button key={item.id} type="button" className={item.id === slotId ? 'is-active' : ''} onClick={() => setSlotId(item.id)}
@@ -194,7 +212,8 @@ export default function SkinMapperApp() {
             className={view === name ? 'is-active' : ''} onClick={() => setView(name)}>{name === 'sign-in' ? 'Sign-In' : name === 'buddy-list' ? 'Buddy List' : name === 'conversation' ? 'Conversation' : 'Notification'}</button>)}
         </div>
         <div className="sm-stage-canvas">
-          <MappedPreview css={css} transcript={compiled?.transcript || 'classic'} window={view} picked={slotId} onPick={id => setSlotId(id)} state={sim} />
+          <MappedPreview css={css} transcript={compiled?.transcript || 'classic'} window={view} picked={slotId} onPick={id => setSlotId(id)} state={sim}
+            decorations={project.theme.decorations} urlFor={path => urls[path]} />
         </div>
         <div className="sm-simulator" aria-label="State simulator">
           <strong>Preview with:</strong>
@@ -204,6 +223,11 @@ export default function SkinMapperApp() {
       </main>
 
       <aside className="sm-inspector" aria-label="Properties">
+        {slotId === DECOR ? <>
+          <strong>✨ Decorations</strong>
+          <DecorationsPanel decorations={project.theme.decorations || []} view={view} urls={urls} onAdd={addDecoration}
+            onChange={next => change(theme => ({ ...theme, decorations: next.length ? next : undefined }))} />
+        </> : <>
         <strong>{slot?.name || slotId}</strong>
         {mode === 'advanced' && <code>{slotId}</code>}
         {slot?.protected && <p className="sm-hint">This is a working control: you can restyle it, but it always stays visible and clickable.</p>}
@@ -223,6 +247,7 @@ export default function SkinMapperApp() {
           </div>
         })}
         {!editable.length && <p className="sm-hint">Switch to Designer mode for more options.</p>}
+        </>}
         {findings && <div className="sm-findings">
           <strong>Check Skin</strong>
           {!findings.length ? <p className="sm-hint">✓ No problems found.</p> : findings.map((item, index) => <button key={index} type="button" className={'is-' + item.severity}
@@ -236,7 +261,7 @@ export default function SkinMapperApp() {
           <label>Add to <select value={assetFolder} onChange={event => setAssetFolder(event.target.value as AssetFolder)}>{ASSET_FOLDERS.map(folder => <option key={folder}>{folder}</option>)}</select></label>
           <button type="button" onClick={() => assetInput.current?.click()}>+ Import images</button>
           <button type="button" aria-expanded={patternOpen} onClick={() => setPatternOpen(open => !open)}>✦ Make a pattern</button>
-          <small>PNG, WebP or JPEG · up to 4096 px · copied into your project</small>
+          <small>PNG, WebP, JPEG or GIF · up to 4096 px · copied into your project</small>
         </div>
         {patternOpen && <div className="sm-pattern-maker">
           <select value={pattern.kind} onChange={event => setPattern({ ...pattern, kind: event.target.value as PatternKind })}>
@@ -263,7 +288,7 @@ export default function SkinMapperApp() {
       </section>
     </div>
     {notice && <div className="sm-toast-note" role="status">{notice}<button type="button" onClick={() => setNotice('')} aria-label="Dismiss">×</button></div>}
-    <input ref={assetInput} type="file" hidden multiple accept="image/png,image/webp,image/jpeg" onChange={event => { void addAssets(event.target.files); event.target.value = '' }} />
+    <input ref={assetInput} type="file" hidden multiple accept="image/png,image/webp,image/jpeg,image/gif" onChange={event => { void addAssets(event.target.files); event.target.value = '' }} />
   </div>
 }
 

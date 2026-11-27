@@ -2,7 +2,7 @@
 -- Free-first sharing. Resources (downloadable packages) and showcase posts (finished work to look at) are separate.
 -- Every read/write goes through functions that check visibility, ownership, friendship and moderation status.
 
-create table if not exists public.elsewhere_moderators (user_id uuid primary key references public.elsewhere_profiles(id) on delete cascade);
+create table if not exists public.elsewhere_exchange_moderators (user_id uuid primary key references public.elsewhere_profiles(id) on delete cascade);
 
 create table if not exists public.elsewhere_resources (
   id uuid primary key default gen_random_uuid(),
@@ -59,7 +59,7 @@ create table if not exists public.elsewhere_showcase_comments (
   hidden boolean not null default false,
   created_at timestamptz not null default now()
 );
-create table if not exists public.elsewhere_reports (
+create table if not exists public.elsewhere_exchange_reports (
   id uuid primary key default gen_random_uuid(),
   reporter uuid not null references public.elsewhere_profiles(id) on delete cascade,
   target_kind text not null check (target_kind in ('resource', 'showcase', 'comment', 'profile')),
@@ -71,18 +71,18 @@ create table if not exists public.elsewhere_reports (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-alter table public.elsewhere_moderators enable row level security;
+alter table public.elsewhere_exchange_moderators enable row level security;
 alter table public.elsewhere_resources enable row level security;
 alter table public.elsewhere_resource_favorites enable row level security;
 alter table public.elsewhere_showcase enable row level security;
 alter table public.elsewhere_showcase_hearts enable row level security;
 alter table public.elsewhere_showcase_comments enable row level security;
-alter table public.elsewhere_reports enable row level security;
-revoke all on public.elsewhere_moderators, public.elsewhere_resources, public.elsewhere_resource_favorites, public.elsewhere_showcase,
-  public.elsewhere_showcase_hearts, public.elsewhere_showcase_comments, public.elsewhere_reports from anon, authenticated;
+alter table public.elsewhere_exchange_reports enable row level security;
+revoke all on public.elsewhere_exchange_moderators, public.elsewhere_resources, public.elsewhere_resource_favorites, public.elsewhere_showcase,
+  public.elsewhere_showcase_hearts, public.elsewhere_showcase_comments, public.elsewhere_exchange_reports from anon, authenticated;
 
 create or replace function elsewhere_internal.moderator(person uuid)
-returns boolean language sql stable security definer set search_path to '' as $$ select person is not null and exists (select 1 from public.elsewhere_moderators where user_id = person) $$;
+returns boolean language sql stable security definer set search_path to '' as $$ select person is not null and exists (select 1 from public.elsewhere_exchange_moderators where user_id = person) $$;
 create or replace function public.am_elsewhere_moderator()
 returns boolean language sql stable security definer set search_path to '' as $$ select elsewhere_internal.moderator(auth.uid()) $$;
 
@@ -289,15 +289,15 @@ returns uuid language plpgsql security definer set search_path to '' as $$
 declare me uuid := auth.uid(); made uuid;
 begin
   if me is null then raise exception 'Sign in to Elsewhere to report.'; end if;
-  if (select count(*) from public.elsewhere_reports where reporter = me and created_at > now() - interval '1 hour') >= 10 then raise exception 'You''ve sent a lot of reports. Try again later.'; end if;
-  insert into public.elsewhere_reports(reporter, target_kind, target_id, category, details) values (me, target_kind, left(target_id, 64), category, left(coalesce(details, ''), 2000)) returning id into made;
+  if (select count(*) from public.elsewhere_exchange_reports where reporter = me and created_at > now() - interval '1 hour') >= 10 then raise exception 'You''ve sent a lot of reports. Try again later.'; end if;
+  insert into public.elsewhere_exchange_reports(reporter, target_kind, target_id, category, details) values (me, target_kind, left(target_id, 64), category, left(coalesce(details, ''), 2000)) returning id into made;
   return made;
 end $$;
 -- Reporters see the status of their own reports (never who else reported).
 create or replace function public.my_elsewhere_reports()
 returns jsonb language sql stable security definer set search_path to '' as $$
   select coalesce(jsonb_agg(jsonb_build_object('id', id, 'target_kind', target_kind, 'category', category, 'status', status, 'resolution', resolution, 'created_at', created_at) order by created_at desc), '[]'::jsonb)
-  from public.elsewhere_reports where reporter = auth.uid();
+  from public.elsewhere_exchange_reports where reporter = auth.uid();
 $$;
 -- Moderators: the queue.
 create or replace function public.list_elsewhere_reports(only_open boolean default true)
@@ -306,15 +306,15 @@ begin
   if not elsewhere_internal.moderator(auth.uid()) then raise exception 'Moderators only.'; end if;
   return coalesce((select jsonb_agg(jsonb_build_object('id', r.id, 'target_kind', r.target_kind, 'target_id', r.target_id, 'category', r.category, 'details', r.details, 'status', r.status,
     'resolution', r.resolution, 'created_at', r.created_at, 'reporter', (select handle from public.elsewhere_profiles where id = r.reporter)) order by r.created_at)
-    from public.elsewhere_reports r where not only_open or r.status in ('received', 'under_review')), '[]'::jsonb);
+    from public.elsewhere_exchange_reports r where not only_open or r.status in ('received', 'under_review')), '[]'::jsonb);
 end $$;
 -- Moderators: act on a report. Actions: review, dismiss, restrict (hide from discovery/downloads), remove (withdraw / hide comment).
 create or replace function public.act_elsewhere_report(report_id uuid, action text, note text)
 returns void language plpgsql security definer set search_path to '' as $$
-declare r public.elsewhere_reports;
+declare r public.elsewhere_exchange_reports;
 begin
   if not elsewhere_internal.moderator(auth.uid()) then raise exception 'Moderators only.'; end if;
-  select * into r from public.elsewhere_reports where id = report_id;
+  select * into r from public.elsewhere_exchange_reports where id = report_id;
   if r.id is null then raise exception 'Report not found.'; end if;
   if action in ('restrict', 'remove') then
     if r.target_kind = 'resource' then update public.elsewhere_resources set status = case when action = 'remove' then 'withdrawn' else 'restricted' end where id::text = r.target_id;
@@ -322,7 +322,7 @@ begin
     elsif r.target_kind = 'comment' then update public.elsewhere_showcase_comments set hidden = true where id::text = r.target_id;
     end if;
   end if;
-  update public.elsewhere_reports set status = case action when 'review' then 'under_review' when 'dismiss' then 'closed' else 'action_taken' end,
+  update public.elsewhere_exchange_reports set status = case action when 'review' then 'under_review' when 'dismiss' then 'closed' else 'action_taken' end,
     resolution = left(coalesce(note, ''), 1000), updated_at = now() where id = report_id;
 end $$;
 -- Moderators: restore something after review or a successful appeal.
@@ -354,4 +354,4 @@ grant execute on function public.am_elsewhere_moderator(), public.save_elsewhere
   public.restore_elsewhere_item(text, text) to authenticated;
 
 -- Make Cyber (@cyberthreed) the first moderator.
-insert into public.elsewhere_moderators(user_id) select id from public.elsewhere_profiles where handle = 'cyberthreed' on conflict do nothing;
+insert into public.elsewhere_exchange_moderators(user_id) select id from public.elsewhere_profiles where handle = 'cyberthreed' on conflict do nothing;

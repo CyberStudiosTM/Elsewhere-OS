@@ -16,12 +16,12 @@ export const LIMITS = {
   jsonBytes: 512 * 1024,
 }
 
-export type PackageImage = { path: string; type: 'image/png' | 'image/jpeg' | 'image/webp'; width: number; height: number; bytes: Uint8Array }
+export type PackageImage = { path: string; type: 'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif'; width: number; height: number; bytes: Uint8Array }
 export type LoadedSkin = { manifest: SkinManifest; theme: SkinTheme; images: Map<string, PackageImage>; findings: Finding[] }
 export type LoadResult = { ok: true; skin: LoadedSkin } | { ok: false; findings: Finding[] }
 
 const ALLOWED_TOP = new Set(['manifest.json', 'theme.json'])
-const ASSET_PATH = /^assets\/(frames|buttons|icons|textures|backgrounds|preview)\/[A-Za-z0-9 _.-]{1,120}\.(png|webp|jpe?g)$/i
+const ASSET_PATH = /^assets\/(frames|buttons|icons|textures|backgrounds|decorations|preview)\/[A-Za-z0-9 _.-]{1,120}\.(png|webp|jpe?g|gif)$/i
 
 /** Reads width and height from the file header, and confirms the real file type. */
 export function imageInfo(bytes: Uint8Array): { type: PackageImage['type']; width: number; height: number } | null {
@@ -39,6 +39,9 @@ export function imageInfo(bytes: Uint8Array): { type: PackageImage['type']; widt
       return { type: 'image/webp', width: 1 + (((b[1] & 0x3f) << 8) | b[0]), height: 1 + (((b[3] & 0x0f) << 10) | (b[2] << 2) | ((b[1] & 0xc0) >> 6)) }
     }
     return null
+  }
+  if (bytes.length > 10 && /^GIF8[79]a$/.test(String.fromCharCode(...bytes.slice(0, 6)))) {
+    return { type: 'image/gif', width: at(6) | (at(7) << 8), height: at(8) | (at(9) << 8) }
   }
   if (bytes.length > 4 && at(0) === 0xff && at(1) === 0xd8) {
     let i = 2
@@ -98,7 +101,7 @@ export function loadSkinPackage(bytes: Uint8Array): LoadResult {
         const key = name.toLowerCase()
         if (seen.has(key)) { entryProblem = `The package has two files named "${name}".`; return false }
         seen.add(key)
-        if (!ALLOWED_TOP.has(name) && !ASSET_PATH.test(name)) { entryProblem = `"${name}" isn’t allowed in a skin package (only manifest.json, theme.json and PNG, WebP or JPEG images in assets/).`; return false }
+        if (!ALLOWED_TOP.has(name) && !ASSET_PATH.test(name)) { entryProblem = `"${name}" isn’t allowed in a skin package (only manifest.json, theme.json and PNG, WebP, JPEG or GIF images in assets/).`; return false }
         if (seen.size > LIMITS.assetCount + 2) { entryProblem = 'The package has more than 300 images.'; return false }
         declaredTotal += file.originalSize
         if (file.originalSize > (ALLOWED_TOP.has(name) ? LIMITS.jsonBytes : LIMITS.imageBytes)) { entryProblem = `"${name}" is too large.`; return false }
@@ -129,9 +132,9 @@ export function loadSkinPackage(bytes: Uint8Array): LoadResult {
   for (const [name, data] of Object.entries(files)) {
     if (ALLOWED_TOP.has(name)) continue
     const info = imageInfo(data)
-    if (!info) { findings.push({ severity: 'error', message: `"${name}" isn’t a real PNG, WebP or JPEG image.`, path: name }); continue }
+    if (!info) { findings.push({ severity: 'error', message: `"${name}" isn’t a real PNG, WebP, JPEG or GIF image.`, path: name }); continue }
     const extension = name.split('.').pop()!.toLowerCase()
-    const expected = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg'
+    const expected = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : extension === 'gif' ? 'image/gif' : 'image/jpeg'
     if (info.type !== expected) findings.push({ severity: 'warning', message: `"${name}" is actually ${info.type.replace('image/', '').toUpperCase()}; it will be read as that.`, path: name })
     if (!info.width || !info.height || info.width > LIMITS.imageSide || info.height > LIMITS.imageSide) {
       findings.push({ severity: 'error', message: `"${name}" is ${info.width}×${info.height}; images can be up to 4096 pixels per side.`, path: name })

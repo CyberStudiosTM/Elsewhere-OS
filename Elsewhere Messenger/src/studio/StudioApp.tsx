@@ -7,10 +7,11 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { saveLocalImage } from '../services/messengerMedia'
 import { useTreasureRevision, loadTreasures, type Treasure } from '../services/webTreasures'
 import {
-  COLLAGE_LAYOUTS, FILTERS, FRAMES, STARTER_STICKERS, TEXT_STYLES, blankDoc, collageDoc, drawLayer, miniUiLayer, stationeryLayer, frameLayer, imageLayer, newId, stickerLayer, textLayer,
-  type CollageLayout, type FilterName, type FrameStyle, type Layer, type StudioDoc, type StudioProject, type TextStyle,
+  CANVAS_PRESETS, COLLAGE_LAYOUTS, FILTERS, FRAMES, RESIZE_MODES, STARTER_STICKERS, TEXT_STYLES, blankDoc, collageDoc, resizeDoc, drawLayer, miniUiLayer, stationeryLayer, frameLayer, imageLayer, newId, stickerLayer, textLayer,
+  type CollageLayout, type FilterName, type ResizeMode, type FrameStyle, type Layer, type StudioDoc, type StudioProject, type TextStyle,
 } from './studioModel'
-import { canvasToBlob, mediaUrl, renderDoc, textFont, thumbnail } from './studioRender'
+import { canvasToBlob, mediaBlob, mediaUrl, renderDoc, textFont, thumbnail } from './studioRender'
+import { removeBackground, type CutoutOptions } from './backgroundRemover'
 import { MINI_UI, STATIONERY, drawMiniUi, drawStationery, drawStrokes, type MiniUiStyle, type StationeryStyle } from './studioDrawn'
 import {
   addMyTreasure, clearRecovery, deleteProject, findDuplicateTreasure, listMyTreasures, listProjects, loadProject, loadRecovery,
@@ -91,7 +92,7 @@ export default function StudioApp() {
   const [favorites, setFavorites] = useState<Recent[]>(() => readJson(FAVORITES, []))
   const [drawerTab, setDrawerTab] = useState<DrawerTab>('recent')
   const [menu, setMenu] = useState('')
-  const [dialog, setDialog] = useState<'' | 'finish' | 'open' | 'close' | 'export' | 'gallery' | 'wardrobe'>('')
+  const [dialog, setDialog] = useState<'' | 'finish' | 'open' | 'close' | 'export' | 'gallery' | 'wardrobe' | 'resize' | 'new'>('')
   const [look, setLook] = useState<WardrobeLook>(readWardrobe)
   const [recovery, setRecovery] = useState<StudioProject | null>(null)
   const [notice, setNotice] = useState('')
@@ -360,10 +361,10 @@ export default function StudioApp() {
     }
   }
 
-  async function exportImage(type: 'image/png' | 'image/jpeg', fill: string) {
+  async function exportImage(type: 'image/png' | 'image/jpeg', fill: string, size = 1) {
     if (!project) return
     try {
-      const canvas = await renderDoc(project.doc, type === 'image/jpeg' ? fill : undefined)
+      const canvas = await renderDoc(project.doc, type === 'image/jpeg' ? fill : undefined, size)
       const blob = await canvasToBlob(canvas, type, .93)
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
@@ -428,6 +429,48 @@ export default function StudioApp() {
       setNotice('Sent to your Elsewhere picture. Check your buddy list.')
       setDialog('')
     } catch { setNotice('Your Elsewhere picture couldn’t be updated.') }
+  }
+
+  function newBlank(width: number, height: number) {
+    if (project && dirty && !window.confirm('Start a new canvas? Unsaved changes to this project will be lost.')) return
+    const now = new Date().toISOString()
+    setProject({ id: newId(), name: 'Untitled creation', createdAt: now, updatedAt: now, doc: blankDoc(width, height), sourceContactId: params.source, sourceContactName: params.sourceName })
+    setPast([]); setFuture([]); setSelected(null); setDirty(false); setSaved(false); setZoom(0); setDialog('')
+  }
+  /** Changes the canvas size of this project, or makes a resized copy and leaves the original as it was. */
+  function applyResize(width: number, height: number, mode: ResizeMode, asCopy: boolean, label: string) {
+    if (!project) return
+    if (asCopy) {
+      const now = new Date().toISOString()
+      setProject({ ...project, id: newId(), name: `${project.name} (${label})`.slice(0, 80), createdAt: now, updatedAt: now, doc: resizeDoc(project.doc, width, height, mode) })
+      setPast([]); setFuture([]); setDirty(true); setSaved(false)
+      setNotice(`Made a ${width}×${height} copy. Your original project is unchanged; save this copy to keep it.`)
+    } else {
+      commit(current => resizeDoc(current, width, height, mode))
+      setNotice(`Canvas is now ${width}×${height}. Undo (Ctrl+Z) puts it back.`)
+    }
+    setZoom(0); setDialog('')
+  }
+  /** Removes a picture's background into a new copy (the original file is kept for Restore). */
+  async function removeLayerBackground(id: string, options: CutoutOptions) {
+    const item = project?.doc.layers.find(entry => entry.id === id)
+    if (!item || item.type !== 'image') return
+    setNotice('Removing the background…')
+    try {
+      const source = await mediaBlob(item.mediaId, item.mediaKind)
+      if (!source) throw new Error('That picture couldn’t be read.')
+      const { blob, cleared } = await removeBackground(source, options)
+      if (!cleared) { setNotice('No flat background was found around the edges, so nothing changed. Try a higher tolerance.'); return }
+      const media = await saveLocalImage(new File([blob], blob.type === 'image/gif' ? 'cutout.gif' : 'cutout.png', { type: blob.type }))
+      if (media.kind !== 'local') return
+      updateLayer(id, { mediaId: media.id, mediaKind: 'local', originalMediaId: item.originalMediaId ?? item.mediaId, originalKind: item.originalKind ?? item.mediaKind } as Partial<Layer>)
+      setNotice('Background removed ♡ Use Restore original in Edit if you want it back.')
+    } catch (cause) { setNotice((cause instanceof Error ? cause.message : 'The background couldn’t be removed.') + ' Your picture is unchanged.') }
+  }
+  function restoreLayerOriginal(id: string) {
+    const item = project?.doc.layers.find(entry => entry.id === id)
+    if (!item || item.type !== 'image' || !item.originalMediaId) return
+    updateLayer(id, { mediaId: item.originalMediaId, mediaKind: item.originalKind || 'local', originalMediaId: undefined, originalKind: undefined } as Partial<Layer>)
   }
 
   function closeWindow(force = false) {
@@ -543,7 +586,7 @@ export default function StudioApp() {
           <button type="button" onClick={() => { void clearRecovery(); setRecovery(null) }}>Discard Recovery</button>
         </div>}
         <div className="ew-studio-start-actions">
-          <button type="button" className="ew-studio-big" onClick={() => { const now = new Date().toISOString(); setProject({ id: newId(), name: 'Untitled creation', createdAt: now, updatedAt: now, doc: blankDoc(), sourceContactId: params.source, sourceContactName: params.sourceName }) }}>🧁 Blank Canvas</button>
+          <button type="button" className="ew-studio-big" onClick={() => setDialog('new')}>🧁 Blank Canvas…</button>
           <button type="button" className="ew-studio-big" onClick={() => importInput.current?.click()}>📷 Import Photo…</button>
           <button type="button" className="ew-studio-big" onClick={() => setDialog('open')}>📂 Open Project…</button>
           <button type="button" className="ew-studio-big" onClick={() => setDialog('gallery')}>🖼️ My Gallery…</button>
@@ -553,6 +596,7 @@ export default function StudioApp() {
       </div>
       <input ref={importInput} type="file" hidden accept={IMPORT_TYPES.join(',')} onChange={event => { void importMainPhoto(event.target.files?.[0]); event.target.value = '' }} />
       {dialog === 'open' && <OpenProject onClose={() => setDialog('')} onOpen={found => { setProject(found); setSaved(true); setDialog('') }} />}
+      {dialog === 'new' && <CanvasSizeDialog title="New blank canvas" onClose={() => setDialog('')} onApply={(width, height) => newBlank(width, height)} />}
       {dialog === 'gallery' && <GalleryDialog onClose={() => setDialog('')} onOpenProject={found => { setProject(found); setSaved(true); setDialog('') }}
         onEditImage={(blob, name) => void editGalleryImage(blob, name)} />}
     </div>
@@ -561,6 +605,7 @@ export default function StudioApp() {
   // ---------- Editor ----------
   const menus: Record<string, { label: string; action: () => void; disabled?: boolean }[]> = {
     File: [
+      { label: 'New Blank Canvas…', action: () => setDialog('new') },
       { label: 'Import Photo…', action: () => importInput.current?.click() },
       { label: 'Open Project…', action: () => setDialog('open') },
       { label: 'My Gallery…', action: () => setDialog('gallery') },
@@ -582,6 +627,11 @@ export default function StudioApp() {
       { label: 'Fit to Window  (Ctrl 0)', action: () => setZoom(0) },
       { label: workspace.drawer ? 'Hide Quick Drawer' : 'Show Quick Drawer', action: () => setWorkspace({ ...workspace, drawer: !workspace.drawer }) },
       { label: 'Reset Workspace', action: () => { setWorkspace({ drawer: true }); setZoom(0); setTab('library'); setCategory('stickers') } },
+    ],
+    Image: [
+      { label: 'Canvas Size & Presets…', action: () => setDialog('resize') },
+      { label: 'Remove Background (selected picture)', action: () => { if (layer?.type === 'image') void removeLayerBackground(layer.id, { tolerance: 34 }) }, disabled: layer?.type !== 'image' },
+      { label: 'Restore Original Picture', action: () => { if (layer) restoreLayerOriginal(layer.id) }, disabled: !(layer?.type === 'image' && layer.originalMediaId) },
     ],
     Insert: [
       { label: 'Text', action: () => addText('bubble') },
@@ -644,7 +694,8 @@ export default function StudioApp() {
       <main className="ew-studio-canvas-wrap" ref={stageWrap} onPointerDown={() => setSelected(null)}>
         <div className={'ew-studio-stage' + (doc.background === 'transparent' ? ' is-transparent' : '')}
           style={{ width: doc.width * scale, height: doc.height * scale, background: doc.background === 'transparent' ? undefined : doc.background }}>
-          {doc.photoId && <StudioImage id={doc.photoId} kind="local" className="ew-studio-photo" style={{ filter: FILTERS[doc.filter].css(doc.filterStrength) }} />}
+          {doc.photoId && <StudioImage id={doc.photoId} kind="local" className="ew-studio-photo" style={{ filter: FILTERS[doc.filter].css(doc.filterStrength),
+            ...(doc.photoBox ? { left: doc.photoBox.x * scale, top: doc.photoBox.y * scale, width: doc.photoBox.w * scale, height: doc.photoBox.h * scale, inset: 'auto' } : {}) }} />}
           {doc.layers.map(item => <div key={item.id}
             className={'ew-studio-layer' + (item.id === selected ? ' is-selected' : '') + (item.locked ? ' is-locked' : '') + (item.hidden ? ' is-hidden' : '')}
             style={{ left: item.x * scale, top: item.y * scale, width: item.w * scale, height: item.h * scale, opacity: item.opacity,
@@ -719,6 +770,7 @@ export default function StudioApp() {
           {tab === 'edit' && layer?.type === 'slot' && <div className="ew-studio-edit"><p className="ew-studio-hint">This is an empty photo spot.</p>
             <button type="button" className="ew-studio-add" onClick={() => chooseSlotPhoto(layer.id)}>📷 Choose a photo…</button></div>}
           {tab === 'edit' && layer?.type !== 'slot' && <EditPanel layer={layer} onChange={patch => layer && updateLayer(layer.id, patch)}
+            onRemoveBackground={options => { if (layer) void removeLayerBackground(layer.id, options) }} onRestore={() => { if (layer) restoreLayerOriginal(layer.id) }}
             onDuplicate={duplicateSelected} onDelete={removeSelected}
             onForward={() => layer && moveLayer(layer.id, 1)} onBackward={() => layer && moveLayer(layer.id, -1)} />}
           {tab === 'layers' && <LayersPanel doc={doc} selected={selected} onSelect={id => { setSelected(id); setTab('edit') }}
@@ -766,8 +818,11 @@ export default function StudioApp() {
     {dialog === 'gallery' && <GalleryDialog onClose={() => setDialog('')}
       onOpenProject={found => { if (dirty && !window.confirm('Open this project? Unsaved changes to the current one will be lost.')) return; setProject(found); setPast([]); setFuture([]); setSelected(null); setSaved(true); setDirty(false); setDialog('') }}
       onEditImage={(blob, name) => { if (dirty && !window.confirm('Start a new project? Unsaved changes to the current one will be lost.')) return; void editGalleryImage(blob, name) }} />}
-    {dialog === 'export' && <ExportDialog onClose={() => setDialog('')} onExport={(type, fill) => void exportImage(type, fill)}
-      hasTransparency={doc.background === 'transparent'} />}
+    {dialog === 'export' && <ExportDialog onClose={() => setDialog('')} onExport={(type, fill, size) => void exportImage(type, fill, size)}
+      hasTransparency={doc.background === 'transparent'} width={doc.width} height={doc.height} />}
+    {dialog === 'resize' && <CanvasSizeDialog title="Canvas size" current={{ width: doc.width, height: doc.height }} onClose={() => setDialog('')}
+      onApply={(width, height, mode, asCopy, label) => applyResize(width, height, mode, asCopy, label)} />}
+    {dialog === 'new' && <CanvasSizeDialog title="New blank canvas" onClose={() => setDialog('')} onApply={(width, height) => newBlank(width, height)} />}
     {dialog === 'finish' && <div className="ew-studio-modal" role="dialog" aria-modal="true" aria-label="Finish">
       <div className="ew-studio-modal-box">
         <h2>All done? ♡</h2>
@@ -982,9 +1037,11 @@ function Library({ category, doc, treasures, onStudioSticker, onSticker, onFrame
   </>
 }
 
-function EditPanel({ layer, onChange, onDuplicate, onDelete, onForward, onBackward }: {
+function EditPanel({ layer, onChange, onDuplicate, onDelete, onForward, onBackward, onRemoveBackground, onRestore }: {
   layer: Layer | null; onChange: (patch: Partial<Layer>) => void; onDuplicate: () => void; onDelete: () => void; onForward: () => void; onBackward: () => void
+  onRemoveBackground: (options: CutoutOptions) => void; onRestore: () => void
 }) {
+  const [tolerance, setTolerance] = useState(34)
   if (!layer) return <div className="ew-studio-empty"><p>Select something on your photo to edit it, or add a sticker, frame or text from the Library.</p></div>
   return <div className="ew-studio-edit">
     <label className="ew-studio-field">Name<input value={layer.name} maxLength={60} placeholder="(optional)" onChange={event => onChange({ name: event.target.value })} /></label>
@@ -1016,6 +1073,16 @@ function EditPanel({ layer, onChange, onDuplicate, onDelete, onForward, onBackwa
       <label className="ew-studio-check"><input type="checkbox" checked={layer.hidden} onChange={event => onChange({ hidden: event.target.checked })} /> Hide</label>
     </div>
     {layer.type === 'image' && <label className="ew-studio-check" title="Keeps pixel art crisp when you resize it"><input type="checkbox" checked={layer.pixelated} onChange={event => onChange({ pixelated: event.target.checked })} /> Crisp pixels (no blur)</label>}
+    {layer.type === 'image' && <fieldset className="ew-studio-bg">
+      <legend>✂️ Background remover</legend>
+      <label className="ew-studio-slider">Tolerance {tolerance}<input type="range" min={4} max={120} value={tolerance} onChange={event => setTolerance(Number(event.target.value))} /></label>
+      <div className="ew-studio-row">
+        <button type="button" onClick={() => onRemoveBackground({ tolerance })}>Remove background</button>
+        <button type="button" onClick={() => onRemoveBackground({ tolerance, everywhere: true })} title="Also clears the same color inside the picture, like the holes in letters">Remove color everywhere</button>
+      </div>
+      {layer.originalMediaId && <button type="button" onClick={onRestore}>↺ Restore original</button>}
+      <p className="ew-studio-hint">Works on stickers, graphics and GIFs (every frame stays animated) with a flat background. Raise the tolerance for soft or shaded backgrounds.</p>
+    </fieldset>}
     <div className="ew-studio-row">
       <button type="button" onClick={onForward}>Bring forward</button>
       <button type="button" onClick={onBackward}>Send backward</button>
@@ -1045,18 +1112,66 @@ function LayersPanel({ doc, selected, onSelect, onToggle, onRename, onMove }: {
   </ol>
 }
 
-function ExportDialog({ onClose, onExport, hasTransparency }: { onClose: () => void; onExport: (type: 'image/png' | 'image/jpeg', fill: string) => void; hasTransparency: boolean }) {
+function ExportDialog({ onClose, onExport, hasTransparency, width, height }: { onClose: () => void; onExport: (type: 'image/png' | 'image/jpeg', fill: string, size: number) => void; hasTransparency: boolean; width: number; height: number }) {
   const [type, setType] = useState<'image/png' | 'image/jpeg'>('image/png')
   const [fill, setFill] = useState('#ffffff')
+  const [size, setSize] = useState(1)
   return <div className="ew-studio-modal" role="dialog" aria-modal="true" aria-label="Export Image">
     <div className="ew-studio-modal-box">
       <h2>Export Image</h2>
       <label className="ew-studio-check"><input type="radio" checked={type === 'image/png'} onChange={() => setType('image/png')} /> PNG (keeps transparency, best quality)</label>
       <label className="ew-studio-check"><input type="radio" checked={type === 'image/jpeg'} onChange={() => setType('image/jpeg')} /> JPEG (smaller file)</label>
       {type === 'image/jpeg' && hasTransparency && <label className="ew-studio-field">JPEG can’t be transparent. Fill empty areas with<input type="color" value={fill} onChange={event => setFill(event.target.value)} /></label>}
-      <p className="ew-studio-hint">Saves to your Downloads folder. No “Made in Elsewhere” mark is added.</p>
+      <label className="ew-studio-field">Size
+        <select value={size} onChange={event => setSize(Number(event.target.value))}>
+          {[1, 2, 3].map(value => <option key={value} value={value} disabled={Math.max(width, height) * value > 8192}>{value}× · {width * value}×{height * value}px{value === 1 ? ' (actual size)' : ' (extra sharp)'}</option>)}
+        </select></label>
+      <p className="ew-studio-hint">Saves to your Downloads folder. Pictures are drawn from their original files at the size you pick, so they stay sharp. No “Made in Elsewhere” mark is added.</p>
       <div className="ew-studio-modal-actions">
-        <button type="button" onClick={() => onExport(type, fill)}>Export</button>
+        <button type="button" onClick={() => onExport(type, fill, size)}>Export</button>
+        <button type="button" onClick={onClose}>Cancel</button>
+      </div>
+    </div>
+  </div>
+}
+
+function CanvasSizeDialog({ title, current, onClose, onApply }: {
+  title: string; current?: { width: number; height: number }; onClose: () => void
+  onApply: (width: number, height: number, mode: ResizeMode, asCopy: boolean, label: string) => void
+}) {
+  const [preset, setPreset] = useState(current ? 'custom' : 'ig-post')
+  const [width, setWidth] = useState(current?.width || 1080)
+  const [height, setHeight] = useState(current?.height || 1350)
+  const [mode, setMode] = useState<ResizeMode>('fit')
+  const choose = (id: string) => {
+    setPreset(id)
+    const found = CANVAS_PRESETS.find(item => item.id === id)
+    if (found) { setWidth(found.width); setHeight(found.height) }
+  }
+  const valid = width >= 16 && height >= 16 && width <= 8192 && height <= 8192
+  const label = CANVAS_PRESETS.find(item => item.id === preset)?.label.replace(/\s*\(.*\)$/, '') || `${width}×${height}`
+  return <div className="ew-studio-modal" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="ew-studio-modal-box">
+      <h2>{title}</h2>
+      {current && <p className="ew-studio-hint">Now {current.width}×{current.height}px.</p>}
+      <label className="ew-studio-field">Preset
+        <select value={preset} onChange={event => choose(event.target.value)}>
+          {CANVAS_PRESETS.map(item => <option key={item.id} value={item.id}>{item.label} · {item.width}×{item.height}</option>)}
+          <option value="custom">Custom size</option>
+        </select></label>
+      <div className="ew-studio-row">
+        <label className="ew-studio-field">Width<input type="number" min={16} max={8192} value={width} onChange={event => { setPreset('custom'); setWidth(Number(event.target.value)) }} /></label>
+        <label className="ew-studio-field">Height<input type="number" min={16} max={8192} value={height} onChange={event => { setPreset('custom'); setHeight(Number(event.target.value)) }} /></label>
+        <button type="button" title="Swap width and height" onClick={() => { setPreset('custom'); setWidth(height); setHeight(width) }}>⇄</button>
+      </div>
+      {current && (Object.keys(RESIZE_MODES) as ResizeMode[]).map(item => <label key={item} className="ew-studio-check">
+        <input type="radio" checked={mode === item} onChange={() => setMode(item)} /> {RESIZE_MODES[item]}</label>)}
+      {!valid && <p className="ew-studio-notice">Pick a size between 16 and 8192 pixels.</p>}
+      <div className="ew-studio-modal-actions">
+        {current ? <>
+          <button type="button" disabled={!valid} onClick={() => onApply(width, height, mode, false, label)}>Resize this project</button>
+          <button type="button" disabled={!valid} onClick={() => onApply(width, height, mode, true, label)}>Make a resized copy</button>
+        </> : <button type="button" disabled={!valid} onClick={() => onApply(width, height, 'fit', false, label)}>Create</button>}
         <button type="button" onClick={onClose}>Cancel</button>
       </div>
     </div>

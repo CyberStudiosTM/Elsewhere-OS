@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CUSTOM_SKIN_ATTR, CUSTOM_SKIN_KEY, classicSkinCss } from '../skinmapper/classicOverlay'
+import { mountDecorations } from '../skinmapper/decorations'
 import { listSkinProjects, type SkinProject } from '../skinmapper/skinProject'
 import { SKIN_FAMILIES, STARTER_SKINS } from '../skinmapper/stationerySkins'
 import { patternPng } from '../skinmapper/patterns'
@@ -75,7 +76,8 @@ export function useWearCustomSkin(enabled: boolean) {
   const id = useCustomSkinId()
   useEffect(() => {
     const root = document.documentElement
-    const clear = () => { root.removeAttribute(CUSTOM_SKIN_ATTR); document.getElementById(STYLE_ID)?.remove() }
+    let stopDecorations = () => {}
+    const clear = () => { root.removeAttribute(CUSTOM_SKIN_ATTR); document.getElementById(STYLE_ID)?.remove(); stopDecorations() }
     if (!enabled || !id) { clear(); return }
     let alive = true
     const urls: string[] = []
@@ -92,7 +94,8 @@ export function useWearCustomSkin(enabled: boolean) {
       if (!style) { style = document.createElement('style'); style.id = STYLE_ID; document.head.appendChild(style) }
       style.textContent = css
       root.setAttribute(CUSTOM_SKIN_ATTR, project.id)
+      stopDecorations = mountDecorations(project.theme.decorations, asset => blobs.get(asset.path))
     }).catch(clear)
-    return () => { alive = false; urls.forEach(url => URL.revokeObjectURL(url)) }
+    return () => { alive = false; stopDecorations(); urls.forEach(url => URL.revokeObjectURL(url)) }
   }, [enabled, id])
 }

@@ -93,7 +93,7 @@ export async function makePatternAsset(project: SkinProject, kind: PatternKind, 
   return { path, name: path.split('/').pop()!.replace(/\.png$/, ''), type: 'image/png', width: tile.width, height: tile.height, bytes: tile.bytes }
 }
 
-const FOLDERS = ['frames', 'buttons', 'icons', 'textures', 'backgrounds'] as const
+const FOLDERS = ['frames', 'buttons', 'icons', 'textures', 'backgrounds', 'decorations'] as const
 export type AssetFolder = typeof FOLDERS[number]
 export const ASSET_FOLDERS = FOLDERS
 
@@ -101,14 +101,28 @@ export const ASSET_FOLDERS = FOLDERS
 export async function importAsset(project: SkinProject, file: File, folder: AssetFolder): Promise<ProjectAsset> {
   const bytes = new Uint8Array(await file.arrayBuffer())
   const info = imageInfo(bytes)
-  if (!info) throw new Error(`${file.name} isn’t a PNG, WebP or JPEG image.`)
+  if (!info) throw new Error(`${file.name} isn’t a PNG, WebP, JPEG or GIF image.`)
   if (bytes.length > 10 * 1024 * 1024) throw new Error(`${file.name} is larger than 10 MB.`)
   if (info.width > 4096 || info.height > 4096) throw new Error(`${file.name} is bigger than 4096 pixels on a side.`)
-  const extension = info.type === 'image/png' ? 'png' : info.type === 'image/webp' ? 'webp' : 'jpg'
+  const extension = info.type === 'image/png' ? 'png' : info.type === 'image/webp' ? 'webp' : info.type === 'image/gif' ? 'gif' : 'jpg'
   const base = file.name.replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9 _.-]+/g, '-').slice(0, 80) || 'image'
   let path = `assets/${folder}/${base}.${extension}`
   for (let n = 2; project.assets.some(asset => asset.path.toLowerCase() === path.toLowerCase()); n++) path = `assets/${folder}/${base}-${n}.${extension}`
   return { path, name: base, type: info.type, width: info.width, height: info.height, bytes }
+}
+
+/** Copies a sticker, Web Treasure or Studio creation into the project as a decoration image. */
+export async function decorationAsset(project: SkinProject, blob: Blob): Promise<ProjectAsset> {
+  const bytes = new Uint8Array(await blob.arrayBuffer())
+  const info = imageInfo(bytes)
+  if (!info) throw new Error('That picture isn’t a PNG, WebP, JPEG or GIF image.')
+  if (bytes.length > 10 * 1024 * 1024) throw new Error('That picture is larger than 10 MB.')
+  if (info.width > 4096 || info.height > 4096) throw new Error('That picture is bigger than 4096 pixels on a side.')
+  const extension = info.type === 'image/png' ? 'png' : info.type === 'image/webp' ? 'webp' : info.type === 'image/gif' ? 'gif' : 'jpg'
+  let n = 1
+  while (project.assets.some(asset => asset.path === `assets/decorations/decoration-${n}.${extension}`)) n++
+  // Generic names only: the picture's own file name is never shown or packaged.
+  return { path: `assets/decorations/decoration-${n}.${extension}`, name: `decoration ${n}`, type: info.type, width: info.width, height: info.height, bytes }
 }
 
 function slug(text: string) { return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'my-skin' }

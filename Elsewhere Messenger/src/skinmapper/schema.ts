@@ -139,7 +139,28 @@ export type SkinTheme = {
   transcript?: 'classic' | 'bubble'
   /** Shell mode for device-shaped skins (transparent window with trim). */
   shell?: { trim: AssetRef; inset: [number, number, number, number] }
+  /** Stickers and Web Treasures placed on the windows. Decorative only: they never cover clicks. */
+  decorations?: Decoration[]
 }
+export type DecorationWindow = 'buddy-list' | 'conversation' | 'sign-in'
+export type DecorationAnchor = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+export type Decoration = {
+  id: string
+  asset: AssetRef
+  window: DecorationWindow
+  anchor: DecorationAnchor
+  /** Distance in px from the anchored corner. */
+  x: number
+  y: number
+  /** Width in px; the height follows the picture. */
+  width: number
+  rotation?: number
+  opacity?: number
+  flip?: boolean
+}
+export const DECORATION_LIMIT = 24
+export const DECORATION_WINDOWS: DecorationWindow[] = ['buddy-list', 'conversation', 'sign-in']
+export const DECORATION_ANCHORS: DecorationAnchor[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
 export type SkinManifest = {
   format: typeof SKIN_FORMAT
   formatVersion: string
@@ -164,7 +185,7 @@ const GRADIENT = /^linear-gradient\(\s*(to (top|bottom|left|right)|\d{1,3}deg)\s
 const LENGTH = /^-?\d{1,4}(\.\d+)?(px|em|%)?$/
 const SHADOW = /^(none|(-?\d{1,3}px\s+){2,3}(-?\d{1,3}px\s+)?(#[0-9a-f]{3,8}|rgba?\([\d.\s,%]+\))(\s*,\s*(-?\d{1,3}px\s+){2,3}(-?\d{1,3}px\s+)?(#[0-9a-f]{3,8}|rgba?\([\d.\s,%]+\)))*)$/i
 const FONTS = new Set(['Segoe UI', 'Tahoma', 'Verdana', 'Arial', 'Trebuchet MS', 'Georgia', 'Courier New', 'Comic Sans MS', 'Segoe Print', 'Lucida Console', 'system-ui'])
-const SAFE_PATH = /^assets\/(frames|buttons|icons|textures|backgrounds|preview)\/[A-Za-z0-9 _.-]{1,120}\.(png|webp|jpe?g)$/i
+const SAFE_PATH = /^assets\/(frames|buttons|icons|textures|backgrounds|decorations|preview)\/[A-Za-z0-9 _.-]{1,120}\.(png|webp|jpe?g|gif)$/i
 const ID = /^[a-z0-9][a-z0-9.-]{2,63}$/
 
 function checkAsset(ref: unknown, where: string, slot: SlotDefinition | undefined, out: Finding[]) {
@@ -174,7 +195,7 @@ function checkAsset(ref: unknown, where: string, slot: SlotDefinition | undefine
     const value = asset[key]
     if (value === undefined && key === 'path2x') continue
     if (typeof value !== 'string' || !SAFE_PATH.test(value) || value.includes('..')) {
-      out.push({ severity: 'error', message: `${where}: "${String(value)}" isn't an allowed package image path (PNG, WebP or JPEG inside assets/).`, slot: slot?.id, path: String(value) })
+      out.push({ severity: 'error', message: `${where}: "${String(value)}" isn't an allowed package image path (PNG, WebP, JPEG or GIF inside assets/).`, slot: slot?.id, path: String(value) })
     }
   }
   if (asset.scale && slot && !slot.scaling.includes(asset.scale)) {
@@ -241,6 +262,24 @@ export function validateTheme(input: unknown): Finding[] {
     for (const [state, style] of Object.entries(states || {})) {
       if (!def.states.includes(state as VisualState)) out.push({ severity: 'warning', message: `${def.name} doesn't have a "${state}" state; it will be ignored.`, slot: id })
       checkStyle(style, `slots.${id}.${state}`, def, out)
+    }
+  }
+  if (t.decorations !== undefined) {
+    if (!Array.isArray(t.decorations)) out.push({ severity: 'error', message: 'decorations must be a list.' })
+    else {
+      if (t.decorations.length > DECORATION_LIMIT) out.push({ severity: 'error', message: `A skin can have up to ${DECORATION_LIMIT} decorations.` })
+      t.decorations.forEach((item, index) => {
+        const where = `decorations[${index}]`
+        if (!item || typeof item !== 'object') { out.push({ severity: 'error', message: `${where} must be an object.` }); return }
+        checkAsset(item.asset, `${where}.asset`, undefined, out)
+        if (!DECORATION_WINDOWS.includes(item.window)) out.push({ severity: 'error', message: `${where}: window must be buddy-list, conversation or sign-in.` })
+        if (!DECORATION_ANCHORS.includes(item.anchor)) out.push({ severity: 'error', message: `${where}: anchor must be a corner.` })
+        const num = (value: unknown, low: number, high: number) => typeof value === 'number' && Number.isFinite(value) && value >= low && value <= high
+        if (!num(item.x, -400, 2000) || !num(item.y, -400, 2000)) out.push({ severity: 'error', message: `${where}: position must be between -400 and 2000 px.` })
+        if (!num(item.width, 4, 800)) out.push({ severity: 'error', message: `${where}: width must be between 4 and 800 px.` })
+        if (item.rotation !== undefined && !num(item.rotation, -360, 360)) out.push({ severity: 'error', message: `${where}: rotation must be between -360 and 360.` })
+        if (item.opacity !== undefined && !num(item.opacity, 0, 1)) out.push({ severity: 'error', message: `${where}: opacity must be between 0 and 1.` })
+      })
     }
   }
   if (t.transcript && t.transcript !== 'classic' && t.transcript !== 'bubble') out.push({ severity: 'error', message: 'transcript must be "classic" or "bubble".' })

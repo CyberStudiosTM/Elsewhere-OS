@@ -174,7 +174,7 @@
 .ew-studio-slider { display: grid; gap: 2px; font-size: 12px; color: var(--soft); }
 .ew-studio-check { display: flex; align-items: center; gap: 4px; font-size: 12px; }
 .ew-studio-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: end; }
-.ew-studio-edit { display: grid; gap: 8px; }
+.ew-studio .ew-studio-edit { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .ew-studio-danger { color: #b3261e !important; }
 .ew-studio-layers { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
 .ew-studio-layers li { display: flex; gap: 2px; align-items: center; padding: 2px; border-radius: 6px; border: 1px solid transparent; }
@@ -311,3 +311,5 @@
 .ew-studio-preview-img img { max-width: 100%; max-height: 150px; object-fit: contain; }
 .ew-studio-preview small { color: var(--st-ink-soft); }
 .ew-studio-preview-actions { display: flex; gap: 6px; }
+.ew-studio-bg { min-width: 0; display: grid; gap: 6px; margin: 4px 0 0; padding: 8px 10px 10px; border: 1px solid var(--st-modal-line, rgba(47,134,207,.35)); border-radius: 10px; }
+.ew-studio-bg legend { padding: 0 4px; font-weight: 700; }

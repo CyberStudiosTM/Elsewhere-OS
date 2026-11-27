@@ -148,6 +148,7 @@ async function drawLayer(ctx: CanvasRenderingContext2D, layer: Layer) {
   if (layer.flipX) ctx.scale(-1, 1)
   ctx.translate(-layer.w / 2, -layer.h / 2)
   ctx.imageSmoothingEnabled = !layer.pixelated
+  ctx.imageSmoothingQuality = 'high'
   if (layer.type === 'slot') {
     // Empty photo spots aren't part of the finished image.
   } else if (layer.type === 'stationery') drawStationery(ctx, layer.w, layer.h, layer.style, layer.color)
@@ -178,12 +179,15 @@ async function drawLayer(ctx: CanvasRenderingContext2D, layer: Layer) {
  * Renders the document. `opaque` fills transparency (needed for JPEG).
  * Returns a canvas the size of the document; callers export it.
  */
-export async function renderDoc(doc: StudioDoc, opaque?: string): Promise<HTMLCanvasElement> {
+export async function renderDoc(doc: StudioDoc, opaque?: string, size = 1): Promise<HTMLCanvasElement> {
   const canvas = document.createElement('canvas')
-  canvas.width = doc.width
-  canvas.height = doc.height
+  canvas.width = Math.round(doc.width * size)
+  canvas.height = Math.round(doc.height * size)
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('This PC couldn’t prepare the image.')
+  // Everything is drawn from the original files at the final size, so resizing never blurs twice.
+  ctx.scale(size, size)
+  ctx.imageSmoothingQuality = 'high'
   const fill = opaque || (doc.background === 'transparent' ? '' : doc.background)
   if (fill) { ctx.fillStyle = fill; ctx.fillRect(0, 0, doc.width, doc.height) }
   if (doc.photoId) {
@@ -191,7 +195,8 @@ export async function renderDoc(doc: StudioDoc, opaque?: string): Promise<HTMLCa
     if (photo) {
       ctx.save()
       ctx.filter = FILTERS[doc.filter].css(doc.filterStrength)
-      ctx.drawImage(photo, 0, 0, doc.width, doc.height)
+      const box = doc.photoBox || { x: 0, y: 0, w: doc.width, h: doc.height }
+      ctx.drawImage(photo, box.x, box.y, box.w, box.h)
       ctx.restore()
       photo.close()
     }
