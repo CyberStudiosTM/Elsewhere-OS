@@ -25,6 +25,7 @@ export default function ActivitiesMenu({ anchor, skin, onClose }: { anchor: HTML
     style={{ top: box.bottom + 2, left }}>
     <button type="button" role="menuitem" onClick={() => { onClose(); toolbarAction({ kind: 'photo' }) }}>Creative Studio…</button>
     <button type="button" role="menuitem" onClick={() => { onClose(); toolbarAction({ kind: 'skinmapper' }) }} title="Design your own Messenger skin">SkinMapper… <span>(beta)</span></button>
+    <button type="button" role="menuitem" onClick={() => { onClose(); toolbarAction({ kind: 'media-player' }) }} title="Play your music and videos">Media Player… <span>(beta)</span></button>
     {studio
       ? <button type="button" role="menuitem" title="Make and dress your own pixel doll" onClick={() => { onClose(); toolbarAction({ kind: 'pixel-doll' }) }}>Pixel Doll Studio… <span>(beta)</span></button>
       : <button type="button" role="menuitem" disabled title="Coming soon">Pixel Doll Studio <span>(coming soon)</span></button>}

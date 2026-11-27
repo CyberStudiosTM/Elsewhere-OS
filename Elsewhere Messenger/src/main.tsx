@@ -12,6 +12,8 @@ import ToastPopup from './components/ToastPopup'
 import { isToastWindow } from './services/toastWindow'
 import PhotoBoothHost from './components/PhotoBooth'
 import StudioApp from './studio/StudioApp'
+import MediaPlayerApp from './media/MediaPlayerApp'
+import { isMediaWindow } from './media/mediaWindow'
 import { isStudioWindow } from './services/studioWindow'
 import SkinMapperApp from './skinmapper/SkinMapperApp'
 import { isSkinMapperWindow } from './services/skinMapperWindow'
@@ -26,7 +28,7 @@ if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('desi
   void import('./profiles/DesignerHarness').then(({ default: Harness }) => createRoot(document.getElementById('root')!).render(<Harness />))
 } else createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {!isToastWindow() && !isStudioWindow() && !isSkinMapperWindow() && !isPixelDollWindow() && !isProfileWindow() && <PhotoBoothHost />}
-    {isProfileWindow() ? <ProfileApp /> : isPixelDollWindow() ? <PixelDollApp /> : isSkinMapperWindow() ? <SkinMapperApp /> : isStudioWindow() ? <StudioApp /> : isToastWindow() ? <ToastPopup /> : new URLSearchParams(window.location.search).has('instagram-inbox') ? <InstagramInbox /> : isNativeClassicChat() || isNativeClassicLogin() ? <Classic /> : (isDeadSignalChild() ? <DeadSignal /> : <SkinHost />)}
+    {!isToastWindow() && !isStudioWindow() && !isSkinMapperWindow() && !isPixelDollWindow() && !isProfileWindow() && !isMediaWindow() && <PhotoBoothHost />}
+    {isMediaWindow() ? <MediaPlayerApp /> : isProfileWindow() ? <ProfileApp /> : isPixelDollWindow() ? <PixelDollApp /> : isSkinMapperWindow() ? <SkinMapperApp /> : isStudioWindow() ? <StudioApp /> : isToastWindow() ? <ToastPopup /> : new URLSearchParams(window.location.search).has('instagram-inbox') ? <InstagramInbox /> : isNativeClassicChat() || isNativeClassicLogin() ? <Classic /> : (isDeadSignalChild() ? <DeadSignal /> : <SkinHost />)}
   </StrictMode>,
 )

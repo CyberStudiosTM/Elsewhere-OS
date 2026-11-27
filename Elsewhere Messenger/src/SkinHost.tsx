@@ -1,4 +1,5 @@
 import ToolbarDialogs from './components/ToolbarDialogs'
+import { openMediaPlayer } from './media/mediaWindow'
 import { openStudio } from './services/studioWindow'
 import { openSkinMapper } from './services/skinMapperWindow'
 import { openPixelDoll } from './services/pixelDollWindow'
@@ -257,6 +258,7 @@ export default function SkinHost() {
       else {
         if (request.kind === 'skinmapper') { void openSkinMapper().catch(console.error); return }
         if (request.kind === 'pixel-doll') { void openPixelDoll().catch(console.error); return }
+        if (request.kind === 'media-player') { void openMediaPlayer().catch(console.error); return }
         if (request.kind === 'profile') { void openProfile(request.handle || 'me', Boolean(request.edit)).catch(console.error); return }
         if (request.kind === 'open-contact' && request.personId) { window.dispatchEvent(new CustomEvent(OPEN_TOOLBAR_CONTACT, { detail: request.personId })); return }
         if (request.kind === 'photo') {

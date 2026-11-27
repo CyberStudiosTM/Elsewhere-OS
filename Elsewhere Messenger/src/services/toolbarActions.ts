@@ -7,7 +7,7 @@ import type { SocialService } from '../components/SocialServiceFilter'
 export const TOOLBAR_ACTION = 'elsewhere:toolbar-action'
 export const NUDGE_LOCAL_ONLY = 'Nudge only available in local messaging'
 export type ToolbarRequest = {
-  kind: 'new-dm' | 'add-contact' | 'call' | 'photo' | 'mail' | 'accounts' | 'skinmapper' | 'pixel-doll' | 'profile' | 'open-contact'
+  kind: 'new-dm' | 'add-contact' | 'call' | 'photo' | 'mail' | 'accounts' | 'skinmapper' | 'media-player' | 'pixel-doll' | 'profile' | 'open-contact'
   /** For 'profile': whose profile to open (handle), or nothing for your own. */
   handle?: string
   edit?: boolean

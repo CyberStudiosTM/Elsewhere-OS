@@ -490,6 +490,7 @@ export default function ClassicMenuBar(
             <>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'photo' }))}>Open Creative Studio...</button>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'skinmapper' }))}>SkinMapper... (beta)</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'media-player' }))}>Media Player... (beta)</button>
               <button type="button" disabled={!studioPreview} title={studioPreview ? undefined : 'Coming soon'} onClick={() => run(() => toolbarAction({ kind: 'pixel-doll' }))}>{studioPreview ? 'Pixel Doll Studio... (beta)' : 'Pixel Doll Studio (coming soon)'}</button>
             </>
           )}
@@ -500,6 +501,7 @@ export default function ClassicMenuBar(
             <>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'photo' }))}>Creative Studio...</button>
               <button type="button" onClick={() => run(() => toolbarAction({ kind: 'skinmapper' }))}>SkinMapper... (beta)</button>
+              <button type="button" onClick={() => run(() => toolbarAction({ kind: 'media-player' }))}>Media Player... (beta)</button>
               <button type="button" disabled={!studioPreview} title={studioPreview ? undefined : 'Coming soon'} onClick={() => run(() => toolbarAction({ kind: 'pixel-doll' }))}>{studioPreview ? 'Pixel Doll Studio... (beta)' : 'Pixel Doll Studio (coming soon)'}</button>
               <details>
                 <summary>Skins</summary>

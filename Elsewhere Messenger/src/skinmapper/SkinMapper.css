@@ -120,3 +120,35 @@
 .sm-picker-grid[aria-busy="true"] { opacity: .6; pointer-events: none; }
 .sm-decor-entry { margin: 4px 0 6px; padding: 5px 8px; text-align: left; border: 1px solid #8aafd9; border-radius: 4px; color: #06418d; cursor: pointer; background: linear-gradient(#fff7fb, #ffe3f0); font-weight: 700; }
 .sm-decor-entry.is-active { border-color: #2f86cf; box-shadow: 0 0 0 2px #2f86cf55; }
+
+/* Media Player skins */
+.sm-player-pick { max-width: 760px; }
+.sm-template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.sm-template { display: grid; gap: 4px; justify-items: center; padding: 6px; border: 1px solid #b9d3f0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; }
+.sm-template input { position: absolute; opacity: 0; pointer-events: none; }
+.sm-template img { width: 100%; height: 80px; object-fit: contain; }
+.sm-template.is-active { border-color: #2f86cf; box-shadow: 0 0 0 2px #2f86cf55; background: #eef6ff; }
+.sm-library-heading { margin: 10px 0 4px; font-size: 14px; }
+.sm-player-editor { display: flex; flex-direction: column; height: 100vh; }
+.sm-player-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 200px 1fr 260px; }
+.sm-player-body .sm-explorer { display: flex; flex-direction: column; gap: 3px; overflow: auto; }
+.sm-player-body .sm-explorer button { text-align: left; }
+.sm-player-body .sm-stage { display: flex; flex-direction: column; min-width: 0; overflow: auto; }
+.sm-player-stage { flex: 1; display: grid; place-items: center; padding: 20px; background: repeating-conic-gradient(#eef3f8 0% 25%, #ffffff 0% 50%) 0 0 / 20px 20px; touch-action: none; }
+.sm-player-art { position: relative; flex: none; }
+.sm-player-art > img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.sm-part { position: absolute; display: grid; place-items: center; border: 2px dashed rgba(47,134,207,.85); background: rgba(47,134,207,.14); color: #06418d; font: 700 11px "Segoe UI", sans-serif; cursor: move; user-select: none; }
+.sm-part span { padding: 1px 5px; border-radius: 4px; background: rgba(255,255,255,.85); white-space: nowrap; pointer-events: none; }
+.sm-part.is-control { border-radius: 50%; border-color: rgba(141,226,54,.95); background: rgba(141,226,54,.18); }
+.sm-part.is-control span { font-size: 9px; }
+.sm-part.is-volume { border-radius: 8px; }
+.sm-part.is-picked { border-style: solid; border-color: #ff4fa0; box-shadow: 0 0 0 3px rgba(255,79,160,.3); z-index: 2; }
+.sm-part i { position: absolute; right: -6px; bottom: -6px; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 3px; background: #ff4fa0; cursor: nwse-resize; }
+.sm-part:not(.is-picked) i { display: none; }
+.sm-row-fields { display: flex; gap: 6px; }
+.sm-row-fields label { display: grid; gap: 2px; font-size: 12px; }
+.sm-row-fields input { width: 64px; }
+.sm-findings .is-error { margin: 2px 0; color: #a3170f; font-size: 12px; }
+.sm-player-body > * { grid-area: auto; min-height: 0; }
+.sm-player-editor { display: flex; flex-direction: column; }
+.sm-player-editor .sm-player-body { flex: 1; }

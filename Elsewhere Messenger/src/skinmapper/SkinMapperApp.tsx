@@ -15,6 +15,8 @@ import {
 } from './skinProject'
 import SliceEditor from './SliceEditor'
 import DecorationsPanel from './DecorationsPanel'
+import PlayerSkinEditor, { PlayerTemplatePicker } from './PlayerSkinEditor'
+import { deletePlayerSkin, listPlayerSkins, playerSkinFromPackage, type PlayerSkinRecord } from '../media/playerSkins'
 import { PATTERNS, type PatternKind } from './patterns'
 import { SKIN_FAMILIES, STARTER_SKINS } from './stationerySkins'
 import './SkinMapper.css'
@@ -46,6 +48,7 @@ function download(bytes: Uint8Array, name: string) {
 
 export default function SkinMapperApp() {
   const [project, setProject] = useState<SkinProject | null>(null)
+  const [playerSkin, setPlayerSkin] = useState<PlayerSkinRecord | null>(null)
   const [past, setPast] = useState<SkinTheme[]>([])
   const [future, setFuture] = useState<SkinTheme[]>([])
   const [dirty, setDirty] = useState(false)
@@ -163,7 +166,8 @@ export default function SkinMapperApp() {
     else setProject(null)
   }
 
-  if (!project) return <WelcomeHub onOpen={next => { setProject(next); setPast([]); setFuture([]); setDirty(false) }} onClose={closeWindow} />
+  if (playerSkin) return <PlayerSkinEditor key={playerSkin.id} initial={playerSkin} onClose={() => setPlayerSkin(null)} />
+  if (!project) return <WelcomeHub onOpen={next => { setProject(next); setPast([]); setFuture([]); setDirty(false) }} onOpenPlayer={setPlayerSkin} onClose={closeWindow} />
 
   const value = (property: StyleProperty) => resolve(project.theme, slotId, property, state)
   const grouped = Object.entries(REGIONS).map(([region, label]) => ({ label, slots: SLOTS.filter(item => item.region === Number(region)) }))
@@ -325,15 +329,16 @@ function PropertyInput({ property, value, assets, allowed, onChange, urls }: {
   return <input value={text} placeholder={property.includes('hadow') ? '0px 2px 4px #00000055' : 'e.g. 6px'} onChange={event => onChange(event.target.value || undefined)} />
 }
 
-function WelcomeHub({ onOpen, onClose }: { onOpen: (project: SkinProject) => void; onClose: () => void }) {
-  const [step, setStep] = useState<'' | 'quick' | 'library'>('')
+function WelcomeHub({ onOpen, onOpenPlayer, onClose }: { onOpen: (project: SkinProject) => void; onOpenPlayer: (skin: PlayerSkinRecord) => void; onClose: () => void }) {
+  const [step, setStep] = useState<'' | 'quick' | 'library' | 'player'>('')
+  const [players, setPlayers] = useState<PlayerSkinRecord[]>([])
   const [name, setName] = useState('')
   const [author, setAuthor] = useState('')
   const [template, setTemplate] = useState('classic')
   const [library, setLibrary] = useState<SkinProject[] | null>(null)
   const [error, setError] = useState('')
   const importInput = useRef<HTMLInputElement>(null)
-  useEffect(() => { if (step === 'library') void listSkinProjects().then(setLibrary, () => setLibrary([])) }, [step])
+  useEffect(() => { if (step === 'library') { void listSkinProjects().then(setLibrary, () => setLibrary([])); void listPlayerSkins().then(setPlayers, () => setPlayers([])) } }, [step])
 
   async function importSkin(file: File | undefined) {
     if (!file) return
@@ -341,6 +346,8 @@ function WelcomeHub({ onOpen, onClose }: { onOpen: (project: SkinProject) => voi
     if (file.size > 50 * 1024 * 1024) { setError('That file is larger than 50 MB.'); return }
     const result = loadSkinPackage(new Uint8Array(await file.arrayBuffer()))
     if (!result.ok) { setError('This skin can’t be opened: ' + (result.findings.find(item => item.severity === 'error')?.message || 'it isn’t a valid skin package.')); return }
+    const player = playerSkinFromPackage(result)
+    if (player) { onOpenPlayer(player); return }
     onOpen(projectFromPackage(result))
   }
 
@@ -356,6 +363,7 @@ function WelcomeHub({ onOpen, onClose }: { onOpen: (project: SkinProject) => voi
         <button type="button" onClick={() => onOpen(newProject('My Skin', '', 'classic'))}><b>🎨 Custom Design</b><small>Start from Classic and change anything.</small></button>
         <button type="button" onClick={() => importInput.current?.click()}><b>📦 Import a Skin</b><small>Open an .eskin file to edit it.</small></button>
         <button type="button" onClick={() => setStep('library')}><b>📚 My Skin Library</b><small>Skins you’ve saved on this PC.</small></button>
+        <button type="button" onClick={() => setStep('player')}><b>🎧 Media Player skin</b><small>Start from a player layout, add your art, move the controls.</small></button>
       </div>}
       {step === 'quick' && <form className="sm-quick" onSubmit={event => {
         event.preventDefault()
@@ -373,12 +381,17 @@ function WelcomeHub({ onOpen, onClose }: { onOpen: (project: SkinProject) => voi
         </fieldset>)}
         <div className="sm-actions"><button type="button" onClick={() => setStep('')}>Back</button><button type="submit" className="sm-app-primary">Start designing</button></div>
       </form>}
+      {step === 'player' && <PlayerTemplatePicker onOpen={onOpenPlayer} onBack={() => setStep('')} />}
       {step === 'library' && <div className="sm-library">
         {library === null ? <p>Loading…</p> : !library.length ? <p className="sm-hint">No saved skins yet. Use File → Save while designing.</p>
           : library.map(item => <div key={item.id} className="sm-library-row">
             <button type="button" onClick={() => onOpen(item)}><b>{item.name}</b><small>by {item.author} · {new Date(item.updatedAt).toLocaleString()}</small></button>
             <button type="button" onClick={() => { if (window.confirm(`Delete “${item.name}”? This can’t be undone.`)) void deleteSkinProject(item.id).then(() => setLibrary(list => (list || []).filter(entry => entry.id !== item.id))) }}>Delete</button>
           </div>)}
+        {players.length > 0 && <><h3 className="sm-library-heading">🎧 My Player Skins</h3>{players.map(item => <div key={item.id} className="sm-library-row">
+            <button type="button" onClick={() => onOpenPlayer(item)}><b>{item.name}</b><small>{item.target === 'music' ? 'Music' : 'Video'} player · by {item.author} · {new Date(item.updatedAt).toLocaleString()}</small></button>
+            <button type="button" onClick={() => { if (window.confirm(`Delete “${item.name}”? This can’t be undone.`)) void deletePlayerSkin(item.id).then(() => setPlayers(list => list.filter(entry => entry.id !== item.id))) }}>Delete</button>
+          </div>)}</>}
         <div className="sm-actions"><button type="button" onClick={() => setStep('')}>Back</button></div>
       </div>}
       {error && <p className="sm-error-note" role="alert">{error}</p>}

@@ -282,6 +282,30 @@ export function validateTheme(input: unknown): Finding[] {
       })
     }
   }
+  // Media Player skins (target music or video): art plus where the controls sit. Data only.
+  const player = (t as { player?: Record<string, unknown> }).player
+  if (player !== undefined) {
+    const num = (value: unknown, low: number, high: number) => typeof value === 'number' && Number.isFinite(value) && value >= low && value <= high
+    if (!player || typeof player !== 'object') out.push({ severity: 'error', message: 'player must be an object.' })
+    else {
+      if (player.target !== 'music' && player.target !== 'video') out.push({ severity: 'error', message: 'player.target must be music or video.' })
+      checkAsset(player.art, 'player.art', undefined, out)
+      if (!num(player.width, 80, 2048) || !num(player.height, 60, 2048)) out.push({ severity: 'error', message: 'player size must be between 80 × 60 and 2048 × 2048.' })
+      const music = player.music as { hotspots?: { control?: unknown; x?: unknown; y?: unknown; r?: unknown }[] } | undefined
+      if (player.target === 'music') {
+        if (!music || !Array.isArray(music.hotspots)) out.push({ severity: 'error', message: 'A music player skin needs its controls.' })
+        else {
+          if (music.hotspots.length > 20) out.push({ severity: 'error', message: 'A player skin can have up to 20 controls.' })
+          for (const control of ['play', 'prev', 'next']) if (!music.hotspots.some(spot => spot.control === control)) out.push({ severity: 'error', message: `The ${control} control is missing. Every player keeps it.` })
+          if (music.hotspots.some(spot => !num(spot.x, 0, 2048) || !num(spot.y, 0, 2048) || !num(spot.r, 8, 200))) out.push({ severity: 'error', message: 'A control is off the player or too small to click.' })
+        }
+      }
+      if (player.target === 'video') {
+        const box = (player.video as { window?: { x?: unknown; y?: unknown; w?: unknown; h?: unknown } } | undefined)?.window
+        if (!box || !num(box.x, 0, 2048) || !num(box.y, 0, 2048) || !num(box.w, 240, 2048) || !num(box.h, 160, 2048)) out.push({ severity: 'error', message: 'The video window must be at least 240 × 160 and on the player art.' })
+      }
+    }
+  }
   if (t.transcript && t.transcript !== 'classic' && t.transcript !== 'bubble') out.push({ severity: 'error', message: 'transcript must be "classic" or "bubble".' })
   if (t.shell) {
     checkAsset(t.shell.trim, 'shell.trim', SLOT_INDEX['window.trim'], out)
