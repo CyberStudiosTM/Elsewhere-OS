@@ -9,14 +9,14 @@
 
 **A nostalgic desktop messaging experience bringing the magic of early-2000s instant messaging into the modern internet.**
 
-<img src="https://img.shields.io/badge/VERSION-v0.2.55-C7B3F1?style=for-the-badge" alt="Version: 0.2.55">
+<img src="https://img.shields.io/badge/VERSION-v0.2.56-C7B3F1?style=for-the-badge" alt="Version: 0.2.56">
 <img src="https://img.shields.io/badge/PLATFORM-WINDOWS_x64-ABD8F0?style=for-the-badge" alt="Platform: Windows x64">
 <img src="https://img.shields.io/badge/LICENSE-MIT-A8E7DE?style=for-the-badge" alt="License: MIT">
 <img src="https://img.shields.io/badge/STATUS-BETA-F4C4DD?style=for-the-badge" alt="Status: Beta">
 
 *A little piece of yesterday, reimagined by [CyberStudios™](https://github.com/CyberStudiosTM).*
 
-[Download](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.55) · [What's New](#-whats-new-in-v0255) · [The Vision](#-the-elsewhere-experience) · [Releases](https://github.com/CyberStudiosTM/Elsewhere-OS/releases)
+[Download](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.56) · [What's New](#-whats-new-in-v0256) · [The Vision](#-the-elsewhere-experience) · [Releases](https://github.com/CyberStudiosTM/Elsewhere-OS/releases)
 
 </div>
 
@@ -83,7 +83,7 @@ not every planned integration is available in the public beta.
 
 ---
 
-## 💿 what's new in v0.2.55?
+## 💿 what's new in v0.2.56?
 
 <img src="https://img.shields.io/badge/NEW-ELSEWHAERO_PROFILES-F4C4DD?style=for-the-badge" alt="Elsewhaero profiles">
 <img src="https://img.shields.io/badge/NEW-15_SKINS-ABD8F0?style=for-the-badge" alt="15 new skins">
@@ -93,7 +93,9 @@ not every planned integration is available in the public beta.
 
 a *lot* has happened since v0.2.21. ♡
 
-> **✦ fresh in v0.2.55: ✂️ cute cutouts & canvas sizes!** Creative Studio has **canvas presets** (Instagram post, story, reel, TikTok, wallpapers, blinkies and more) with *Save as a resized copy*, **sharper exports** up to 3×, and a **background remover** that keeps GIFs animated. SkinMapper skins can now be **decorated** with Web Treasures, My Treasures, Studio stickers and your Gallery creations ♡
+> **✦ fresh in v0.2.56: 🎧 the Elsewhere Media Player!** one app with **Music** and **Video** modes: play your MP3s and MP4s with shuffle, repeat, a music-reactive visualizer, full screen and subtitles, wearing the five official skins (**Bubble Machine, Butterfly Frequency, DreamDisc, Liquid Radio, Glass Garden**). Make your own player skin in **SkinMapper** from a layout template ♡
+>
+> **✦ v0.2.55: ✂️ cute cutouts & canvas sizes!** Creative Studio has **canvas presets** (Instagram post, story, reel, TikTok, wallpapers, blinkies and more) with *Save as a resized copy*, **sharper exports** up to 3×, and a **background remover** that keeps GIFs animated. SkinMapper skins can now be **decorated** with Web Treasures, My Treasures, Studio stickers and your Gallery creations ♡
 >
 > **✦ v0.2.54: profiles, all grown up!** make **multiple pages** with page menus, popups and click/hover interactions; build or install **widgets** in the Widgets Studio (a pocket pet, music player, terrarium, mini-game and more), plus **polls** and a **visitor counter**; organize pictures in the **Asset Manager** with a Sprite Sheet Studio; hang out in your private **Elsewhere Home** with discovery and **webrings**; and share layouts, widgets, skins and art in the **Creative Exchange** and **Community Showcase**. every profile also gets a short link: `cyberthreed.github.io/CyberStudios/@you` ♡
 >
@@ -141,7 +143,7 @@ the old Winks button is now **Web Treasures**, with the Elsewhere Collection and
 
 for every detail, see the release notes:
 
-[**✧ Elsewhere Messenger v0.2.55 Release Notes**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.55)
+[**✧ Elsewhere Messenger v0.2.56 Release Notes**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/tag/messenger-v0.2.56)
 
 ---
 
@@ -149,9 +151,9 @@ for every detail, see the release notes:
 
 ### ୨୧ Windows x64
 
-**Current documented beta: v0.2.55**
+**Current documented beta: v0.2.56**
 
-[**☁️ Download Elsewhere Messenger Setup**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-v0.2.55/Elsewhere-Messenger_0.2.55_x64-setup.exe)
+[**☁️ Download Elsewhere Messenger Setup**](https://github.com/CyberStudiosTM/Elsewhere-OS/releases/download/messenger-v0.2.56/Elsewhere-Messenger_0.2.56_x64-setup.exe)
 
 ### ୨୧ macOS (Apple Silicon & Intel)
 
